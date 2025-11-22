@@ -1,0 +1,93 @@
+@startuml
+class Utilisateur {
+    id : String
+    nom : String
+    mail : String
+    localisation : String
+    +rechercherLieu() : void
+    +rechercherLivre() : void
+    +envMsg() : void
+    +repondre() : void
+    +ajoutFav() : void
+    +ajoutAvis() : void
+}
+
+class Favori {
+    id : String
+    dateAjout : Date
+}
+
+class Recherche {
+    id : String
+    depart : String
+    coordonnees : String
+}
+
+class Publication {
+    id : String
+    message : String
+    date : Date
+}
+
+class Lieu {
+    id : String
+    nom : String
+    type : TypeLieu
+    adresse : String
+    coordonnees : String
+    nivCalme : Integer
+    wifi : Boolean
+    +calculerDist() : Float
+}
+
+class Disponibilité {
+    id : String
+    bibliotheque : String
+    livreDispo : Boolean
+}
+
+class Livre {
+    id : String
+    titre : String
+    auteur : String
+    isbn : String
+}
+
+class Avis {
+    id : String
+    note : Integer
+    description : String
+}
+
+enum TypeLieu {
+    BIBLIOTHEQUE_UNIVERSITAIRE
+    BIBLIOTHEQUE
+    MEDIATHEQUE
+    COWORKING_SPACE
+    COWORKING_COFFEE
+}
+
+' Utilisateur – Favori (1 to *)
+Utilisateur "1" -- "*" Favori : ajoute >
+
+' Utilisateur – Recherche (1 to *)
+Utilisateur "1" -- "*" Recherche : fait >
+
+' Utilisateur – Publication (1 to *)
+Utilisateur "1" -- "*" Publication : "pose question"
+
+' Publication – Utilisateur (1 to *)
+Publication "1" -- "*" Utilisateur : repond >
+
+' Lieu – Disponibilité (1 to *)
+Lieu "1" -- "*" Disponibilité : possède >
+
+' Disponibilité – Livre (1 to 1)
+Disponibilité "*" -- "1" Livre : concerne >
+
+' Utilisateur – Avis (1 to *)
+Utilisateur "1" -- "*" Avis : écrit >
+
+' Lieu – Avis (1 to *)
+Lieu "1" -- "*" Avis : reçoit >
+@enduml
