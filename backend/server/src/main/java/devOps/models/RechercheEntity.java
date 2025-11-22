@@ -18,6 +18,6 @@ public class RechercheEntity {
     private String coordonnees;
 
     @ManyToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "utilisateur_id")
     private UtilisateurEntity utilisateur;
 }

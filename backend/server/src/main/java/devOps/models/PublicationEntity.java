@@ -19,10 +19,10 @@ public class PublicationEntity {
     private Date date;
 
     @ManyToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "utilisateur_id")
     private UtilisateurEntity utilisateur;
 
     @ManyToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "utilisateur_rep_id")
     private UtilisateurEntity repondeur;
 }

@@ -18,10 +18,16 @@ public class DisponibiliteEntity {
     private Boolean livreDispo;
 
     @ManyToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "lieu_id")
     private LieuEntity lieu;
 
-    @OneToOne
-    @JoinColumn(name = "id")
+    @ManyToOne
+    @JoinColumn(name = "livre_id")
     private LivreEntity livre;
+
+    public LivreEntity getLivre() {
+        return this.livre;
+    }
+
+
 }
