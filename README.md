@@ -4,7 +4,8 @@ Ce projet vise à moderniser l’expérience des usagers en bibliothèque en off
 Grâce à des outils de recherche avancée, des fonctionnalités communautaires et des options de personnalisation, l’application facilite l’accès aux ressources et améliore la navigation au sein du réseau de bibliothèques.
 Elle s’adresse autant aux étudiants et chercheurs qu’aux lecteurs occasionnels souhaitant optimiser leurs visites.
 
-✨ Features
+✨ Features :
+
 🔍 Fonctionnalités principales :
 
 1 / Recherche d’espaces :
@@ -31,3 +32,4 @@ Ajouter des espaces ou des livres à une liste de favoris pour les retrouver plu
 
 2 / Avis et retours utilisateurs
 Donner un avis sur un espace ou un livre afin d’aider les autres membres de la communauté.
+
