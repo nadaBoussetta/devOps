@@ -1,0 +1,10 @@
+package devOps.enums;
+
+public enum TypeLieu {
+    BIBLIOTHEQUE_UNIVERSITAIRE,
+    BIBLIOTHEQUE,
+    MEDIATHEQUE,
+    COWORKING_SPACE,
+    COWORKING_COFFEE
+}
+
