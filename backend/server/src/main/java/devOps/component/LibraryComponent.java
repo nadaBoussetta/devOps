@@ -39,7 +39,6 @@ public class LibraryComponent {
                         Math.pow(lon1 - lon2, 2));
     }
 
-    // --- AJOUTER CETTE MÉTHODE ---
     public LibraryEntity saveLibrary(LibraryEntity library) {
         return libraryRepository.save(library);
     }

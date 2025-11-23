@@ -9,15 +9,14 @@ import jakarta.persistence.Id;
 public class LibraryEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO) // Hibernate génère l'ID
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private String name;
-    private String address; // ou street, selon ton JSON
+    private String address;
     private double latitude;
     private double longitude;
 
-    // --- Getters et Setters ---
     public Long getId() {
         return id;
     }

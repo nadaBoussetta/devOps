@@ -6,9 +6,9 @@ import devOps.models.LibraryEntity;
 import devOps.repositories.LibraryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -18,24 +18,32 @@ public class DataInitializer implements CommandLineRunner {
 
     private final LibraryRepository libraryRepository;
 
-    private static final String JSON_FILE_PATH = "src/main/resources/repertoire-bibliotheques.json";
-
     @Override
     public void run(String... args) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
 
+        ClassPathResource resource = new ClassPathResource("repertoire-bibliotheques.json");
+
+        if (!resource.exists()) {
+            System.err.println(" Fichier JSON introuvable dans les resources !");
+            return;
+        }
+
+        System.out.println(" Chargement des bibliothèques depuis " + resource.getFilename());
+
         // Lire le JSON
         List<Map<String, Object>> libraries = mapper.readValue(
-                new File(JSON_FILE_PATH),
+                resource.getInputStream(),
                 new TypeReference<List<Map<String, Object>>>() {});
 
+        int count = 0;
         for (Map<String, Object> library : libraries) {
             String name = (String) library.get("nometablissement");
-            String address = (String) library.get("nomrue"); // <-- champ correct pour ton JSON
+            String address = (String) library.get("nomrue");
 
             Map<String, Object> geo = (Map<String, Object>) library.get("geo");
             if (geo == null || geo.get("lat") == null || geo.get("lon") == null) {
-                System.out.println("Bibliothèque ignorée (pas de geo) : " + name);
+                System.out.println("⚠️ Bibliothèque ignorée (pas de geo) : " + name);
                 continue;
             }
 
@@ -49,8 +57,9 @@ public class DataInitializer implements CommandLineRunner {
             entity.setLongitude(longitude);
 
             libraryRepository.save(entity);
+            count++;
         }
 
-        System.out.println("Initialisation des bibliothèques terminée !");
+        System.out.println("Initialisation terminée ! " + count + " bibliothèques chargées.");
     }
 }

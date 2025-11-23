@@ -15,14 +15,12 @@ public class LibraryController implements LibraryEndpoint {
 
     private final LibraryService libraryService;
 
-    // Récupérer toutes les bibliothèques
     @Override
     @GetMapping
     public List<LibraryResponseDTO> getAllLibraries() {
         return libraryService.getAllLibraries();
     }
 
-    // Récupérer la meilleure bibliothèque pour l'utilisateur
     @Override
     @GetMapping("/recommend")
     public LibraryResponseDTO getBestLibrary(@RequestParam double latitude,
@@ -30,21 +28,12 @@ public class LibraryController implements LibraryEndpoint {
         return libraryService.getBestLibrary(latitude, longitude);
     }
 
-    // Récupérer une bibliothèque par son ID
     @Override
     @GetMapping("/{id}")
     public LibraryResponseDTO getLibraryById(@PathVariable String id) {
         return libraryService.getLibrary(id);
     }
 
-    // Créer une nouvelle bibliothèque
-    @Override
-    @PostMapping
-    public LibraryResponseDTO createLibrary(@RequestBody LibraryResponseDTO libraryResponseDTO) {
-        return libraryService.createLibrary(libraryResponseDTO);
-    }
-
-    // Récupérer les bibliothèques proches de l'utilisateur
     @GetMapping("/nearby")
     public List<LibraryResponseDTO> getLibrariesNearby(
             @RequestParam double lat,

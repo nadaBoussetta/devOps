@@ -52,11 +52,10 @@ public class LibraryService {
                 .sorted((lib1, lib2) -> Double.compare(
                         calculerDistanceKm(userLat, userLon, lib1.getLatitude(), lib1.getLongitude()),
                         calculerDistanceKm(userLat, userLon, lib2.getLatitude(), lib2.getLongitude())))
-                .map(LibraryEntity::getName) // <-- transformer en String
+                .map(LibraryEntity::getName)
                 .collect(Collectors.toList());
     }
 
-    // --- MÉTHODES PRIVÉES ---
     private List<LibraryEntity> findLibrariesNear(double userLat, double userLon, double rayonKm) {
         return libraryComponent.getAllLibraries()
                 .stream()
