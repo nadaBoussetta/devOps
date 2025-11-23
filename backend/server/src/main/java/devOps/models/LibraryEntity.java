@@ -1,29 +1,60 @@
 package devOps.models;
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
 @Entity
 public class LibraryEntity {
 
     @Id
-    @Column(unique = true, nullable = false)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.AUTO) // Hibernate génère l'ID
+    private Long id;
 
-    @Column(nullable = false)
     private String name;
-
-    @Column(nullable = false)
+    private String address; // ou street, selon ton JSON
     private double latitude;
-
-    @Column(nullable = false)
     private double longitude;
 
-    private String environment;
+    // --- Getters et Setters ---
+    public Long getId() {
+        return id;
+    }
 
-    private double accessibilityScore;
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    private double meteorologyScore;
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
 }

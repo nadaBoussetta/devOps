@@ -4,9 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+@Entity
 @Getter
 @Setter
-@Entity
 public class DisponibiliteEntity {
 
     @Id
@@ -18,10 +18,10 @@ public class DisponibiliteEntity {
     private Boolean livreDispo;
 
     @ManyToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "lieu_id") // <-- colonne différente
     private LieuEntity lieu;
 
     @OneToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "livre_id") // <-- colonne différente
     private LivreEntity livre;
 }
