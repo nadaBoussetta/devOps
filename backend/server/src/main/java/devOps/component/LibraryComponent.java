@@ -17,8 +17,7 @@ public class LibraryComponent {
     public LibraryEntity getLibrary(String id) throws NotFoundLibraryEntityException {
         return libraryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundLibraryEntityException(
-                        String.format("La bibliothèque %s n'a pas été trouvée", id)
-                ));
+                        String.format("La bibliothèque %s n'a pas été trouvée", id)));
     }
 
     public List<LibraryEntity> getAllLibraries() {
@@ -30,15 +29,18 @@ public class LibraryComponent {
                 .stream()
                 .min((lib1, lib2) -> Double.compare(
                         distance(userLat, userLon, lib1.getLatitude(), lib1.getLongitude()),
-                        distance(userLat, userLon, lib2.getLatitude(), lib2.getLongitude())
-                ))
+                        distance(userLat, userLon, lib2.getLatitude(), lib2.getLongitude())))
                 .orElseThrow(() -> new NotFoundLibraryEntityException("Aucune bibliothèque disponible"));
     }
 
     private double distance(double lat1, double lon1, double lat2, double lon2) {
         return Math.sqrt(
                 Math.pow(lat1 - lat2, 2) +
-                        Math.pow(lon1 - lon2, 2)
-        );
+                        Math.pow(lon1 - lon2, 2));
+    }
+
+    // --- AJOUTER CETTE MÉTHODE ---
+    public LibraryEntity saveLibrary(LibraryEntity library) {
+        return libraryRepository.save(library);
     }
 }
