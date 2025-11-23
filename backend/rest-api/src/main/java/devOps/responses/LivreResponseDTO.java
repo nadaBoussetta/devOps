@@ -1,13 +1,13 @@
 package devOps.responses;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;  // ← AJOUTEZ CECI
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;   // ← AJOUTEZ CECI
+import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor                 // ← AJOUTEZ CECI
-@AllArgsConstructor                // ← AJOUTEZ CECI
+@NoArgsConstructor
+@AllArgsConstructor
 @Schema(description = "Livre disponible dans un lieu")
 public class LivreResponseDTO {
 

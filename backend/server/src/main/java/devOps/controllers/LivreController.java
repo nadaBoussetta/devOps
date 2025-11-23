@@ -1,7 +1,6 @@
 package devOps.controllers;
 
 import devOps.endpoints.LivreEndpoint;
-import devOps.models.LivreEntity;
 import devOps.responses.LivreResponseDTO;
 import devOps.services.LivreService;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +12,6 @@ public class LivreController implements LivreEndpoint {
 
     private final LivreService livreService;
 
-    // constructeur explicite pour Spring
     public LivreController(LivreService livreService) {
         this.livreService = livreService;
     }

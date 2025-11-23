@@ -17,6 +17,8 @@ public class RechercheEntity {
 
     private String coordonnees;
 
+    private static final double RAYON_KM = 20.0;
+
     @ManyToOne
     @JoinColumn(name = "utilisateur_id")
     private UtilisateurEntity utilisateur;
