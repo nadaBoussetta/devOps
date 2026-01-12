@@ -35,7 +35,7 @@ public class LibraryService {
                 .stream()
                 // Filtre distance
                 .filter(lib -> calculerDistanceKm(userLat, userLon,
-                        lib.getLatitude(), lib.getLongitude()) <= rayonKm)
+                lib.getLatitude(), lib.getLongitude()) <= rayonKm)
                 // Filtre horaire
                 .filter(lib -> estOuverte(lib.getHeuresOuverture(), jour, heureDebut, heureFin))
                 // Map en DTO
@@ -45,7 +45,9 @@ public class LibraryService {
 
     // ===== Vérifie ouverture pour un jour et une plage horaire =====
     private boolean estOuverte(String heuresOuverture, DayOfWeek jourDemande, LocalTime heureDebut, LocalTime heureFin) {
-        if (heuresOuverture == null) return false;
+        if (heuresOuverture == null) {
+            return false;
+        }
 
         // Correspondance jours français → DayOfWeek
         String[] joursFrancais = {"Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"};
@@ -53,7 +55,9 @@ public class LibraryService {
 
         String[] lignes = heuresOuverture.split("\n");
         for (String ligne : lignes) {
-            if (!ligne.startsWith(jourStr)) continue;
+            if (!ligne.startsWith(jourStr)) {
+                continue;
+            }
 
             String plagesStr = ligne.substring(ligne.indexOf(":") + 1).trim();
             String[] blocs = plagesStr.split("et"); // plusieurs plages possibles
@@ -61,16 +65,18 @@ public class LibraryService {
             for (String bloc : blocs) {
                 bloc = bloc.trim().replace("h", ""); // "14h-18h" → "14-18"
                 String[] heures = bloc.split("-");
-                if (heures.length != 2) continue;
+                if (heures.length != 2) {
+                    continue;
+                }
 
                 try {
                     LocalTime debut = LocalTime.parse(heures[0].trim() + ":00");
                     LocalTime fin = LocalTime.parse(heures[1].trim() + ":00");
 
-                    // Vérifie chevauchement de la plage demandée avec la plage d'ouverture
-                    if (!heureFin.isBefore(debut) && !heureDebut.isAfter(fin)) {
+                    if (!heureDebut.isBefore(debut) && !heureFin.isAfter(fin)) {
                         return true;
                     }
+
                 } catch (Exception e) {
                     // Ignore les formats incorrects
                 }
