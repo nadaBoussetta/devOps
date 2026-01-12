@@ -1,17 +1,17 @@
 package devOps.mappers;
 
 import devOps.models.LibraryEntity;
-import devOps.responses.LibraryResponseDTO;
+import devOps.dtos.LibraryResponseDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface LibraryMapper {
 
-    @Mapping(source = "tournee.id", target = "tourneeId", ignore = true)
-    LibraryResponseDTO toResponse(LibraryEntity libraryEntity);
+    // Convertit une entité vers un DTO
+    LibraryResponseDTO toResponse(LibraryEntity entity);
 
-    @Mapping(target = "id", ignore = true) // Laisser Hibernate générer l'ID
-    @Mapping(source = "tourneeId", target = "tournee.id", ignore = true)
-    LibraryEntity toEntity(LibraryResponseDTO libraryResponseDTO);
+    // Convertit un DTO vers une entité
+    @Mapping(target = "id", ignore = true) // Hibernate gère l'ID
+    LibraryEntity toEntity(LibraryResponseDTO dto);
 }

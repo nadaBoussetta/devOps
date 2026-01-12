@@ -20,8 +20,8 @@
 
 	<properties>
 		<lombok.version>1.18.30</lombok.version>
-		<maven.compiler.source>21</maven.compiler.source>
-		<maven.compiler.target>21</maven.compiler.target>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<springFoxSwagger.version>3.0.0</springFoxSwagger.version>
 		<swagger-annotation.version>1.6.14</swagger-annotation.version>

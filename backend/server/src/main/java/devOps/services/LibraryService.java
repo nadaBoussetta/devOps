@@ -3,7 +3,7 @@ package devOps.services;
 import devOps.component.LibraryComponent;
 import devOps.mappers.LibraryMapper;
 import devOps.models.LibraryEntity;
-import devOps.responses.LibraryResponseDTO;
+import devOps.dtos.LibraryResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
