@@ -4,6 +4,8 @@ import devOps.endpoints.LivreEndpoint;
 import devOps.responses.LivreResponseDTO;
 import devOps.services.LivreService;
 import org.springframework.web.bind.annotation.*;
+import devOps.responses.DisponibiliteResponseDTO;
+
 
 import java.util.List;
 
@@ -22,6 +24,16 @@ public class LivreController implements LivreEndpoint {
             @RequestParam String titre
     ) {
         return livreService.rechercherLivres(lieuId, titre);
+    }
+
+    @Override
+    public DisponibiliteResponseDTO verifierDisponibilite(String lieuId, String livreId) {
+        return livreService.verifierDisponibilite(lieuId, livreId);
+    }
+
+    @Override
+    public void emprunterLivre(String lieuId, String livreId) {
+        livreService.emprunterLivre(lieuId, livreId);
     }
 
 }
