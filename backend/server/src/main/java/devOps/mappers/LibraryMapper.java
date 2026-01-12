@@ -11,6 +11,7 @@ public class LibraryMapper {
         LibraryResponseDTO dto = new LibraryResponseDTO();
         dto.setName(entity.getName());
         dto.setAddress(entity.getAddress());
+        dto.setHeuresOuverture(entity.getHeuresOuverture());
         return dto;
     }
 
@@ -18,6 +19,7 @@ public class LibraryMapper {
         LibraryEntity entity = new LibraryEntity();
         entity.setName(dto.getName());
         entity.setAddress(dto.getAddress());
+        entity.setHeuresOuverture(dto.getHeuresOuverture());
         return entity;
     }
 }

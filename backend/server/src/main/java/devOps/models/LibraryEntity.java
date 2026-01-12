@@ -1,60 +1,39 @@
 package devOps.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
 public class LibraryEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO) // Hibernate génère l'ID
-    private Long id;
+    @Column(unique = true, nullable = false)
+    private String id;
 
     private String name;
-    private String address; // ou street, selon ton JSON
+    private String address;
+
     private double latitude;
     private double longitude;
 
-    // --- Getters et Setters ---
-    public Long getId() {
-        return id;
-    }
+    @Column(length = 2000)
+    private String heuresOuverture;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    // Getters et Setters manuels
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 
-    public String getAddress() {
-        return address;
-    }
+    public double getLatitude() { return latitude; }
+    public void setLatitude(double latitude) { this.latitude = latitude; }
 
-    public void setAddress(String address) {
-        this.address = address;
-    }
+    public double getLongitude() { return longitude; }
+    public void setLongitude(double longitude) { this.longitude = longitude; }
 
-    public double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
-    }
-
-    public double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
-    }
+    public String getHeuresOuverture() { return heuresOuverture; }
+    public void setHeuresOuverture(String heuresOuverture) { this.heuresOuverture = heuresOuverture; }
 }
