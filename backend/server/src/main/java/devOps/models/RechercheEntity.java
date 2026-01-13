@@ -10,14 +10,14 @@ import lombok.Setter;
 public class RechercheEntity {
 
     @Id
-    @Column(unique = true, nullable = false)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private String depart;
 
     private String coordonnees;
 
     @ManyToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "utilisateur_id")
     private UtilisateurEntity utilisateur;
 }

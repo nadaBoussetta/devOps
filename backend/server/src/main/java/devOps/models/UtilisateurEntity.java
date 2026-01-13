@@ -11,8 +11,8 @@ import java.util.List;
 public class UtilisateurEntity {
 
     @Id
-    @Column(unique = true, nullable = false)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private String nom;
 
@@ -31,7 +31,4 @@ public class UtilisateurEntity {
 
     @OneToMany(mappedBy = "repondeur", cascade = CascadeType.ALL)
     private List<PublicationEntity> publicationsRepondues;
-
-    @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL)
-    private List<AvisEntity> avis;
 }

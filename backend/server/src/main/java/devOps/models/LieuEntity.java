@@ -12,8 +12,8 @@ import java.util.List;
 public class LieuEntity {
 
     @Id
-    @Column(unique = true, nullable = false)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private String nom;
 
@@ -30,7 +30,4 @@ public class LieuEntity {
 
     @OneToMany(mappedBy = "lieu", cascade = CascadeType.ALL)
     private List<DisponibiliteEntity> disponibilites;
-
-    @OneToMany(mappedBy = "lieu", cascade = CascadeType.ALL)
-    private List<AvisEntity> avis;
 }

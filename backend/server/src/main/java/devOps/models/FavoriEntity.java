@@ -11,12 +11,16 @@ import java.util.Date;
 public class FavoriEntity {
 
     @Id
-    @Column(unique = true, nullable = false)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private Date dateAjout;
 
     @ManyToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "utilisateur_id")   // colonne propre
     private UtilisateurEntity utilisateur;
+
+    @ManyToOne
+    @JoinColumn(name = "livre_id")         // colonne propre
+    private LivreEntity livre;
 }

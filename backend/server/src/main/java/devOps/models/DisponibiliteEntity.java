@@ -10,18 +10,18 @@ import lombok.Setter;
 public class DisponibiliteEntity {
 
     @Id
-    @Column(unique = true, nullable = false)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private String bibliotheque;
 
     private Boolean livreDispo;
 
     @ManyToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "lieu_id")   // ← colonne différente
     private LieuEntity lieu;
 
     @OneToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "livre_id")  // ← colonne différente
     private LivreEntity livre;
 }
