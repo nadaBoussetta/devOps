@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import devOps.models.LibraryEntity;
 import devOps.repositories.LibraryRepository;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +40,7 @@ public class DataInitializer implements CommandLineRunner {
                 new TypeReference<List<Map<String, Object>>>() {}
         );
 
+        int count = 0;
         for (Map<String, Object> library : libraries) {
 
             // ===== ID =====
@@ -84,6 +85,7 @@ public class DataInitializer implements CommandLineRunner {
             entity.setHeuresOuverture(heuresOuverture);
 
             libraryRepository.save(entity);
+            count++;
         }
 
         System.out.println(" Initialisation des bibliothèques terminée !");

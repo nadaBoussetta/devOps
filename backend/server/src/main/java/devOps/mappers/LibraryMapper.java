@@ -2,10 +2,10 @@ package devOps.mappers;
 
 import devOps.models.LibraryEntity;
 import devOps.responses.LibraryResponseDTO;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
 
-@Component
-public class LibraryMapper {
+@Mapper(componentModel = "spring")
+public interface LibraryMapper {
 
     public LibraryResponseDTO toResponse(LibraryEntity entity) {
         LibraryResponseDTO dto = new LibraryResponseDTO();

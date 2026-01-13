@@ -17,6 +17,6 @@ public class FavoriEntity {
     private Date dateAjout;
 
     @ManyToOne
-    @JoinColumn(name = "utilisateur_id") // <-- colonne différente
+    @JoinColumn(name = "utilisateur_id")
     private UtilisateurEntity utilisateur;
 }

@@ -18,10 +18,10 @@ public class AvisEntity {
     private String description;
 
     @ManyToOne
-    @JoinColumn(name = "utilisateur_id") // colonne différente
+    @JoinColumn(name = "utilisateur_id")
     private UtilisateurEntity utilisateur;
 
     @ManyToOne
-    @JoinColumn(name = "lieu_id") // colonne différente
+    @JoinColumn(name = "lieu_id")
     private LieuEntity lieu;
 }
