@@ -2,7 +2,7 @@ package devOps.dtos;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.data;
+import lombok.Data;
 
 @Getter
 @Setter
