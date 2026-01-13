@@ -1,8 +1,8 @@
 package devOps.services;
 
 import devOps.dtos.PublicationRequestDTO;
-import devOps.dtos.PublicationResponseDTO;
 import devOps.models.PublicationEntity;
+import devOps.models.UtilisateurEntity;
 import devOps.repositories.PublicationRepository;
 import devOps.repositories.UtilisateurRepository;
 import org.springframework.stereotype.Service;
@@ -22,36 +22,35 @@ public class PublicationService {
         this.utilisateurRepository = utilisateurRepository;
     }
 
-    public PublicationEntity create(PublicationRequestDTO request) {
+    public PublicationEntity createPublication(PublicationRequestDTO dto) {
 
-        PublicationEntity publication = new PublicationEntity();
-        publication.setMessage(request.getMessage());
-        publication.setDate(new Date());
+        UtilisateurEntity utilisateur = utilisateurRepository.findById(dto.getUtilisateurId())
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
 
-        publication.setUtilisateur(
-                utilisateurRepository.findById(request.getUtilisateurId())
-                        .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"))
-        );
-
-        if (request.getRepondeurId() != null) {
-            publication.setRepondeur(
-                    utilisateurRepository.findById(request.getRepondeurId())
-                            .orElseThrow(() -> new RuntimeException("Répondeur introuvable"))
-            );
+        UtilisateurEntity repondeur = null;
+        if (dto.getRepondeurId() != null) {
+            repondeur = utilisateurRepository.findById(dto.getRepondeurId())
+                    .orElse(null);
         }
 
-        return publicationRepository.save(publication);
+        PublicationEntity pub = new PublicationEntity();
+        pub.setMessage(dto.getMessage());
+        pub.setDate(new Date());
+        pub.setUtilisateur(utilisateur);
+        pub.setRepondeur(repondeur);
+
+        return publicationRepository.save(pub);
     }
 
-    public List<PublicationEntity> getAll() {
-        return publicationRepository.findAllByOrderByDateDesc();
+    public List<PublicationEntity> getAllPublications() {
+        return publicationRepository.findAll();
     }
 
-    public List<PublicationEntity> getByUtilisateur(Long utilisateurId) {
-        return publicationRepository.findByUtilisateurIdOrderByDateDesc(utilisateurId);
+    public PublicationEntity getPublication(Long id) {
+        return publicationRepository.findById(id).orElse(null);
     }
 
-    public List<PublicationEntity> getByRepondeur(Long repondeurId) {
-        return publicationRepository.findByRepondeurId(repondeurId);
+    public void deletePublication(Long id) {
+        publicationRepository.deleteById(id);
     }
 }

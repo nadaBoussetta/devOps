@@ -27,30 +27,30 @@ public class PublicationEndpoint {
     @Operation(description = "Créer une nouvelle publication")
     @PostMapping
     public PublicationResponseDTO create(@RequestBody PublicationRequestDTO request) {
-        return publicationMapper.toDto(publicationService.create(request));
+        return publicationMapper.toDto(
+                publicationService.createPublication(request)
+        );
     }
 
     @Operation(description = "Récupérer toutes les publications")
     @GetMapping
     public List<PublicationResponseDTO> getAll() {
-        return publicationService.getAll().stream()
+        return publicationService.getAllPublications().stream()
                 .map(publicationMapper::toDto)
                 .toList();
     }
 
-    @Operation(description = "Récupérer les publications par utilisateur")
-    @GetMapping("/utilisateur/{id}")
-    public List<PublicationResponseDTO> getByUtilisateur(@PathVariable Long id) {
-        return publicationService.getByUtilisateur(id).stream()
-                .map(publicationMapper::toDto)
-                .toList();
+    @Operation(description = "Récupérer une publication par ID")
+    @GetMapping("/{id}")
+    public PublicationResponseDTO getById(@PathVariable Long id) {
+        return publicationMapper.toDto(
+                publicationService.getPublication(id)
+        );
     }
 
-    @Operation(description = "Récupérer les publications par répondeur")
-    @GetMapping("/repondeur/{id}")
-    public List<PublicationResponseDTO> getByRepondeur(@PathVariable Long id) {
-        return publicationService.getByRepondeur(id).stream()
-                .map(publicationMapper::toDto)
-                .toList();
+    @Operation(description = "Supprimer une publication")
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        publicationService.deletePublication(id);
     }
 }
