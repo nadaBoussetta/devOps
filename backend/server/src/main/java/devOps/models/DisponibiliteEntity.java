@@ -24,4 +24,10 @@ public class DisponibiliteEntity {
     @OneToOne
     @JoinColumn(name = "livre_id")  // ← colonne différente
     private LivreEntity livre;
+
+    public LivreEntity getLivre() {
+        return this.livre;
+    }
+
+
 }

@@ -31,12 +31,6 @@ public interface LibraryEndpoint {
     @ResponseStatus(HttpStatus.OK)
     LibraryResponseDTO getLibraryById(@PathVariable(name = "id") String id);
 
-    @Operation(description = "Créer une nouvelle bibliothèque")
-    @ApiResponse(responseCode = "201", description = "Bibliothèque créée")
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    LibraryResponseDTO createLibrary(@RequestBody LibraryResponseDTO libraryDTO);
-
     @GetMapping("/recommend")
     LibraryResponseDTO getBestLibrary(@RequestParam double latitude,
                                       @RequestParam double longitude);
