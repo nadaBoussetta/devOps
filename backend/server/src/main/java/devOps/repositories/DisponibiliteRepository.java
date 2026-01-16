@@ -4,10 +4,10 @@ import devOps.models.DisponibiliteEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
-public interface DisponibiliteRepository extends JpaRepository<DisponibiliteEntity, String> {
+public interface DisponibiliteRepository extends JpaRepository<DisponibiliteEntity, Long> {
 
     List<DisponibiliteEntity> findByLieuIdAndLivreDispoTrueAndLivreTitreContainingIgnoreCase(
-            String lieuId,
+            Long lieuId,
             String titre
     );
 }

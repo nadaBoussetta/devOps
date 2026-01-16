@@ -16,7 +16,7 @@ public class DisponibiliteComponent {
         this.disponibiliteRepository = disponibiliteRepository;
     }
 
-    public List<DisponibiliteEntity> searchBooks(String lieuId, String titre) {
+    public List<DisponibiliteEntity> searchBooks(Long lieuId, String titre) {
         return disponibiliteRepository
                 .findByLieuIdAndLivreDispoTrueAndLivreTitreContainingIgnoreCase(lieuId, titre);
     }

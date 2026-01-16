@@ -16,7 +16,7 @@ public interface LivreEndpoint {
     @GetMapping("/{lieuId}/livres")
     @ResponseStatus(HttpStatus.OK)
     List<LivreResponseDTO> rechercherLivres(
-            @PathVariable(name = "lieuId") String lieuId,
+            @PathVariable(name = "lieuId") Long lieuId,
             @RequestParam(name = "titre") String titre
     );
 }

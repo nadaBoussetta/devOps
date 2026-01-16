@@ -4,6 +4,8 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: "Comic Sans MS", "Segoe Script", "Bradley Hand", cursive;
+
 }
 
 /* ================= VARIABLES ================= */
@@ -242,22 +244,28 @@ footer {
     display: flex;
     flex-direction: column;
     gap: 15px;
+
 }
+
 
 .publication-form input,
 .publication-form textarea {
     padding: 12px;
     border: 1px solid #ccc;
     border-radius: 6px;
-    font-size: 16px;
-}
+    font-size: 11px;
 
+}
+.publication-form input
+{
+    height:45px;
+}
 .publication-form button {
     padding: 12px;
     background: #0077cc;
     color: white;
     border: none;
-    border-radius: 6px;
+    border-radius: 15px;
     font-size: 18px;
     cursor: pointer;
     transition: 0.3s;
@@ -271,5 +279,37 @@ footer {
     margin-top: 15px;
     text-align: center;
     font-weight: bold;
+}
+.upload-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: Arial, sans-serif;
+
+}
+
+.upload-text {
+    font-size: 12px;
+    color: #333;
+}
+
+.upload-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    background-color: #4a90e2;
+    color: white;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 20px;
+    transition: 0.3s ease;
+}
+
+.upload-btn:hover {
+    background-color: #357ac9;
+    transform: translatex(4px);
+
 }
 
