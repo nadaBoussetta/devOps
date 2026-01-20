@@ -1,0 +1,72 @@
+---
+title: "Documentation du projet Bibliothèque"
+author: "KACI Lilia, BOUSSETTA Nada, ELHADJ MIMOUNE Nour El Islem, AFOUCHAL Assia"
+date: "2026-01-20"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+# Introduction
+
+Ce projet a pour objectif de créer une application permettant de regrouper les bibliothèques disponibles et de faciliter l'accès à leurs ressources. L'application offre aux utilisateurs une liste de bibliothèques classées selon la proximité de leur position et permet de consulter la disponibilité des livres, les horaires et autres informations utiles.
+
+# Qui ?
+
+Cette application s’adresse à toute personne intéressée par les bibliothèques et la lecture. Elle a été pensée pour **les bibliophiles**, **les étudiants**, **les chercheurs** ou toute personne ayant besoin d’un espace calme pour travailler, lire ou étudier. Grâce à la géolocalisation, l’utilisateur peut entrer sa position et l’application lui propose les bibliothèques disponibles autour de lui, classées de la plus proche à la plus éloignée. L’application peut également être utile à quelqu’un qui cherche un livre précis ou qui souhaite simplement découvrir de nouvelles bibliothèques près de chez lui. Elle s’adresse donc à un large public, sans distinction, dès lors qu’il existe un besoin d’accéder facilement à des bibliothèques et à leurs ressources.
+
+# Pourquoi ?
+
+Le projet répond à plusieurs besoins :
+
+Faciliter la recherche de bibliothèques et de livres disponibles à proximité.
+
+Offrir un outil pratique pour les étudiants et les chercheurs qui recherchent un lieu calme pour travailler.
+
+Permettre aux utilisateurs de découvrir de nouvelles bibliothèques et leurs horaires.
+
+Améliorer l’expérience utilisateur grâce à un classement des bibliothèques de la plus proche à la plus éloignée.
+
+# Concurrence
+
+Il existe plusieurs solutions qui permettent aux utilisateurs de trouver des bibliothèques ou des lieux proches, mais aucune ne répond exactement à tous les besoins ciblés par notre application.  
+
+Par exemple :  
+- **Google Maps** permet de localiser des bibliothèques et de calculer les distances, mais ne fournit pas d’informations détaillées sur la disponibilité des livres ni de fonctionnalités pour publier ou consulter des recherches entre utilisateurs.  
+- **WorldCat ou OpenLibrary** offrent un catalogue de livres étendu, mais ne géolocalisent pas les bibliothèques proches ni ne donnent d’informations sur les horaires ou l’accessibilité immédiate.  
+- Les sites web de bibliothèques locales fournissent des informations sur leurs collections et horaires, mais chaque site est indépendant, et il n’existe pas de solution centralisée pour comparer rapidement plusieurs bibliothèques autour de soi.  
+
+Notre application se différencie donc par sa **centralisation des bibliothèques**, son **tri automatique par proximité**, et la possibilité pour les utilisateurs de **consulter la disponibilité des livres et interagir via des publications ou recherches**. Elle combine géolocalisation, information sur les livres, et interaction utilisateur, ce qui n’est pas proposé par les solutions existantes.
+
+# Architecture et Technologies
+
+Pour le backend, nous utilisons **Spring Boot** sous **IntelliJ IDEA**, ce qui permet de développer rapidement une application Java robuste avec des API REST.  
+
+L’architecture suit le modèle **MVC** :  
+
+- **Model** : contient les entités JPA (UtilisateurEntity, LivreEntity, LibraryEntity…) qui représentent les données de l’application.  
+- **Repository** : gère l’accès à la base de données et les opérations CRUD via JPA/Hibernate.  
+- **Service** : contient la logique métier, comme la recherche des bibliothèques proches ou la vérification de la disponibilité des livres.  
+- **Controller** : définit les endpoints API pour exposer les fonctionnalités aux utilisateurs ou au frontend.  
+
+Cette organisation permet de séparer clairement les responsabilités et facilite la maintenance et l’évolution de l’application.
+
+
+# Éléments de gestion de projet
+
+# Diagramme de classes
+
+# Features
+
+## Feature 1 : Recherche de bibliothèques
+L’utilisateur peut saisir sa position actuelle ainsi que l’heure à laquelle il souhaite se rendre dans une bibliothèque pour travailler ou étudier. L’application utilise ces informations pour afficher une liste des bibliothèques disponibles, classées de la plus proche à la plus éloignée par rapport à sa position. De plus, seules les bibliothèques ouvertes à l’heure spécifiée sont proposées, ce qui permet à l’utilisateur de gagner du temps et de choisir rapidement un lieu adapté à ses besoins.
+
+## Feature 2 : Recherche de disponibilité de livres
+L’utilisateur peut entrer le nom d’un livre qu’il souhaite trouver. L’application recherche alors dans toutes les bibliothèques enregistrées et affiche celles où le livre est disponible. Cette fonctionnalité permet non seulement de savoir rapidement où se procurer un livre, mais aussi de planifier efficacement ses déplacements en choisissant la bibliothèque la plus pratique ou la plus proche.
+
+# Résumé
+
+# Annexe API REST
