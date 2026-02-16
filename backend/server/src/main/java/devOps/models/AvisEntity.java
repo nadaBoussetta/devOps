@@ -10,18 +10,18 @@ import lombok.Setter;
 public class AvisEntity {
 
     @Id
-    @Column(unique = true, nullable = false)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private Integer note;
 
     private String description;
 
     @ManyToOne
-    @JoinColumn(name = "utilisateur_id")
+    @JoinColumn(name = "utilisateur_id")   // colonne différente
     private UtilisateurEntity utilisateur;
 
     @ManyToOne
-    @JoinColumn(name = "lieu_id")
+    @JoinColumn(name = "lieu_id")          // colonne différente
     private LieuEntity lieu;
 }

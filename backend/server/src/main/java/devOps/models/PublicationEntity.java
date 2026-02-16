@@ -11,18 +11,19 @@ import java.util.Date;
 public class PublicationEntity {
 
     @Id
-    @Column(unique = true, nullable = false)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private String message;
 
+    @Temporal(TemporalType.TIMESTAMP)
     private Date date;
 
     @ManyToOne
-    @JoinColumn(name = "utilisateur_id")
+    @JoinColumn(name = "utilisateur_id", nullable = false)
     private UtilisateurEntity utilisateur;
 
     @ManyToOne
-    @JoinColumn(name = "utilisateur_rep_id")
+    @JoinColumn(name = "repondeur_id")
     private UtilisateurEntity repondeur;
 }

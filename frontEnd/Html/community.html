@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="author" content="Bibliothèque Communautaire">
+    <meta name="keywords" content="bibliothèque, communauté, livres, discussions, lecture">
+    <meta name="description" content="Bibliothèque Communautaire - Partagez et discutez avec la communauté de lecteurs.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Communauté - Bibliothèque Communautaire</title>
+
+    <link rel="stylesheet" href="../assets/css/community.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+
+<header>
+    <div class="top-bar">
+        <div class="top-bar-left">
+            <span>Rejoignez notre communauté de lecteurs et partagez vos découvertes !</span>
+        </div>
+        <div class="top-bar-right">
+            <div class="social-icons">
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-header">
+        <div class="logo-section">
+            <div class="logo-container">
+                <i class="fas fa-book logo-icon"></i>
+                <span class="company-name">MaBiblio</span>
+            </div>
+        </div>
+
+        <div class="contact-info">
+            <div class="contact-item">
+                <i class="fas fa-map-marker-alt contact-icon"></i>
+                <div class="contact-details">
+                    <strong>Localisation</strong>
+                    <span>France</span>
+                </div>
+            </div>
+
+            <div class="contact-divider"></div>
+
+            <div class="contact-item">
+                <i class="fas fa-envelope contact-icon"></i>
+                <div class="contact-details">
+                    <strong>Contactez-nous</strong>
+                    <span>
+                        <a id="l1" href="mailto:contact@bibliotheque.fr">contact@bibliotheque.fr</a>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="main-navigation">
+        <div class="nav-container">
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="main.html" class="nav-link">
+                        ACCUEIL <i class="fas fa-home nav-icon"></i>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="community.html" class="nav-link active">
+                        COMMUNAUTÉ <i class="fas fa-users nav-icon"></i>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="contact.html" class="nav-link">
+                        CONTACT <i class="fas fa-envelope nav-icon"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</header>
+
+<section class="hero-section">
+    <h1>Notre Communauté</h1>
+    <p>Discutez, partagez vos lectures et découvrez de nouveaux livres grâce à notre communauté active.</p>
+</section>
+
+<section class="community-section">
+    <h2>Discussions Récentes</h2>
+    <div class="posts-grid">
+
+        <div class="post-card">
+            <h4>Quel est votre livre préféré du mois ?</h4>
+            <p>Partagez vos recommandations avec les autres membres et découvrez de nouvelles lectures passionnantes.</p>
+        </div>
+
+        <div class="post-card">
+            <h4>Suggestions de lecture</h4>
+            <p>Vous avez un livre à recommander ? Postez-le ici et échangez vos avis avec la communauté.</p>
+        </div>
+
+        <div class="post-card">
+            <h4>Critiques et avis</h4>
+            <p>Évaluez vos lectures et lisez les critiques des autres membres pour vous inspirer.</p>
+        </div>
+
+    </div>
+</section>
+<section class="create-publication-section">
+    <h2>Créer une Publication</h2>
+
+    <form id="publicationForm" class="publication-form">
+        <div class="upload-container">
+            <span class="upload-text">Ajoutez une image :</span>
+
+            <label for="photo" class="upload-btn">
+                <i class="fas fa-camera"></i>
+            </label>
+
+            <input type="file" id="photo" name="photo" accept="image/*" style="display:none;">
+        </div>
+
+        <input type="text" id="title" placeholder="Titre de la publication" required>
+        <textarea id="content" placeholder="Contenu de la publication" required></textarea>
+        <input type="number" id="userId" placeholder="ID utilisateur" required>
+
+        <button type="submit">Publier</button>
+    </form>
+
+    <p id="pubMessage" class="pub-message"></p>
+</section>
+
+
+<footer>
+    <p>&copy; 2025 - Tous droits réservés - Bibliothèque Communautaire</p>
+</footer>
+
+</body>
+</html>

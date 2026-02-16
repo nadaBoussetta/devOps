@@ -1,7 +1,9 @@
 package devOps.controllers;
 
-import devOps.responses.LibraryResponseDTO;
+import devOps.endpoints.LibraryEndpoint;
+import devOps.dtos.LibraryResponseDTO;
 import devOps.services.LibraryService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.DayOfWeek;

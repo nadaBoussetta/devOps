@@ -1,6 +1,6 @@
 package devOps.endpoints;
 
-import devOps.responses.LibraryResponseDTO;
+import devOps.dtos.LibraryResponseDTO;
 import devOps.errors.NotFoundLibraryErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

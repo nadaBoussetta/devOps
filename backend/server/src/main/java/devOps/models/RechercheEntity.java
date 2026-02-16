@@ -10,8 +10,8 @@ import lombok.Setter;
 public class RechercheEntity {
 
     @Id
-    @Column(unique = true, nullable = false)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private String depart;
 

@@ -10,12 +10,18 @@ import lombok.Setter;
 public class LivreEntity {
 
     @Id
-    @Column(unique = true, nullable = false)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
+    @Column(nullable = false)
     private String titre;
 
+    @Column(nullable = false)
     private String auteur;
 
-    private String isbn;
+    private String categorie;
+
+    private String description;
+
+    private String imageUrl;
 }

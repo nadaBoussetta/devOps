@@ -18,7 +18,7 @@ public class LivreController implements LivreEndpoint {
 
     @Override
     public List<LivreResponseDTO> rechercherLivres(
-            @PathVariable String lieuId,
+            @PathVariable Long lieuId,
             @RequestParam String titre
     ) {
         return livreService.rechercherLivres(lieuId, titre);

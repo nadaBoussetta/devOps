@@ -19,7 +19,7 @@ public class LivreService {
         this.livreMapper = livreMapper;
     }
 
-    public List<LivreResponseDTO> rechercherLivres(String lieuId, String titre) {
+    public List<LivreResponseDTO> rechercherLivres(Long lieuId, String titre) {
         return disponibiliteComponent.searchBooks(lieuId, titre)
                 .stream()
                 .map(d -> livreMapper.toResponse(d.getLivre()))
