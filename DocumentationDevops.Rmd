@@ -1,7 +1,4 @@
 ---
-title: "Documentation du projet Bibliothèque"
-author: "KACI Lilia, BOUSSETTA Nada, ELHADJ MIMOUNE Nour El Islem, AFOUCHAL Assia"
-date: "2026-01-20"
 output: pdf_document
 ---
 
@@ -10,19 +7,54 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```
 
+\begin{titlepage}
+    \centering
+    \vspace*{1cm}
+
+    {\LARGE \textbf{Documentation du projet DevOps \\[0.3cm]Application Bibliothèques} \par}
+
+    \vspace{2cm}
+
+    {\large
+    KACI Lilia \\[0.3cm]
+    BOUSSETTA Nada\\[0.3cm]
+    ELHADJ MIMOUNE Nour El Islem\\[0.3cm]
+    AFOUCHAL Assia
+    \par}
+
+    \vfill
+
+    {\large 
+    M1 MIAGE APP
+    \\[0.3cm] 2025-2026}
+
+\end{titlepage}
+
+\newpage
+
 # Introduction
 
-Le projet vise à développer une application centralisant les bibliothèques d’Île-de-France afin de faciliter l’accès à leurs ressources. Elle permet aux utilisateurs de consulter les bibliothèques disponibles autour de leur position, de rechercher des livres spécifiques, de connaître les horaires et autres informations utiles. 
+Le projet vise à développer une application centralisant les bibliothèques d’Île-de-France afin de faciliter l’accès à leurs ressources. 
+
+Elle permet aux utilisateurs de consulter les bibliothèques disponibles autour de leur position, de rechercher des livres spécifiques, de connaître les horaires et autres informations utiles. 
+
 L’application inclut également un espace de communication où les utilisateurs peuvent partager des publications et commenter.
 
 # Qui ?
 
-Cette application s’adresse à toute personne intéressée par les bibliothèques et la lecture : bibliophiles, étudiants, chercheurs ou toute personne recherchant un espace calme pour travailler, lire ou étudier. Grâce à la géolocalisation, l’utilisateur peut indiquer sa position et l’application lui propose les bibliothèques les plus proches. Elle est également utile pour rechercher un livre précis ou découvrir de nouvelles bibliothèques à proximité.
+Cette application s’adresse à toute personne intéressée par les bibliothèques et la lecture : bibliophiles, étudiants, chercheurs ou toute personne recherchant un espace calme pour travailler, lire ou étudier. 
 
-Pour mieux comprendre ce qui rend une bibliothèque attractive, notre équipe a créé un formulaire destiné à enrichir les données utilisateurs :
+Grâce à la géolocalisation, l’utilisateur peut indiquer sa position et l’application lui propose les bibliothèques les plus proches. 
 
-- Formulaire : questions sur la bibliothèque la plus fréquentée, la fréquence de visite et l’avis sur différents critères (calme, disponibilité des livres, accessibilité, transport…).
-- Lien : https://docs.google.com/forms/d/e/1FAIpQLSfBo74v6iYrtgw3JT_3I3TNfxV2FgsowrZedcDw3OZZpTeXMQ/viewform
+Elle est également utile pour rechercher un livre précis ou découvrir de nouvelles bibliothèques à proximité.
+
+Pour mieux comprendre ce qui rend une bibliothèque attractive, notre équipe a créé **un formulaire** destiné à enrichir les données utilisateurs :
+
+*- Formulaire : * questions sur la bibliothèque la plus fréquentée, la fréquence de visite et l’avis sur différents critères (calme, disponibilité des livres, accessibilité, transport…).
+
+*- Lien : *
+
+https://docs.google.com/forms/d/e/1FAIpQLSfBo74v6iYrtgw3JT_3I3TNfxV2FgsowrZedcDw3OZZpTeXMQ/viewform
 
 Les résultat : 
 
@@ -44,16 +76,29 @@ Le projet répond à plusieurs besoins :
 
 Plusieurs solutions existantes permettent de localiser des bibliothèques ou des lieux proches, mais aucune ne répond à tous les besoins ciblés par notre application :
 
-- Google Maps : outil général de géolocalisation ; ne fournit pas d’informations sur la disponibilité des livres ni de fonctionnalités sociales.
+**- Google Maps :** outil général de géolocalisation ; ne fournit pas d’informations sur la disponibilité des livres ni de fonctionnalités sociales.
 
-- WorldCat / OpenLibrary : catalogues étendus de livres, mais sans géolocalisation des bibliothèques ni informations sur les horaires.
+**- WorldCat / OpenLibrary :** catalogues étendus de livres, mais sans géolocalisation des bibliothèques ni informations sur les horaires.
 
-- Muggerino : aide à trouver des « study spots » (bibliothèques, cafés, bureaux) et fournit des informations sur les installations et le flux de fréquentation, mais l’expérience est moins centrée sur les livres et la communication entre utilisateurs.
+**- Muggerino :** aide à trouver des « study spots » (bibliothèques, cafés, bureaux) et fournit des informations sur les installations et le flux de fréquentation, mais l’expérience est moins centrée sur les livres et la communication entre utilisateurs.
 
-- Sites web de bibliothèques locales : offrent des informations sur collections et horaires, mais chaque site est indépendant, sans solution centralisée pour comparer plusieurs bibliothèques rapidement.
+**- Sites web de bibliothèques locales :** offrent des informations sur collections et horaires, mais chaque site est indépendant, sans solution centralisée pour comparer plusieurs bibliothèques rapidement.
 
 
-Notre application se différencie donc par sa **centralisation des bibliothèques**, son **tri automatique par proximité**, et la possibilité pour les utilisateurs de **consulter la disponibilité des livres et interagir via des publications ou recherches**. Elle combine géolocalisation, information sur les livres, et interaction utilisateur, ce qui n’est pas proposé par les solutions existantes.
+Notre application se différencie donc par sa **centralisation des bibliothèques**, son **tri automatique par proximité**, et la possibilité pour les utilisateurs de **consulter la disponibilité des livres et interagir via des publications ou recherches**. 
+
+Elle combine géolocalisation, information sur les livres, et interaction utilisateur, ce qui n’est pas proposé par les solutions existantes.
+
+## Concurrence – Tableau comparatif
+
+| Application | Géolocalisation | Info livres | Horaires | Interaction sociale |
+|------------|----------------|------------|---------|------------------|
+| Google Maps |  Oui |  Non |  Oui |  Oui | 
+| WorldCat / OpenLibrary |  Non |  Oui |  Non |  Non |  
+| Muggerino |  Oui |  Non |  Oui |  Oui | 
+| Sites web locaux |  Non |  Oui |  Oui |  Non | 
+| **Notre application** |  Oui |  Oui |  Oui |  Oui | 
+
 
 # Architecture et Technologies
 
@@ -77,29 +122,192 @@ Ajout Partie Test : JUnit-Mockito ....
 # Features
 
 ## Feature 1 : Recherche de bibliothèques
-- But : L’utilisateur saisit sa position et la plage horaire souhaitée pour se rendre en bibliothèque. L’application affiche les bibliothèques disponibles, ouvertes à l’heure choisie, classées de la plus proche à la plus éloignée.
 
-- Scenario : 
+- **But :** L’utilisateur saisit sa position et la plage horaire souhaitée pour se rendre en bibliothèque. L’application affiche les bibliothèques disponibles, ouvertes à l’heure choisie, classées de la plus proche à la plus éloignée.
+
+- **Scenario :** 
+
+**Persona**  
+
+Nom : Amine 
+
+Âge : 21 ans 
+
+Statut : Étudiant en licence informatique 
+
+Lieu : Île-de-France 
+
+Objectif : Trouver une bibliothèque calme pour réviser ses examens
+
+    
+**Contexte d’utilisation**
+
+Amine prépare ses partiels et cherche un endroit calme pour étudier.
+Les bibliothèques proches de son domicile sont souvent pleines, et il souhaite trouver une         bibliothèque ouverte en soirée.
+    
+**Scénario d’utilisation**
+
+*1- Connexion à l’application : *
+
+Amine ouvre l’application.
+
+Il se connecte via email et mot de passe.
+    
+*2- Accès à la recherche : *
+
+Depuis la page d’accueil, il sélectionne la fonctionnalité « Rechercher une bibliothèque ».
+    
+*3- Saisie de la position : *
+
+Amine saisit manuellement l’adresse qu’il souhaite utiliser pour effectuer sa recherche. Cette     adresse peut correspondre à sa position actuelle, à son domicile, à son université ou à tout       autre lieu où il souhaite trouver une bibliothèque à proximité. L’application utilise alors        cette adresse comme point de départ afin d’identifier les bibliothèques les plus proches.
+    
+*4- Choix du rayon de recherche : *
+
+Il définit le rayon dans lequel il souhaite effectuer la recherche (par exemple 2 km, 5 km ou      10 km) afin de limiter les résultats aux bibliothèques situées dans la zone souhaitée.
+        
+*5- Choix de la plage horaire : *
+
+Il indique qu’il souhaite étudier de 18h à 22h.
+    
+*6- Traitement par l’application : *
+
+L’application détecte sa position, identifie les bibliothèques ouvertes sur le créneau demandé,
+calcule la distance,classe les résultats de la plus proche à la plus éloignée.
+    
+*7- Affichage des résultats : *
+
+Une liste de bibliothèques s’affiche.
+    
+
+
 - ScreenShot : 
 
 ## Feature 2 : Recherche de disponibilité de livres
-- But : L’utilisateur recherche un livre spécifique. L’application indique les bibliothèques où le livre est disponible, facilitant la planification des déplacements.
 
-- Scenario : 
+- **But :** L’utilisateur recherche un livre spécifique. L’application indique les bibliothèques où le livre est disponible, facilitant la planification des déplacements.
+
+- **Scenario :** 
+
+**Persona**  
+
+Nom : Dr. Claire Martin 
+
+Âge : 34 ans
+
+Statut : Chercheuse en biologie moléculaire 
+
+Lieu : Île-de-France 
+
+Objectif : Identifier rapidement dans quelles bibliothèques un ouvrage scientifique est disponible afin de préparer un article
+
+**Contexte d’utilisation**
+
+Dr. Claire Martin est en plein travail de recherche. Elle doit consulter un livre spécialisé pour compléter un chapitre de son article scientifique. Les bibliothèques universitaires sont nombreuses, mais elle ne connaît pas toutes les collections disponibles. Elle souhaite gagner du temps et se concentrer sur sa recherche plutôt que sur la logistique.
+
+*1- Connexion à l’application : *
+
+Claire ouvre l’application et se connecte.
+    
+*2- Accès à la recherche : *
+
+Depuis la page d’accueil, elle sélectionne la fonctionnalité « Rechercher un livre ». 
+
+*3- Saisie du titre  : *
+
+Claire saisit le titre exact du livre scientifique dont elle a besoin. L’application propose des suggestions pertinentes en temps réel.
+    
+*4- Affichage des résultats : *
+
+L’application affiche les bibliothèques qui possèdent le livre.
+
+
 - ScreenShot : 
 
 ## Feature 3 : Feed de communication
-- But : Permettre à un utilisateur de demander de l’aide pour emprunter un livre ou partager des informations avec d’autres utilisateurs via publications et commentaires.
-- Scenario : 
+
+- **But :** Permettre à un utilisateur de demander de l’aide pour emprunter un livre ou partager des informations avec d’autres utilisateurs via publications et commentaires.
+
+- **Scenario :** 
+
+**Persona**  
+
+Nom : Léa Dubois
+
+Âge : 28 ans
+
+Statut : Doctorante en sciences sociales
+
+Lieu : Île-de-France 
+
+Objectif : Poser des questions sur la disponibilité d’un livre et partager des informations utiles avec d’autres étudiants et chercheurs
+
+**Contexte d’utilisation**
+
+Léa prépare sa thèse et souhaite interagir avec la communauté universitaire. Elle cherche des conseils pour trouver un livre spécifique, partager ses recommandations et suivre les discussions autour des ouvrages disponibles dans les bibliothèques proches.
+
+*1- Connexion à l’application : *
+
+Léa ouvre l’application et se connecte.
+    
+*2- Accès au feed de communication : *
+
+Depuis la page d’accueil, elle sélectionne la fonctionnalité « Feed de communication ».
+
+*3- Publication d’une question : *
+
+Léa rédige un message demandant si quelqu’un a trouvé le livre “Introduction à la sociologie urbaine” et le poste sur le feed.
+    
+*4- Interaction avec d’autres utilisateurs :*
+
+D’autres utilisateurs voient le message et peuvent répondre à la question et faires des commentaires.
+Léa peut également répondre aux questions des autres utilisateurs via les commentaires.
+
 - ScreenShot : 
 
 ## Feature 4 :  Favoris / Liste de bibliothèques préférées
-- But : L’utilisateur peut enregistrer ses bibliothèques favorites pour y accéder rapidement et recevoir des recommandations personnalisées selon ses préférences et évaluations passées.
-- Scenario : 
+
+- **But :** L’utilisateur peut enregistrer ses bibliothèques favorites pour y accéder rapidement et recevoir des recommandations personnalisées selon ses préférences et évaluations passées.
+
+- **Scenario :** 
+
+**Persona**  
+
+Nom : Maxime Leroy
+
+Âge : 25 ans
+
+Statut : Étudiant en master MIAGE
+
+Lieu : Île-de-France 
+
+Objectif : Accéder rapidement à ses bibliothèques préférées et recevoir des suggestions adaptées à ses habitudes
+
+**Contexte d’utilisation**
+
+Maxime consulte régulièrement plusieurs bibliothèques pour étudier et emprunter des livres. Il souhaite créer une liste de ses bibliothèques préférées afin de ne pas perdre de temps à rechercher les mêmes endroits et recevoir des recommandations personnalisées basées sur ses évaluations précédentes.
+
+*1- Connexion à l’application : *
+
+Maxime ouvre l’application et se connecte.
+    
+*2- Accès à la liste de favoris : *
+
+Depuis la page d’accueil, il sélectionne la fonctionnalité « Bibliothèques favorites » et accède à sa liste de bibliothèques favorites.
+
+*3- Ajout/suppression d’une bibliothèque aux favoris : *
+
+Il parcourt la liste des bibliothèques disponibles et clique sur l’icône « Ajouter aux favoris » pour les bibliothèques qu’il visite régulièrement. Il peut également supprimer une bibliothèque de sa liste des favoris.
+    
+*4- Recommandations personnalisées : *
+
+L’application lui propose des suggestions basées sur ses bibliothèques favorites et sur les évaluations qu’il a données précédemment.
+
+
 - ScreenShot : 
 
-# SCENARIO
 # Résumé
-Cette application centralise l’information sur les bibliothèques d’Île-de-France, facilite la recherche de livres et d’espaces de travail, et offre des fonctionnalités sociales pour améliorer l’expérience utilisateur. Elle combine géolocalisation, disponibilité des livres et interaction utilisateur, ce qui la distingue des solutions existantes.
+Cette application centralise l’information sur les bibliothèques d’Île-de-France, facilite la recherche de livres et d’espaces de travail, et offre des fonctionnalités sociales pour améliorer l’expérience utilisateur.
+
+Elle combine géolocalisation, disponibilité des livres et interaction utilisateur, ce qui la distingue des solutions existantes.
 
 # Annexe API REST
