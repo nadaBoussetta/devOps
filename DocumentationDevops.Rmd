@@ -1,0 +1,105 @@
+---
+title: "Documentation du projet Bibliothèque"
+author: "KACI Lilia, BOUSSETTA Nada, ELHADJ MIMOUNE Nour El Islem, AFOUCHAL Assia"
+date: "2026-01-20"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+# Introduction
+
+Le projet vise à développer une application centralisant les bibliothèques d’Île-de-France afin de faciliter l’accès à leurs ressources. Elle permet aux utilisateurs de consulter les bibliothèques disponibles autour de leur position, de rechercher des livres spécifiques, de connaître les horaires et autres informations utiles. 
+L’application inclut également un espace de communication où les utilisateurs peuvent partager des publications et commenter.
+
+# Qui ?
+
+Cette application s’adresse à toute personne intéressée par les bibliothèques et la lecture : bibliophiles, étudiants, chercheurs ou toute personne recherchant un espace calme pour travailler, lire ou étudier. Grâce à la géolocalisation, l’utilisateur peut indiquer sa position et l’application lui propose les bibliothèques les plus proches. Elle est également utile pour rechercher un livre précis ou découvrir de nouvelles bibliothèques à proximité.
+
+Pour mieux comprendre ce qui rend une bibliothèque attractive, notre équipe a créé un formulaire destiné à enrichir les données utilisateurs :
+
+- Formulaire : questions sur la bibliothèque la plus fréquentée, la fréquence de visite et l’avis sur différents critères (calme, disponibilité des livres, accessibilité, transport…).
+- Lien : https://docs.google.com/forms/d/e/1FAIpQLSfBo74v6iYrtgw3JT_3I3TNfxV2FgsowrZedcDw3OZZpTeXMQ/viewform
+
+Les résultat : 
+
+# Pourquoi ?
+
+Le projet répond à plusieurs besoins :
+
+- Faciliter la recherche de bibliothèques et de livres à proximité.
+
+- Offrir un outil pratique pour découvrir de nouvelles bibliothèques et choisir un lieu adapté selon ses critères.
+
+- Améliorer l’expérience utilisateur grâce à un classement automatique des bibliothèques par proximité.
+
+- Permettre la communication entre utilisateurs via un espace de partage et de commentaires.
+
+- Personnaliser les recommandations en fonction de l’historique et des préférences de l’utilisateur.
+
+# Concurrence 
+
+Plusieurs solutions existantes permettent de localiser des bibliothèques ou des lieux proches, mais aucune ne répond à tous les besoins ciblés par notre application :
+
+- Google Maps : outil général de géolocalisation ; ne fournit pas d’informations sur la disponibilité des livres ni de fonctionnalités sociales.
+
+- WorldCat / OpenLibrary : catalogues étendus de livres, mais sans géolocalisation des bibliothèques ni informations sur les horaires.
+
+- Muggerino : aide à trouver des « study spots » (bibliothèques, cafés, bureaux) et fournit des informations sur les installations et le flux de fréquentation, mais l’expérience est moins centrée sur les livres et la communication entre utilisateurs.
+
+- Sites web de bibliothèques locales : offrent des informations sur collections et horaires, mais chaque site est indépendant, sans solution centralisée pour comparer plusieurs bibliothèques rapidement.
+
+
+Notre application se différencie donc par sa **centralisation des bibliothèques**, son **tri automatique par proximité**, et la possibilité pour les utilisateurs de **consulter la disponibilité des livres et interagir via des publications ou recherches**. Elle combine géolocalisation, information sur les livres, et interaction utilisateur, ce qui n’est pas proposé par les solutions existantes.
+
+# Architecture et Technologies
+
+Pour le backend, nous utilisons **Spring Boot** sous **IntelliJ IDEA**, ce qui permet de développer rapidement une application Java robuste avec des API REST.  
+
+L’architecture suit le modèle **MVC** :  
+
+- **Model** : contient les entités JPA (UtilisateurEntity, LivreEntity, LibraryEntity…) qui représentent les données de l’application.  
+- **Repository** : gère l’accès à la base de données et les opérations CRUD via JPA/Hibernate.  
+- **Service** : contient la logique métier, comme la recherche des bibliothèques proches ou la vérification de la disponibilité des livres.  
+- **Controller** : définit les endpoints API pour exposer les fonctionnalités aux utilisateurs ou au frontend.  
+
+Cette organisation permet de séparer clairement les responsabilités et facilite la maintenance et l’évolution de l’application.
+
+Ajout Partie Test : JUnit-Mockito ....
+
+# Éléments de gestion de projet
+
+# Diagramme de classes
+
+# Features
+
+## Feature 1 : Recherche de bibliothèques
+- But : L’utilisateur saisit sa position et la plage horaire souhaitée pour se rendre en bibliothèque. L’application affiche les bibliothèques disponibles, ouvertes à l’heure choisie, classées de la plus proche à la plus éloignée.
+
+- Scenario : 
+- ScreenShot : 
+
+## Feature 2 : Recherche de disponibilité de livres
+- But : L’utilisateur recherche un livre spécifique. L’application indique les bibliothèques où le livre est disponible, facilitant la planification des déplacements.
+
+- Scenario : 
+- ScreenShot : 
+
+## Feature 3 : Feed de communication
+- But : Permettre à un utilisateur de demander de l’aide pour emprunter un livre ou partager des informations avec d’autres utilisateurs via publications et commentaires.
+- Scenario : 
+- ScreenShot : 
+
+## Feature 4 :  Favoris / Liste de bibliothèques préférées
+- But : L’utilisateur peut enregistrer ses bibliothèques favorites pour y accéder rapidement et recevoir des recommandations personnalisées selon ses préférences et évaluations passées.
+- Scenario : 
+- ScreenShot : 
+
+# SCENARIO
+# Résumé
+Cette application centralise l’information sur les bibliothèques d’Île-de-France, facilite la recherche de livres et d’espaces de travail, et offre des fonctionnalités sociales pour améliorer l’expérience utilisateur. Elle combine géolocalisation, disponibilité des livres et interaction utilisateur, ce qui la distingue des solutions existantes.
+
+# Annexe API REST
