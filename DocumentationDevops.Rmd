@@ -12,32 +12,46 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Introduction
 
-Ce projet a pour objectif de créer une application permettant de regrouper les bibliothèques disponibles et de faciliter l'accès à leurs ressources. L'application offre aux utilisateurs une liste de bibliothèques classées selon la proximité de leur position et permet de consulter la disponibilité des livres, les horaires et autres informations utiles.
+Le projet vise à développer une application centralisant les bibliothèques d’Île-de-France afin de faciliter l’accès à leurs ressources. Elle permet aux utilisateurs de consulter les bibliothèques disponibles autour de leur position, de rechercher des livres spécifiques, de connaître les horaires et autres informations utiles. 
+L’application inclut également un espace de communication où les utilisateurs peuvent partager des publications et commenter.
 
 # Qui ?
 
-Cette application s’adresse à toute personne intéressée par les bibliothèques et la lecture. Elle a été pensée pour **les bibliophiles**, **les étudiants**, **les chercheurs** ou toute personne ayant besoin d’un espace calme pour travailler, lire ou étudier. Grâce à la géolocalisation, l’utilisateur peut entrer sa position et l’application lui propose les bibliothèques disponibles autour de lui, classées de la plus proche à la plus éloignée. L’application peut également être utile à quelqu’un qui cherche un livre précis ou qui souhaite simplement découvrir de nouvelles bibliothèques près de chez lui. Elle s’adresse donc à un large public, sans distinction, dès lors qu’il existe un besoin d’accéder facilement à des bibliothèques et à leurs ressources.
+Cette application s’adresse à toute personne intéressée par les bibliothèques et la lecture : bibliophiles, étudiants, chercheurs ou toute personne recherchant un espace calme pour travailler, lire ou étudier. Grâce à la géolocalisation, l’utilisateur peut indiquer sa position et l’application lui propose les bibliothèques les plus proches. Elle est également utile pour rechercher un livre précis ou découvrir de nouvelles bibliothèques à proximité.
+
+Pour mieux comprendre ce qui rend une bibliothèque attractive, notre équipe a créé un formulaire destiné à enrichir les données utilisateurs :
+
+- Formulaire : questions sur la bibliothèque la plus fréquentée, la fréquence de visite et l’avis sur différents critères (calme, disponibilité des livres, accessibilité, transport…).
+- Lien : https://docs.google.com/forms/d/e/1FAIpQLSfBo74v6iYrtgw3JT_3I3TNfxV2FgsowrZedcDw3OZZpTeXMQ/viewform
+
+Les résultat : 
 
 # Pourquoi ?
 
 Le projet répond à plusieurs besoins :
 
-Faciliter la recherche de bibliothèques et de livres disponibles à proximité.
+- Faciliter la recherche de bibliothèques et de livres à proximité.
 
-Offrir un outil pratique pour les étudiants et les chercheurs qui recherchent un lieu calme pour travailler.
+- Offrir un outil pratique pour découvrir de nouvelles bibliothèques et choisir un lieu adapté selon ses critères.
 
-Permettre aux utilisateurs de découvrir de nouvelles bibliothèques et leurs horaires.
+- Améliorer l’expérience utilisateur grâce à un classement automatique des bibliothèques par proximité.
 
-Améliorer l’expérience utilisateur grâce à un classement des bibliothèques de la plus proche à la plus éloignée.
+- Permettre la communication entre utilisateurs via un espace de partage et de commentaires.
 
-# Concurrence
+- Personnaliser les recommandations en fonction de l’historique et des préférences de l’utilisateur.
 
-Il existe plusieurs solutions qui permettent aux utilisateurs de trouver des bibliothèques ou des lieux proches, mais aucune ne répond exactement à tous les besoins ciblés par notre application.  
+# Concurrence 
 
-Par exemple :  
-- **Google Maps** permet de localiser des bibliothèques et de calculer les distances, mais ne fournit pas d’informations détaillées sur la disponibilité des livres ni de fonctionnalités pour publier ou consulter des recherches entre utilisateurs.  
-- **WorldCat ou OpenLibrary** offrent un catalogue de livres étendu, mais ne géolocalisent pas les bibliothèques proches ni ne donnent d’informations sur les horaires ou l’accessibilité immédiate.  
-- Les sites web de bibliothèques locales fournissent des informations sur leurs collections et horaires, mais chaque site est indépendant, et il n’existe pas de solution centralisée pour comparer rapidement plusieurs bibliothèques autour de soi.  
+Plusieurs solutions existantes permettent de localiser des bibliothèques ou des lieux proches, mais aucune ne répond à tous les besoins ciblés par notre application :
+
+- Google Maps : outil général de géolocalisation ; ne fournit pas d’informations sur la disponibilité des livres ni de fonctionnalités sociales.
+
+- WorldCat / OpenLibrary : catalogues étendus de livres, mais sans géolocalisation des bibliothèques ni informations sur les horaires.
+
+- Muggerino : aide à trouver des « study spots » (bibliothèques, cafés, bureaux) et fournit des informations sur les installations et le flux de fréquentation, mais l’expérience est moins centrée sur les livres et la communication entre utilisateurs.
+
+- Sites web de bibliothèques locales : offrent des informations sur collections et horaires, mais chaque site est indépendant, sans solution centralisée pour comparer plusieurs bibliothèques rapidement.
+
 
 Notre application se différencie donc par sa **centralisation des bibliothèques**, son **tri automatique par proximité**, et la possibilité pour les utilisateurs de **consulter la disponibilité des livres et interagir via des publications ou recherches**. Elle combine géolocalisation, information sur les livres, et interaction utilisateur, ce qui n’est pas proposé par les solutions existantes.
 
@@ -54,6 +68,7 @@ L’architecture suit le modèle **MVC** :
 
 Cette organisation permet de séparer clairement les responsabilités et facilite la maintenance et l’évolution de l’application.
 
+Ajout Partie Test : JUnit-Mockito ....
 
 # Éléments de gestion de projet
 
@@ -62,11 +77,29 @@ Cette organisation permet de séparer clairement les responsabilités et facilit
 # Features
 
 ## Feature 1 : Recherche de bibliothèques
-L’utilisateur peut saisir sa position actuelle ainsi que l’heure à laquelle il souhaite se rendre dans une bibliothèque pour travailler ou étudier. L’application utilise ces informations pour afficher une liste des bibliothèques disponibles, classées de la plus proche à la plus éloignée par rapport à sa position. De plus, seules les bibliothèques ouvertes à l’heure spécifiée sont proposées, ce qui permet à l’utilisateur de gagner du temps et de choisir rapidement un lieu adapté à ses besoins.
+- But : L’utilisateur saisit sa position et la plage horaire souhaitée pour se rendre en bibliothèque. L’application affiche les bibliothèques disponibles, ouvertes à l’heure choisie, classées de la plus proche à la plus éloignée.
+
+- Scenario : 
+- ScreenShot : 
 
 ## Feature 2 : Recherche de disponibilité de livres
-L’utilisateur peut entrer le nom d’un livre qu’il souhaite trouver. L’application recherche alors dans toutes les bibliothèques enregistrées et affiche celles où le livre est disponible. Cette fonctionnalité permet non seulement de savoir rapidement où se procurer un livre, mais aussi de planifier efficacement ses déplacements en choisissant la bibliothèque la plus pratique ou la plus proche.
+- But : L’utilisateur recherche un livre spécifique. L’application indique les bibliothèques où le livre est disponible, facilitant la planification des déplacements.
 
+- Scenario : 
+- ScreenShot : 
+
+## Feature 3 : Feed de communication
+- But : Permettre à un utilisateur de demander de l’aide pour emprunter un livre ou partager des informations avec d’autres utilisateurs via publications et commentaires.
+- Scenario : 
+- ScreenShot : 
+
+## Feature 4 :  Favoris / Liste de bibliothèques préférées
+- But : L’utilisateur peut enregistrer ses bibliothèques favorites pour y accéder rapidement et recevoir des recommandations personnalisées selon ses préférences et évaluations passées.
+- Scenario : 
+- ScreenShot : 
+
+# SCENARIO
 # Résumé
+Cette application centralise l’information sur les bibliothèques d’Île-de-France, facilite la recherche de livres et d’espaces de travail, et offre des fonctionnalités sociales pour améliorer l’expérience utilisateur. Elle combine géolocalisation, disponibilité des livres et interaction utilisateur, ce qui la distingue des solutions existantes.
 
 # Annexe API REST
