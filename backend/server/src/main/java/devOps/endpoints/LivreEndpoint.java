@@ -1,6 +1,6 @@
 package devOps.endpoints;
 
-import devOps.responses.LivreResponseDTO;
+import devOps.dtos.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
