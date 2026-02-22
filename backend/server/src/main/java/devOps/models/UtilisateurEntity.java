@@ -1,34 +1,56 @@
 package devOps.models;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 @Entity
+@Table(name = "users")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class UtilisateurEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String nom;
+    @Column(unique = true, nullable = false)
+    private String username;
 
-    private String mail;
+    @Column(unique = true, nullable = false)
+    private String email;
 
-    private String localisation;
+    @Column(nullable = false)
+    private String password;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "role")
+    private Set<String> roles = new HashSet<>();
 
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL)
-    private List<FavoriEntity> favoris;
+    private List<PublicationEntity> posts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "auteur", cascade = CascadeType.ALL)
+    private List<CommentEntity> comments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<NotationEntity> notations = new ArrayList<>();
 
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL)
-    private List<RechercheEntity> recherches;
+    private List<FavoriEntity> favoris = new ArrayList<>();
 
-    @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL)
-    private List<PublicationEntity> publicationsPosees;
-
-    @OneToMany(mappedBy = "repondeur", cascade = CascadeType.ALL)
-    private List<PublicationEntity> publicationsRepondues;
+    public UtilisateurEntity(String username, String email, String password) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.roles.add("ROLE_USER");
+    }
 }

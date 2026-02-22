@@ -1,29 +1,45 @@
 package devOps.services;
 
-import devOps.component.DisponibiliteComponent;
-import devOps.mappers.LivreMapper;
-import devOps.responses.LivreResponseDTO;
-import lombok.RequiredArgsConstructor;
+import devOps.adapter.*;
+import devOps.dtos.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class LivreService {
 
-    private final DisponibiliteComponent disponibiliteComponent;
-    private final LivreMapper livreMapper;
+    @Autowired
+    private BibliothequeAdapterFactory adapterFactory;
 
-    public LivreService(DisponibiliteComponent disponibiliteComponent, LivreMapper livreMapper) {
-        this.disponibiliteComponent = disponibiliteComponent;
-        this.livreMapper = livreMapper;
+    public List<LivreResponseDTO> rechercherLivre(String titre) {
+        List<LivreResponseDTO> resultats = new ArrayList<>();
+
+        List<LibraryAdapter> adapters = adapterFactory.getAllAdapters();
+
+        for (LibraryAdapter adapter : adapters) {
+            try {
+                List<LivreResponseDTO> livresAdapter = adapter.rechercherLivre(titre);
+                resultats.addAll(livresAdapter);
+            } catch (Exception e) {
+                System.err.println("Erreur lors de la recherche dans " +
+                        adapter.getNomBibliotheque() + ": " + e.getMessage());
+            }
+        }
+
+        return resultats;
     }
 
-    public List<LivreResponseDTO> rechercherLivres(Long lieuId, String titre) {
-        return disponibiliteComponent.searchBooks(lieuId, titre)
-                .stream()
-                .map(d -> livreMapper.toResponse(d.getLivre()))
-                .toList();
-    }
+    public List<LivreResponseDTO> rechercherLivreDansBibliotheque(String titre, String nomBibliotheque) {
+        LibraryAdapter adapter = adapterFactory.getAdapter(nomBibliotheque);
 
+        if (adapter == null) {
+            throw new RuntimeException("Bibliothèque non trouvée: " + nomBibliotheque);
+        }
+
+        return adapter.rechercherLivre(titre);
+    }
 }
+

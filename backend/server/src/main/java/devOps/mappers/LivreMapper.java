@@ -1,7 +1,7 @@
 package devOps.mappers;
 
 import devOps.models.LivreEntity;
-import devOps.responses.LivreResponseDTO;
+import devOps.dtos.LivreResponseDTO;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")

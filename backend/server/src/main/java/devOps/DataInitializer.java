@@ -8,7 +8,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -17,18 +17,15 @@ public class DataInitializer implements CommandLineRunner {
 
     private final LibraryRepository libraryRepository;
 
-    // Constructeur explicite pour Spring
     public DataInitializer(LibraryRepository libraryRepository) {
         this.libraryRepository = libraryRepository;
     }
 
-    private static final String JSON_FILE_PATH =
-            "src/main/resources/repertoire-bibliotheques.json";
+    private static final String JSON_FILE = "repertoire-bibliotheques.json";
 
     @Override
     public void run(String... args) throws Exception {
 
-        // Évite de recharger si la base est déjà remplie
         if (libraryRepository.count() > 0) {
             System.out.println("Bibliothèques déjà initialisées.");
             return;
@@ -36,23 +33,23 @@ public class DataInitializer implements CommandLineRunner {
 
         ObjectMapper mapper = new ObjectMapper();
 
+        // ⚡ Charger depuis le classpath
+        InputStream is = new ClassPathResource(JSON_FILE).getInputStream();
+
         List<Map<String, Object>> libraries = mapper.readValue(
-                new File(JSON_FILE_PATH),
+                is,
                 new TypeReference<List<Map<String, Object>>>() {}
         );
 
         int count = 0;
         for (Map<String, Object> library : libraries) {
 
-            // ===== ID =====
             String id = (String) library.get("sql_6");
             if (id == null) continue;
 
-            // ===== Nom =====
             String name = (String) library.get("nometablissement");
             if (name == null) name = "Nom inconnu";
 
-            // ===== Adresse complète =====
             String rue = (String) library.get("nomrue");
             String commune = (String) library.get("commune");
             String codePostal = (String) library.get("codepostal");
@@ -63,7 +60,6 @@ public class DataInitializer implements CommandLineRunner {
                     commune != null ? commune : ""
             );
 
-            // ===== Geo =====
             Map<String, Object> geo = (Map<String, Object>) library.get("geo");
             if (geo == null || geo.get("lat") == null || geo.get("lon") == null) {
                 System.out.println("Bibliothèque ignorée (pas de coordonnées) : " + name);
@@ -73,10 +69,8 @@ public class DataInitializer implements CommandLineRunner {
             double latitude = ((Number) geo.get("lat")).doubleValue();
             double longitude = ((Number) geo.get("lon")).doubleValue();
 
-            // ===== Horaires =====
             String heuresOuverture = (String) library.get("heuresouverture");
 
-            // ===== Création entité =====
             LibraryEntity entity = new LibraryEntity();
             entity.setId(id);
             entity.setName(name);
@@ -89,6 +83,6 @@ public class DataInitializer implements CommandLineRunner {
             count++;
         }
 
-        System.out.println(" Initialisation des bibliothèques terminée !");
+        System.out.println("Initialisation des bibliothèques terminée ! Total : " + count);
     }
 }
