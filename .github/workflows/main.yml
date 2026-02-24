@@ -19,5 +19,5 @@ jobs:
           java-version: 17
 
       - run: |
-          cd backend\server
+          cd backend/server
           mvn clean test
