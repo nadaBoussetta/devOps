@@ -1,39 +1,66 @@
 package devOps.models;
-
+import devOps.enums.TypeBibliotheque;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
+@Table(name = "bibliotheques")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class LibraryEntity {
 
     @Id
-    @Column(unique = true, nullable = false)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    private String name;
-    private String address;
+    @Column(nullable = false)
+    private String nom;
 
-    private double latitude;
-    private double longitude;
+    @Column(nullable = false)
+    private String adresse;
 
-    @Column(length = 2000)
-    private String heuresOuverture;
+    @Column(nullable = false)
+    private Double latitude;
 
-    // Getters et Setters manuels
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    @Column(nullable = false)
+    private Double longitude;
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TypeBibliotheque type;
 
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
+    @Column
+    private Double noteGlobale = 0.0;
 
-    public double getLatitude() { return latitude; }
-    public void setLatitude(double latitude) { this.latitude = latitude; }
+    @Column
+    private Integer nombreNotations = 0;
 
-    public double getLongitude() { return longitude; }
-    public void setLongitude(double longitude) { this.longitude = longitude; }
+    @OneToMany(mappedBy = "bibliotheque", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<HoraireEntity> horaires = new ArrayList<>();
 
-    public String getHeuresOuverture() { return heuresOuverture; }
-    public void setHeuresOuverture(String heuresOuverture) { this.heuresOuverture = heuresOuverture; }
+    @OneToMany(mappedBy = "libraryEntity", cascade = CascadeType.ALL)
+    private List<PublicationEntity> posts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "bibliotheque", cascade = CascadeType.ALL)
+    private List<NotationEntity> notations = new ArrayList<>();
+
+    @OneToMany(mappedBy = "libraryEntity", cascade = CascadeType.ALL)
+    private List<FavoriEntity> favoris = new ArrayList<>();
+
+    public void addHoraire(HoraireEntity horaire) {
+        horaires.add(horaire);
+        horaire.setBibliotheque(this);
+    }
+
+    public void updateNoteGlobale(Integer nouvelleNote) {
+        double total = noteGlobale * nombreNotations + nouvelleNote;
+        nombreNotations++;
+        noteGlobale = total / nombreNotations;
+    }
 }

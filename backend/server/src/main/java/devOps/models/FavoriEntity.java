@@ -1,26 +1,38 @@
 package devOps.models;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import java.util.Date;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
+import java.time.LocalDateTime;
+
 @Entity
+@Table(name = "favoris", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"user_id", "bibliotheque_id"})
+})
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class FavoriEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Date dateAjout;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private UtilisateurEntity user;
 
-    @ManyToOne
-    @JoinColumn(name = "utilisateur_id")   // colonne propre
-    private UtilisateurEntity utilisateur;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bibliotheque_id", nullable = false)
+    private LibraryEntity libraryEntity;
 
-    @ManyToOne
-    @JoinColumn(name = "livre_id")         // colonne propre
-    private LivreEntity livre;
+    @Column(nullable = false)
+    private LocalDateTime dateAjout;
+
+    @PrePersist
+    protected void onCreate() {
+        dateAjout = LocalDateTime.now();
+    }
 }

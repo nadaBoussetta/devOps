@@ -1,49 +1,41 @@
 package devOps.controllers;
-
-import devOps.endpoints.LibraryEndpoint;
 import devOps.dtos.LibraryResponseDTO;
+import devOps.dtos.RechercheDTO;
 import devOps.services.LibraryService;
-import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.DayOfWeek;
-import java.time.LocalTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/libraries")
+@RequestMapping("/api/bibliotheques")
+@CrossOrigin(origins = "*")
 public class LibraryController {
 
-    private final LibraryService libraryService;
+    @Autowired
+    private LibraryService libraryService;
 
-    public LibraryController(LibraryService libraryService) {
-        this.libraryService = libraryService;
+    @PostMapping("/recherche")
+    public ResponseEntity<List<LibraryResponseDTO>> rechercherBibliotheques(
+            @Valid @RequestBody RechercheDTO rechercheDTO) {
+        List<LibraryResponseDTO> resultats =
+                libraryService.rechercherBibliotheques(rechercheDTO);
+        return ResponseEntity.ok(resultats);
     }
 
-    @GetMapping("/search")
-    public List<LibraryResponseDTO> searchLibraries(
-            @RequestParam double lat,
-            @RequestParam double lon,
-            @RequestParam double radiusKm,
-            @RequestParam String jour,        // ex: "Mardi"
-            @RequestParam String heureDebut,  // ex: "09:00"
-            @RequestParam String heureFin) {  // ex: "18:00"
+    @GetMapping
+    public ResponseEntity<List<LibraryResponseDTO>> getAllBibliotheques() {
+        List<LibraryResponseDTO> bibliotheques =
+                libraryService.getAllBibliotheques();
+        return ResponseEntity.ok(bibliotheques);
+    }
 
-        // Conversion jour français -> DayOfWeek
-        DayOfWeek jourEnum = switch (jour.toLowerCase()) {
-            case "lundi" -> DayOfWeek.MONDAY;
-            case "mardi" -> DayOfWeek.TUESDAY;
-            case "mercredi" -> DayOfWeek.WEDNESDAY;
-            case "jeudi" -> DayOfWeek.THURSDAY;
-            case "vendredi" -> DayOfWeek.FRIDAY;
-            case "samedi" -> DayOfWeek.SATURDAY;
-            case "dimanche" -> DayOfWeek.SUNDAY;
-            default -> throw new IllegalArgumentException("Jour invalide : " + jour);
-        };
-
-        LocalTime debut = LocalTime.parse(heureDebut);
-        LocalTime fin = LocalTime.parse(heureFin);
-
-        return libraryService.searchLibraries(lat, lon, radiusKm, jourEnum, debut, fin);
+    @GetMapping("/{id}")
+    public ResponseEntity<LibraryResponseDTO> getBibliothequeById(@PathVariable Long id) {
+        LibraryResponseDTO bibliotheque =
+                libraryService.getBibliothequeById(id);
+        return ResponseEntity.ok(bibliotheque);
     }
 }

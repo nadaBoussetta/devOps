@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recherche de livres - Bibliothèques IDF</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <h1 class="logo">📚 Bibliothèques IDF</h1>
+            <ul class="nav-links">
+                <li><a href="index.html">Accueil</a></li>
+                <li><a href="recherche.html">Recherche</a></li>
+                <li><a href="livres.html" class="active">Livres</a></li>
+                <li><a href="feed.html">Feed Social</a></li>
+                <li><a href="favoris.html">Mes Favoris</a></li>
+                <li><a href="sessions.html">Sessions</a></li>
+                <li><a href="notifications.html">Notifications</a></li>
+                <li><a href="login.html" id="auth-link">Connexion</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section class="search-section">
+            <h2>Rechercher un livre</h2>
+            <p>Découvrez dans quelles bibliothèques universitaires votre livre est disponible.</p>
+
+            <form id="book-search-form" class="search-form">
+                <div class="form-group">
+                    <label for="titre">Titre du livre</label>
+                    <input type="text" id="titre" placeholder="Ex: Les Misérables" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Rechercher</button>
+            </form>
+        </section>
+
+        <section class="results-section">
+            <h3>Résultats</h3>
+            <div id="book-results-container">
+                <p class="info-message">Effectuez une recherche pour voir les résultats.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Bibliothèques Île-de-France. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script src="js/livres.js"></script>
+</body>
+</html>

@@ -1,29 +1,49 @@
 package devOps.models;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import java.util.Date;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
+@Table(name = "posts")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class PublicationEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String message;
+    @Column(nullable = false, length = 1000)
+    private String contenu;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date date;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "auteur_id", nullable = false)
+    private UtilisateurEntity auteur;
 
-    @ManyToOne
-    @JoinColumn(name = "utilisateur_id", nullable = false)
-    private UtilisateurEntity utilisateur;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bibliotheque_id")
+    private LibraryEntity libraryEntity;
 
-    @ManyToOne
-    @JoinColumn(name = "repondeur_id")
-    private UtilisateurEntity repondeur;
+    @Column(nullable = false)
+    private LocalDateTime dateCreation;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentEntity> comments = new ArrayList<>();
+
+    @PrePersist
+    protected void onCreate() {
+        dateCreation = LocalDateTime.now();
+    }
+
+    public void addComment(CommentEntity comment) {
+        comments.add(comment);
+        comment.setPost(this);
+    }
 }

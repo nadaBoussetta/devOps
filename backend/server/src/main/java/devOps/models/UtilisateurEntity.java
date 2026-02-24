@@ -35,7 +35,7 @@ public class UtilisateurEntity {
     @Column(name = "role")
     private Set<String> roles = new HashSet<>();
 
-    @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "auteur", cascade = CascadeType.ALL)
     private List<PublicationEntity> posts = new ArrayList<>();
 
     @OneToMany(mappedBy = "auteur", cascade = CascadeType.ALL)
@@ -44,7 +44,7 @@ public class UtilisateurEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<NotationEntity> notations = new ArrayList<>();
 
-    @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<FavoriEntity> favoris = new ArrayList<>();
 
     public UtilisateurEntity(String username, String email, String password) {

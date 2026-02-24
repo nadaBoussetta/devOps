@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feed Social - Bibliothèques IDF</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <h1 class="logo">📚 Bibliothèques IDF</h1>
+            <ul class="nav-links">
+                <li><a href="index.html">Accueil</a></li>
+                <li><a href="recherche.html">Recherche</a></li>
+                <li><a href="livres.html">Livres</a></li>
+                <li><a href="feed.html" class="active">Feed Social</a></li>
+                <li><a href="favoris.html">Mes Favoris</a></li>
+                <li><a href="sessions.html">Sessions</a></li>
+                <li><a href="notifications.html">Notifications</a></li>
+                <li><a href="login.html" id="auth-link">Connexion</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section class="feed-section">
+            <h2>Feed Social</h2>
+            <p>Partagez vos expériences et découvrez celles des autres utilisateurs.</p>
+
+            <div class="create-post">
+                <h3>Créer une publication</h3>
+                <form id="create-post-form">
+                    <div class="form-group">
+                        <textarea id="post-content" placeholder="Partagez votre expérience..." rows="4" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Publier</button>
+                </form>
+            </div>
+
+            <div class="posts-container">
+                <h3>Publications récentes</h3>
+                <div id="posts-list" class="loading">
+                    <p>Chargement des publications...</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Bibliothèques Île-de-France. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script src="js/feed.js"></script>
+</body>
+</html>

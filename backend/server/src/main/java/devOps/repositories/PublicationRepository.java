@@ -9,18 +9,9 @@ import java.util.List;
 @Repository
 public interface PublicationRepository extends JpaRepository<PublicationEntity, Long> {
 
-    // Publications créées par un utilisateur donné
-    List<PublicationEntity> findByUtilisateurId(Long utilisateurId);
+    List<PublicationEntity> findByAuteurId(Long auteurId);
 
-    // Publications où un utilisateur est répondeur
-    List<PublicationEntity> findByRepondeurId(Long repondeurId);
+    List<PublicationEntity> findByAuteurIdOrderByDateCreationDesc(Long auteurId);
 
-    // Toutes les publications triées de la plus récente à la plus ancienne
-    List<PublicationEntity> findAllByOrderByDateDesc();
-
-    // Publications d’un utilisateur triées par date décroissante
-    List<PublicationEntity> findByUtilisateurIdOrderByDateDesc(Long utilisateurId);
-
-    // Échanges directs entre deux utilisateurs
-    List<PublicationEntity> findByUtilisateurIdAndRepondeurId(Long utilisateurId, Long repondeurId);
+    List<PublicationEntity> findAllByOrderByDateCreationDesc();
 }

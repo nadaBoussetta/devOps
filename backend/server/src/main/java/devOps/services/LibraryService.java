@@ -1,95 +1,115 @@
 package devOps.services;
-
-import devOps.component.LibraryComponent;
-import devOps.mappers.LibraryMapper;
 import devOps.dtos.LibraryResponseDTO;
-import lombok.RequiredArgsConstructor;
+import devOps.dtos.HoraireDTO;
+import devOps.dtos.RechercheDTO;
+import devOps.models.LibraryEntity;
+import devOps.models.HoraireEntity;
+import devOps.repositories.LibraryRepository;
+import devOps.util.DistanceCalculator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 @Service
-@RequiredArgsConstructor
 public class LibraryService {
 
-    private final LibraryComponent libraryComponent;
-    private final LibraryMapper libraryMapper;
-    private static final double RAYON_TERRE_KM = 6371.0;
+    @Autowired
+    private LibraryRepository libraryRepository;
 
-    // ===== Recherche principale =====
-    public List<LibraryResponseDTO> searchLibraries(
-            double userLat,
-            double userLon,
-            double rayonKm,
-            DayOfWeek jour,
-            LocalTime heureDebut,
-            LocalTime heureFin) {
+    @Autowired
+    private GeolocationService geolocationService;
 
-        return libraryComponent.getAllLibraries()
-                .stream()
-                .filter(lib -> calculerDistanceKm(
-                        userLat, userLon,
-                        lib.getLatitude(), lib.getLongitude()
-                ) <= rayonKm)
-                .filter(lib -> estOuverte(
-                        lib.getHeuresOuverture(),
-                        jour, heureDebut, heureFin
-                ))
-                .map(libraryMapper::toResponse)
-                .collect(Collectors.toList());
+    public List<LibraryResponseDTO> rechercherBibliotheques(RechercheDTO recherche) {
+
+        double[] coordonnees = geolocationService.geocodeAdresse(recherche.getAdresse());
+        double latRecherche = coordonnees[0];
+        double lonRecherche = coordonnees[1];
+
+        LocalTime heureDebut = LocalTime.parse(recherche.getHeureDebut());
+        LocalTime heureFin = LocalTime.parse(recherche.getHeureFin());
+
+        List<LibraryEntity> toutesBibliotheques = libraryRepository.findAll();
+
+        List<LibraryResponseDTO> resultats = new ArrayList<>();
+
+        for (LibraryEntity lib : toutesBibliotheques) {
+            double distance = DistanceCalculator.calculateDistance(
+                    latRecherche, lonRecherche,
+                    lib.getLatitude(), lib.getLongitude()
+            );
+
+            if (distance <= recherche.getRayon()) {
+                boolean ouvert = verifierOuverture(lib, heureDebut, heureFin);
+
+                LibraryResponseDTO dto = convertToDTO(lib);
+                dto.setDistance(Math.round(distance * 100.0) / 100.0);
+                dto.setOuvert(ouvert);
+
+                resultats.add(dto);
+            }
+        }
+
+        resultats.sort(Comparator
+                .comparing(LibraryResponseDTO::getOuvert, Comparator.reverseOrder())
+                .thenComparing(LibraryResponseDTO::getDistance)
+                .thenComparing(LibraryResponseDTO::getNoteGlobale, Comparator.reverseOrder())
+        );
+
+        return resultats;
     }
 
-    private boolean estOuverte(String heuresOuverture, DayOfWeek jourDemande,
-                               LocalTime heureDebut, LocalTime heureFin) {
-
-        if (heuresOuverture == null) return false;
-
-        String[] joursFrancais = {
-                "Lundi", "Mardi", "Mercredi", "Jeudi",
-                "Vendredi", "Samedi", "Dimanche"
-        };
-
-        String jourStr = joursFrancais[jourDemande.getValue() - 1];
-
-        for (String ligne : heuresOuverture.split("\n")) {
-            if (!ligne.startsWith(jourStr)) continue;
-
-            String plagesStr = ligne.substring(ligne.indexOf(":") + 1).trim();
-            for (String bloc : plagesStr.split("et")) {
-
-                bloc = bloc.trim().replace("h", "");
-                String[] heures = bloc.split("-");
-
-                if (heures.length != 2) continue;
-
-                try {
-                    LocalTime debut = LocalTime.parse(heures[0].trim() + ":00");
-                    LocalTime fin = LocalTime.parse(heures[1].trim() + ":00");
-
-                    if (!heureDebut.isBefore(debut) && !heureFin.isAfter(fin)) {
-                        return true;
-                    }
-
-                } catch (Exception ignored) {}
+    private boolean verifierOuverture(LibraryEntity lib, LocalTime debut, LocalTime fin) {
+        for (HoraireEntity horaire : lib.getHoraires()) {
+            if (horaire.estOuvertSur(debut, fin)) {
+                return true;
             }
         }
         return false;
     }
 
-    private double calculerDistanceKm(double lat1, double lon1, double lat2, double lon2) {
-        double dLat = Math.toRadians(lat2 - lat1);
-        double dLon = Math.toRadians(lon2 - lon1);
+    public List<LibraryResponseDTO> getAllBibliotheques() {
+        return libraryRepository.findAll().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
 
-        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
-                + Math.cos(Math.toRadians(lat1))
-                * Math.cos(Math.toRadians(lat2))
-                * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    public LibraryResponseDTO getBibliothequeById(Long id) {
+        LibraryEntity lib = libraryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Bibliothèque non trouvée"));
+        return convertToDTO(lib);
+    }
 
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    private LibraryResponseDTO convertToDTO(LibraryEntity lib) {
+        LibraryResponseDTO dto = new LibraryResponseDTO();
+        dto.setId(lib.getId());
+        dto.setNom(lib.getNom());
+        dto.setAdresse(lib.getAdresse());
+        dto.setLatitude(lib.getLatitude());
+        dto.setLongitude(lib.getLongitude());
+        dto.setType(lib.getType());
+        dto.setNoteGlobale(lib.getNoteGlobale());
+        dto.setNombreNotations(lib.getNombreNotations());
 
-        return RAYON_TERRE_KM * c;
+        List<HoraireDTO> horairesDTO = lib.getHoraires().stream()
+                .map(this::convertHoraireToDTO)
+                .collect(Collectors.toList());
+        dto.setHoraires(horairesDTO);
+
+        return dto;
+    }
+
+    private HoraireDTO convertHoraireToDTO(HoraireEntity horaire) {
+        HoraireDTO dto = new HoraireDTO();
+        dto.setId(horaire.getId());
+        dto.setJourSemaine(horaire.getJourSemaine());
+        dto.setHeureOuverture(horaire.getHeureOuverture().toString());
+        dto.setHeureFermeture(horaire.getHeureFermeture().toString());
+        return dto;
     }
 }
