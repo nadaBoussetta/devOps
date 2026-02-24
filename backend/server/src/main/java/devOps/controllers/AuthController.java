@@ -39,13 +39,24 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginDTO loginDTO) {
+        System.out.println(">>> AuthController.login démarré pour username: " + loginDTO.getUsername());
+
         try {
+            System.out.println(">>> Appel authService.login...");
             JwtResponseDTO response = authService.login(loginDTO);
+            System.out.println(">>> authService.login a réussi ! Token généré: " + (response.getToken() != null ? "oui" : "null"));
+
             return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("error", "Identifiants invalides");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        } catch (RuntimeException e) {  // ← catch plus précis (BadCredentialsException est Runtime)
+            System.out.println(">>> RuntimeException attrapée: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Identifiants invalides"));
+        } catch (Exception e) {  // ← catch général seulement pour les cas vraiment inattendus
+            System.out.println(">>> Erreur inattendue dans login: " + e.getClass().getName());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Erreur serveur"));
         }
     }
 }

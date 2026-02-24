@@ -85,6 +85,7 @@ INSERT INTO horaires (bibliotheque_id, jour_semaine, heure_ouverture, heure_ferm
 
 -- Utilisateur de test (mot de passe: password123)
 INSERT INTO users (username, email, password) VALUES
-('testuser', 'test@example.com', '$2a$10$7rL43L5/VPWbH8z3mAm9BOpWjVBnzbf9520tTeyyTpeDNd1m8ErZ2');
+('testuser', 'test@example.com', '$2a$10$3FWzCj66pQGQzgh0pqzkP.E2Q8zWY.GoUZehVhphPDaPPE0.Wkml2');
 
 INSERT INTO user_roles (user_id, role) VALUES (1, 'ROLE_USER');
+
