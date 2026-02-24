@@ -1,6 +1,5 @@
 package devOps.repositories;
 
-import devOps.models.*;
 import devOps.models.UtilisateurEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
