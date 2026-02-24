@@ -9,7 +9,7 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "notations", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"user_id", "bibliotheque_id"})
+        @UniqueConstraint(columnNames = {"user_id", "bibliotheque_id"})
 })
 @Data
 @NoArgsConstructor

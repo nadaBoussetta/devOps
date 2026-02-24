@@ -1,31 +1,26 @@
 package devOps.dtos;
 
-
-import io.swagger.v3.oas.annotations.media.Schema;
+import devOps.enums.TypeBibliotheque;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
-@Schema(description = "Représente une bibliothèque")
+@NoArgsConstructor
+@AllArgsConstructor
 public class LibraryResponseDTO {
 
-    @Schema(description = "ID de la bibliothèque")
-    private String id;
-
-    @Schema(description = "Nom de la bibliothèque")
-    private String name;
-
-    @Schema(description = "Latitude de la bibliothèque")
-    private double latitude;
-
-    @Schema(description = "Longitude de la bibliothèque")
-    private double longitude;
-
-    @Schema(description = "Type d'environnement de la bibliothèque")
-    private String environment;
-
-    @Schema(description = "Score d'accessibilité de la bibliothèque")
-    private double accessibilityScore;
-
-    @Schema(description = "Score météorologique de la bibliothèque")
-    private double meteorologyScore;
+    private Long id;
+    private String nom;
+    private String adresse;
+    private Double latitude;
+    private Double longitude;
+    private TypeBibliotheque type;
+    private Double noteGlobale;
+    private Integer nombreNotations;
+    private Double distance; // Distance calculée lors de la recherche
+    private Boolean ouvert; // Statut d'ouverture pour le créneau recherché
+    private List<HoraireDTO> horaires;
 }
