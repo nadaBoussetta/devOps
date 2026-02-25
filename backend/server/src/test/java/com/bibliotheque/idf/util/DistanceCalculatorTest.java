@@ -1,56 +1,44 @@
-package com.bibliotheque.idf.util;
+package devOps.util;
 
-import devOps.util.DistanceCalculator;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 class DistanceCalculatorTest {
 
-    @Test
-    void testCalculateDistance_SamePoint() {
-        double distance = DistanceCalculator.calculateDistance(48.8566, 2.3522, 48.8566, 2.3522);
-        assertEquals(0.0, distance, 0.01, "La distance entre deux points identiques doit être 0");
-    }
+    private static final double DELTA = 0.01; // tolérance raisonnable pour km
 
-    @Test
-    void testCalculateDistance_ParisTourEiffel() {
-        // Distance entre Notre-Dame et Tour Eiffel (environ 3.5 km)
-        double lat1 = 48.8530; // Notre-Dame
-        double lon1 = 2.3499;
-        double lat2 = 48.8584; // Tour Eiffel
-        double lon2 = 2.2945;
+    @ParameterizedTest
+    @CsvSource({
+            "48.8566, 2.3522, 48.8566, 2.3522, 0.0",           // même point
+            "48.8566, 2.3522, 48.8606, 2.3376, 1.15",          // Paris centre → Louvre ≈ 1.15 km
+            "48.8566, 2.3522, 45.7578, 4.8320, 392.0",         // Paris → Lyon ≈ 392 km
+            "51.5074, -0.1278, 48.8566, 2.3522, 344.0"         // Londres → Paris ≈ 344 km
+    })
+    void calculateDistance_shouldReturnCorrectHaversineDistance(
+            double lat1, double lon1, double lat2, double lon2, double expected) {
 
         double distance = DistanceCalculator.calculateDistance(lat1, lon1, lat2, lon2);
-        
-        assertTrue(distance > 3.0 && distance < 4.5, 
-                "La distance entre Notre-Dame et Tour Eiffel devrait être environ 3.5 km, obtenu: " + distance);
+
+        assertThat(distance).isCloseTo(expected, within(DELTA));
     }
 
     @Test
-    void testCalculateDistance_ParisLyon() {
-        // Distance entre Paris et Lyon (environ 400 km)
-        double lat1 = 48.8566; // Paris
-        double lon1 = 2.3522;
-        double lat2 = 45.7640; // Lyon
-        double lon2 = 4.8357;
+    void calculateDistance_shouldBeSymmetric() {
+        double d1 = DistanceCalculator.calculateDistance(40.7128, -74.0060, 34.0522, -118.2437);
+        double d2 = DistanceCalculator.calculateDistance(34.0522, -118.2437, 40.7128, -74.0060);
 
-        double distance = DistanceCalculator.calculateDistance(lat1, lon1, lat2, lon2);
-        
-        assertTrue(distance > 350 && distance < 450, 
-                "La distance entre Paris et Lyon devrait être environ 400 km, obtenu: " + distance);
+        assertThat(d1).isEqualTo(d2);
     }
 
     @Test
-    void testCalculateDistance_Symmetry() {
-        double lat1 = 48.8566;
-        double lon1 = 2.3522;
-        double lat2 = 48.8584;
-        double lon2 = 2.2945;
+    void calculateDistance_shouldHandleSmallDistances() {
+        // ~1 km vers l'est
+        double distance = DistanceCalculator.calculateDistance(48.8566, 2.3522, 48.8566, 2.3700);
 
-        double distance1 = DistanceCalculator.calculateDistance(lat1, lon1, lat2, lon2);
-        double distance2 = DistanceCalculator.calculateDistance(lat2, lon2, lat1, lon1);
-        
-        assertEquals(distance1, distance2, 0.01, "La distance doit être symétrique");
+        assertThat(distance).isBetween(1.4, 1.6); // approx 1.5 km
     }
 }
