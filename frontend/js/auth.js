@@ -70,4 +70,31 @@ document.addEventListener('DOMContentLoaded', () => {
             messageDiv.textContent = 'Identifiants invalides';
         }
     });
+    // Afficher / masquer le mot de passe pour la connexion
+    const loginPassword = document.getElementById('login-password');
+    const toggleLoginPassword = document.getElementById('toggle-login-password');
+
+    toggleLoginPassword.addEventListener('click', () => {
+        if (loginPassword.type === 'password') {
+            loginPassword.type = 'text';
+            toggleLoginPassword.textContent = '🙈'; // changer l’icône
+        } else {
+            loginPassword.type = 'password';
+            toggleLoginPassword.textContent = '👁️';
+        }
+    });
+
+    // Afficher / masquer le mot de passe pour l'inscription
+    const registerPassword = document.getElementById('register-password');
+    const toggleRegisterPassword = document.getElementById('toggle-register-password');
+
+    toggleRegisterPassword.addEventListener('click', () => {
+        if (registerPassword.type === 'password') {
+            registerPassword.type = 'text';
+            toggleRegisterPassword.textContent = '🙈';
+        } else {
+            registerPassword.type = 'password';
+            toggleRegisterPassword.textContent = '👁️';
+        }
+    });
 });

@@ -1,0 +1,633 @@
+@startuml DevOps_ClassDiagram
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 12
+skinparam classBackgroundColor #F8F9FA
+skinparam classBorderColor #343A40
+skinparam classArrowColor #495057
+skinparam packageBackgroundColor #E9ECEF
+skinparam packageBorderColor #ADB5BD
+skinparam stereotypeCBackgroundColor #D4EDDA
+skinparam stereotypeIBackgroundColor #CCE5FF
+skinparam stereotypeEBackgroundColor #FFF3CD
+skinparam linetype ortho
+
+' ============================================================
+' PACKAGE : enums
+' ============================================================
+package "devOps.enums" #FFF3CD {
+
+    enum TypeBibliotheque {
+        PUBLIQUE
+        UNIVERSITAIRE
+    }
+
+
+    enum TypeNotification {
+        FERMETURE_BIBLIOTHEQUE
+        AFFLUENCE_FAIBLE
+        LIVRE_DISPONIBLE
+        NOUVELLE_BIBLIOTHEQUE
+        RECOMMANDATION
+        --
+        - description : String
+        --
+        + getDescription() : String
+    }
+}
+
+' ============================================================
+' PACKAGE : models (Entités JPA)
+' ============================================================
+package "devOps.models" #D4EDDA {
+
+    class LibraryEntity <<Entity>> {
+        - id : Long
+        - nom : String
+        - adresse : String
+        - latitude : Double
+        - longitude : Double
+        - type : TypeBibliotheque
+        - noteGlobale : Double
+        - nombreNotations : Integer
+        - horaires : List<HoraireEntity>
+        - posts : List<PublicationEntity>
+        - notations : List<NotationEntity>
+        - favoris : List<FavoriEntity>
+        --
+        + addHoraire(horaire : HoraireEntity) : void
+        + updateNoteGlobale(nouvelleNote : Integer) : void
+    }
+
+    class UtilisateurEntity <<Entity>> {
+        - id : Long
+        - username : String
+        - email : String
+        - password : String
+        - roles : Set<String>
+        - posts : List<PublicationEntity>
+        - comments : List<CommentEntity>
+        - notations : List<NotationEntity>
+        - favoris : List<FavoriEntity>
+    }
+
+    class PublicationEntity <<Entity>> {
+        - id : Long
+        - contenu : String
+        - dateCreation : LocalDateTime
+        - auteur : UtilisateurEntity
+        - libraryEntity : LibraryEntity
+        - comments : List<CommentEntity>
+        --
+        # onCreate() : void
+        + addComment(comment : CommentEntity) : void
+    }
+
+    class CommentEntity <<Entity>> {
+        - id : Long
+        - contenu : String
+        - dateCreation : LocalDateTime
+        - auteur : UtilisateurEntity
+        - post : PublicationEntity
+        - parentComment : CommentEntity
+        - reponses : List<CommentEntity>
+        --
+        # onCreate() : void
+        + addReponse(reponse : CommentEntity) : void
+    }
+
+    class NotationEntity <<Entity>> {
+        - id : Long
+        - note : Integer
+        - commentaire : String
+        - dateVisite : LocalDate
+        - dateNotation : LocalDate
+        - user : UtilisateurEntity
+        - bibliotheque : LibraryEntity
+        --
+        # onCreate() : void
+    }
+
+    class FavoriEntity <<Entity>> {
+        - id : Long
+        - dateAjout : LocalDateTime
+        - user : UtilisateurEntity
+        - libraryEntity : LibraryEntity
+        --
+        # onCreate() : void
+    }
+
+    class HoraireEntity <<Entity>> {
+        - id : Long
+        - jourSemaine : String
+        - heureOuverture : LocalTime
+        - heureFermeture : LocalTime
+        - bibliotheque : LibraryEntity
+        --
+        + estOuvertSur(debut : LocalTime, fin : LocalTime) : boolean
+    }
+
+    class NotificationEntity <<Entity>> {
+        - id : Long
+        - type : TypeNotification
+        - titre : String
+        - message : String
+        - lue : Boolean
+        - dateCreation : LocalDateTime
+        - dateConsultation : LocalDateTime
+        - user : UtilisateurEntity
+        - bibliotheque : LibraryEntity
+        --
+        # onCreate() : void
+        + marquerCommeLue() : void
+    }
+
+    class SessionEntity <<Entity>> {
+        - id : Long
+        - objectif : String
+        - dureeMinutes : Integer
+        - tempsEcoulesMinutes : Integer
+        - completee : Boolean
+        - dateDebut : LocalDateTime
+        - dateFin : LocalDateTime
+        - dateCreation : LocalDateTime
+        - user : UtilisateurEntity
+        --
+        # onCreate() : void
+        + completer() : void
+        + getTempsRestantMinutes() : Integer
+        + getProgressionPourcentage() : Double
+    }
+}
+
+' ============================================================
+' PACKAGE : repositories
+' ============================================================
+package "devOps.repositories" #CCE5FF {
+
+    interface UtilisateurRepository <<Repository>> {
+        + findByUsername(username : String) : Optional<UtilisateurEntity>
+        + findByEmail(email : String) : Optional<UtilisateurEntity>
+        + existsByUsername(username : String) : Boolean
+        + existsByEmail(email : String) : Boolean
+    }
+
+    interface LibraryRepository <<Repository>> {
+        + findByType(type : TypeBibliotheque) : List<LibraryEntity>
+        + findByNomContainingIgnoreCase(nom : String) : List<LibraryEntity>
+    }
+
+    interface PublicationRepository <<Repository>> {
+        + findByAuteurId(auteurId : Long) : List<PublicationEntity>
+        + findByAuteurIdOrderByDateCreationDesc(auteurId : Long) : List<PublicationEntity>
+        + findAllByOrderByDateCreationDesc() : List<PublicationEntity>
+    }
+
+    interface CommentRepository <<Repository>> {
+        + findByPostIdOrderByDateCreationAsc(postId : Long) : List<CommentEntity>
+        + findByAuteurIdOrderByDateCreationDesc(auteurId : Long) : List<CommentEntity>
+        + findByParentCommentIdOrderByDateCreationAsc(parentCommentId : Long) : List<CommentEntity>
+    }
+
+    interface NotationRepository <<Repository>> {
+        + findByUserIdOrderByDateNotationDesc(userId : Long) : List<NotationEntity>
+        + findByBibliothequeIdOrderByDateNotationDesc(bibliothequeId : Long) : List<NotationEntity>
+        + findByUserIdAndBibliothequeId(userId : Long, bibliothequeId : Long) : Optional<NotationEntity>
+        + existsByUserIdAndBibliothequeId(userId : Long, bibliothequeId : Long) : Boolean
+    }
+
+    interface FavoriRepository <<Repository>> {
+        + findByUser_IdOrderByDateAjoutDesc(userId : Long) : List<FavoriEntity>
+        + findByUser_IdAndLibraryEntity_Id(userId : Long, bibliothequeId : Long) : Optional<FavoriEntity>
+        + existsByUser_IdAndLibraryEntity_Id(userId : Long, bibliothequeId : Long) : Boolean
+        + deleteByUser_IdAndLibraryEntity_Id(userId : Long, bibliothequeId : Long) : void
+    }
+
+    interface NotificationRepository <<Repository>> {
+        + findByUserIdOrderByDateCreationDesc(userId : Long) : List<NotificationEntity>
+        + findByUserIdAndLueIsFalseOrderByDateCreationDesc(userId : Long) : List<NotificationEntity>
+        + findByUserIdAndLueIsTrueOrderByDateCreationDesc(userId : Long) : List<NotificationEntity>
+        + countByUserIdAndLueIsFalse(userId : Long) : Integer
+        + deleteByUserIdAndLueIsTrue(userId : Long) : void
+    }
+
+    interface SessionRepository <<Repository>> {
+        + findByUserIdOrderByDateCreationDesc(userId : Long) : List<SessionEntity>
+        + findByUserIdAndCompleteeIsTrueOrderByDateCreationDesc(userId : Long) : List<SessionEntity>
+        + findByUserIdAndCompleteeIsFalse(userId : Long) : Optional<SessionEntity>
+        + countByUserIdAndCompleteeIsTrue(userId : Long) : Integer
+    }
+}
+
+' ============================================================
+' PACKAGE : dtos
+' ============================================================
+package "devOps.dtos" #F8D7DA {
+
+    class AuthDTO {
+        - username : String
+        - email : String
+        - password : String
+    }
+
+    class LoginDTO {
+        - username : String
+        - password : String
+    }
+
+    class JwtResponseDTO {
+        - token : String
+        - userId : Long
+        - username : String
+        - email : String
+    }
+
+    class LibraryResponseDTO {
+        - id : Long
+        - nom : String
+        - adresse : String
+        - latitude : Double
+        - longitude : Double
+        - type : TypeBibliotheque
+        - noteGlobale : Double
+        - nombreNotations : Integer
+        - distance : Double
+        - ouvert : Boolean
+        - horaires : List<HoraireDTO>
+    }
+
+    class HoraireDTO {
+        - id : Long
+        - jourSemaine : String
+        - heureOuverture : String
+        - heureFermeture : String
+    }
+
+    class RechercheDTO {
+        - adresse : String
+        - heureDebut : String
+        - heureFin : String
+        - rayon : Double
+    }
+
+    class LivreResponseDTO {
+        - titre : String
+        - auteur : String
+        - bibliotheque : String
+        - disponible : Boolean
+        - cote : String
+        - isbn : String
+    }
+
+    class PublicationDTO {
+        - id : Long
+        - contenu : String
+        - auteurId : Long
+        - auteurUsername : String
+        - bibliothequeId : Long
+        - bibliothequeNom : String
+        - dateCreation : LocalDateTime
+        - comments : List<CommentDTO>
+    }
+
+    class CommentDTO {
+        - id : Long
+        - contenu : String
+        - auteurId : Long
+        - auteurUsername : String
+        - postId : Long
+        - parentCommentId : Long
+        - dateCreation : LocalDateTime
+        - reponses : List<CommentDTO>
+    }
+
+    class NotationDTO {
+        - id : Long
+        - userId : Long
+        - bibliothequeId : Long
+        - note : Integer
+        - commentaire : String
+        - dateVisite : LocalDate
+        - dateNotation : LocalDate
+    }
+
+    class FavoriDTO {
+        - id : Long
+        - userId : Long
+        - bibliothequeId : Long
+        - bibliothequeNom : String
+        - dateAjout : LocalDateTime
+    }
+
+    class NotificationDTO {
+        - id : Long
+        - userId : Long
+        - type : TypeNotification
+        - titre : String
+        - message : String
+        - lue : Boolean
+        - dateCreation : LocalDateTime
+        - dateConsultation : LocalDateTime
+    }
+
+    class SessionDTO {
+        - id : Long
+        - objectif : String
+        - dureeMinutes : Integer
+        - tempsEcoulesMinutes : Integer
+        - completee : Boolean
+        - dateDebut : LocalDateTime
+        - dateFin : LocalDateTime
+        - dateCreation : LocalDateTime
+        - progressionPourcentage : Double
+        - tempsRestantMinutes : Integer
+    }
+}
+
+' ============================================================
+' PACKAGE : adapter (Pattern Adapter)
+' ============================================================
+package "devOps.adapter" #E2D9F3 {
+
+    interface LibraryAdapter <<Interface>> {
+        + rechercherLivre(titre : String) : List<LivreResponseDTO>
+        + getNomBibliotheque() : String
+    }
+
+    class SorbonneAdapter <<Component>> {
+        - NOM_BIBLIOTHEQUE : String
+        - catalogueMock : List<LivreResponseDTO>
+        --
+        + rechercherLivre(titre : String) : List<LivreResponseDTO>
+        + getNomBibliotheque() : String
+    }
+
+    class ParisDescarteAdapter <<Component>> {
+        - NOM_BIBLIOTHEQUE : String
+        - catalogueMock : List<LivreResponseDTO>
+        --
+        + rechercherLivre(titre : String) : List<LivreResponseDTO>
+        + getNomBibliotheque() : String
+    }
+
+    class BibliothequeAdapterFactory <<Component>> {
+        - adapters : List<LibraryAdapter>
+        --
+        + getAllAdapters() : List<LibraryAdapter>
+        + getAdapter(nomBibliotheque : String) : LibraryAdapter
+    }
+}
+
+' ============================================================
+' PACKAGE : security
+' ============================================================
+package "devOps.security" #FDE8C8 {
+
+    class CustomUserDetails <<Security>> {
+        - userId : Long
+        --
+        + getUserId() : Long
+    }
+}
+
+' ============================================================
+' PACKAGE : util
+' ============================================================
+package "devOps.util" #D1ECF1 {
+
+    class JwtUtil <<Component>> {
+        - secret : String
+        - expiration : Long
+        --
+        + generateToken(userDetails : UserDetails) : String
+        + extractUsername(token : String) : String
+        + extractExpiration(token : String) : Date
+        + validateToken(token : String, userDetails : UserDetails) : Boolean
+        - extractAllClaims(token : String) : Claims
+        - isTokenExpired(token : String) : Boolean
+        - getSigningKey() : Key
+    }
+
+    class DistanceCalculator <<Utility>> {
+        - EARTH_RADIUS_KM : double
+        --
+        + {static} calculateDistance(lat1 : double, lon1 : double, lat2 : double, lon2 : double) : double
+    }
+
+    class SecurityUtil <<Utility>> {
+        + {static} getCurrentUserId() : Long
+    }
+}
+
+' ============================================================
+' PACKAGE : services
+' ============================================================
+package "devOps.services" #D4EDDA {
+
+    class AuthService <<Service>> {
+        - userRepository : UtilisateurRepository
+        - passwordEncoder : PasswordEncoder
+        - authenticationManager : AuthenticationManager
+        - jwtUtil : JwtUtil
+        - userDetailsService : UserDetailsServiceImpl
+        --
+        + register(authDTO : AuthDTO) : UtilisateurEntity
+        + login(loginDTO : LoginDTO) : JwtResponseDTO
+    }
+
+    class UserDetailsServiceImpl <<Service>> {
+        - utilisateurRepository : UtilisateurRepository
+        --
+        + loadUserByUsername(username : String) : UserDetails
+    }
+
+    class LibraryService <<Service>> {
+        - libraryRepository : LibraryRepository
+        - geolocationService : GeolocationService
+        --
+        + rechercherBibliotheques(recherche : RechercheDTO) : List<LibraryResponseDTO>
+        + getAllBibliotheques() : List<LibraryResponseDTO>
+        + getBibliothequeById(id : Long) : LibraryResponseDTO
+        - verifierOuverture(lib : LibraryEntity, debut : LocalTime, fin : LocalTime) : boolean
+        - convertToDTO(lib : LibraryEntity) : LibraryResponseDTO
+    }
+
+    class LivreService <<Service>> {
+        - adapterFactory : BibliothequeAdapterFactory
+        --
+        + rechercherLivre(titre : String) : List<LivreResponseDTO>
+        + rechercherLivreDansBibliotheque(titre : String, nomBibliotheque : String) : List<LivreResponseDTO>
+    }
+
+    class FeedService <<Service>> {
+        - postRepository : PublicationRepository
+        - commentRepository : CommentRepository
+        - userRepository : UtilisateurRepository
+        - bibliothequeRepository : LibraryRepository
+        --
+        + getAllPosts() : List<PublicationDTO>
+        + getPostById(id : Long) : PublicationDTO
+        + createPost(publicationDTO : PublicationDTO, userId : Long) : PublicationDTO
+        + addCommentToPost(postId : Long, commentDTO : CommentDTO, userId : Long) : CommentDTO
+        + addReplyToComment(commentId : Long, replyDTO : CommentDTO, userId : Long) : CommentDTO
+        + getCommentsByPost(postId : Long) : List<CommentDTO>
+    }
+
+    class NotationService <<Service>> {
+        - notationRepository : NotationRepository
+        - libraryRepository : LibraryRepository
+        - userRepository : UtilisateurRepository
+        --
+        + noterBibliotheque(notationDTO : NotationDTO, userId : Long) : NotationDTO
+        + getNotationsByUser(userId : Long) : List<NotationDTO>
+        + getNotationsByBibliotheque(bibliothequeId : Long) : List<NotationDTO>
+    }
+
+    class NotificationService <<Service>> {
+        - notificationRepository : NotificationRepository
+        - userRepository : UtilisateurRepository
+        --
+        + getNotificationsByUser(userId : Long) : List<NotificationDTO>
+        + getNonLues(userId : Long) : List<NotificationDTO>
+        + marquerCommeLue(notificationId : Long) : NotificationDTO
+        + marquerToutesCommeLues(userId : Long) : void
+        + countNonLues(userId : Long) : Integer
+    }
+
+    class SessionService <<Service>> {
+        - sessionRepository : SessionRepository
+        - userRepository : UtilisateurRepository
+        --
+        + creerSession(sessionDTO : SessionDTO, userId : Long) : SessionDTO
+        + getSessionEnCours(userId : Long) : SessionDTO
+        + getSessionsByUser(userId : Long) : List<SessionDTO>
+        + getSessionsCompleteesByUser(userId : Long) : List<SessionDTO>
+        + updateTempsEcoule(sessionId : Long, tempsEcoulesMinutes : Integer) : SessionDTO
+        + getStatistiques(userId : Long) : SessionStatistiquesDTO
+        - calculerStreak(userId : Long) : Integer
+    }
+
+    class GeolocationService <<Service>> {
+        - ADRESSES_MOCK : Map<String, double[]>
+        --
+        + geocodeAdresse(adresse : String) : double[]
+        - normaliserAdresse(adresse : String) : String
+    }
+
+    class RecommendationService <<Service>> {
+        - notationRepository : NotationRepository
+        - favoriRepository : FavoriRepository
+        - bibliothequeRepository : LibraryRepository
+        - bibliothequeService : LibraryService
+        --
+        + getRecommendations(userId : Long) : List<LibraryResponseDTO>
+        - calculateScore(bibliotheque : LibraryEntity, typePreference : TypeBibliotheque) : double
+    }
+
+    class "SessionService.SessionStatistiquesDTO" as SessionStatistiquesDTO {
+        + nombreSessions : Integer
+        + totalMinutes : Integer
+        + streak : Integer
+        --
+        + getNombreSessions() : Integer
+        + getTotalMinutes() : Integer
+        + getStreak() : Integer
+    }
+
+    class "RecommendationService.BibliothequeScore" as BibliothequeScore {
+        - bibliotheque : LibraryEntity
+        - score : double
+        --
+        + getBibliotheque() : LibraryEntity
+        + getScore() : double
+    }
+}
+
+' ============================================================
+' RELATIONS - Entités JPA
+' ============================================================
+
+' Relations entre entités (associations)
+LibraryEntity "1" *-- "0..*" HoraireEntity : horaires
+LibraryEntity "1" *-- "0..*" PublicationEntity : posts
+LibraryEntity "1" *-- "0..*" NotationEntity : notations
+LibraryEntity "1" *-- "0..*" FavoriEntity : favoris
+LibraryEntity "1" o-- "0..*" NotificationEntity : bibliotheque
+
+UtilisateurEntity "1" *-- "0..*" PublicationEntity : posts
+UtilisateurEntity "1" *-- "0..*" CommentEntity : comments
+UtilisateurEntity "1" *-- "0..*" NotationEntity : notations
+UtilisateurEntity "1" *-- "0..*" FavoriEntity : favoris
+UtilisateurEntity "1" *-- "0..*" NotificationEntity : notifications
+UtilisateurEntity "1" *-- "0..*" SessionEntity : sessions
+
+PublicationEntity "1" *-- "0..*" CommentEntity : comments
+CommentEntity "0..1" o-- "0..*" CommentEntity : reponses
+
+' Enums
+LibraryEntity --> TypeBibliotheque : type
+NotificationEntity --> TypeNotification : type
+
+' ============================================================
+' RELATIONS - Repositories
+' ============================================================
+UtilisateurRepository ..> UtilisateurEntity : gère
+LibraryRepository ..> LibraryEntity : gère
+PublicationRepository ..> PublicationEntity : gère
+CommentRepository ..> CommentEntity : gère
+NotationRepository ..> NotationEntity : gère
+FavoriRepository ..> FavoriEntity : gère
+NotificationRepository ..> NotificationEntity : gère
+SessionRepository ..> SessionEntity : gère
+
+' ============================================================
+' RELATIONS - Adapter Pattern
+' ============================================================
+SorbonneAdapter ..|> LibraryAdapter : implémente
+ParisDescarteAdapter ..|> LibraryAdapter : implémente
+BibliothequeAdapterFactory o-- "0..*" LibraryAdapter : adapters
+
+' ============================================================
+' RELATIONS - Security
+' ============================================================
+CustomUserDetails --|> "User (Spring Security)" : hérite
+
+' ============================================================
+' RELATIONS - Services
+' ============================================================
+AuthService --> UtilisateurRepository : utilise
+AuthService --> JwtUtil : utilise
+AuthService --> UserDetailsServiceImpl : utilise
+
+UserDetailsServiceImpl --> UtilisateurRepository : utilise
+UserDetailsServiceImpl ..> CustomUserDetails : crée
+
+LibraryService --> LibraryRepository : utilise
+LibraryService --> GeolocationService : utilise
+LibraryService --> DistanceCalculator : utilise
+
+LivreService --> BibliothequeAdapterFactory : utilise
+
+FeedService --> PublicationRepository : utilise
+FeedService --> CommentRepository : utilise
+FeedService --> UtilisateurRepository : utilise
+FeedService --> LibraryRepository : utilise
+
+NotationService --> NotationRepository : utilise
+NotationService --> LibraryRepository : utilise
+NotationService --> UtilisateurRepository : utilise
+
+NotificationService --> NotificationRepository : utilise
+NotificationService --> UtilisateurRepository : utilise
+
+SessionService --> SessionRepository : utilise
+SessionService --> UtilisateurRepository : utilise
+SessionService +-- SessionStatistiquesDTO
+
+RecommendationService --> NotationRepository : utilise
+RecommendationService --> FavoriRepository : utilise
+RecommendationService --> LibraryRepository : utilise
+RecommendationService --> LibraryService : utilise
+RecommendationService +-- BibliothequeScore
+
+@enduml
