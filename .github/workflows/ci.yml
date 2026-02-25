@@ -1,0 +1,32 @@
+name: Sonar & Coverage
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  sonar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: maven
+
+      - name: Build with JaCoCo
+        run: |
+          cd backend
+          mvn clean verify
+
+      - name: SonarCloud Scan
+        working-directory: backend
+        uses: SonarSource/sonarcloud-github-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.a4a8058b7c0e678cf7f191b88682de2d2ae13133 }}
