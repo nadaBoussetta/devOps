@@ -26,7 +26,8 @@ jobs:
           mvn clean verify
 
       - name: SonarCloud Scan
-        working-directory: backend
         uses: SonarSource/sonarcloud-github-action@v2
+        with:
+          projectBaseDir: backend
         env:
           SONAR_TOKEN: ${{ secrets.a4a8058b7c0e678cf7f191b88682de2d2ae13133 }}
