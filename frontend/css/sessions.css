@@ -1,0 +1,82 @@
+.session-timer {
+    font-size: 2.5rem;
+    font-weight: bold;
+    text-align: center;
+    color: var(--primary-color);
+    margin: 1rem 0;
+}
+.progress-bar {
+    width: 100%;
+    height: 30px;
+    background: #e0e0e0;
+    border-radius: 15px;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), #4CAF50);
+    transition: width 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+}
+.session-controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin: 1rem 0;
+}
+.btn-timer {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.btn-start {
+    background: #4CAF50;
+    color: white;
+}
+.btn-start:hover {
+    background: #45a049;
+}
+.btn-pause {
+    background: #ff9800;
+    color: white;
+}
+.btn-pause:hover {
+    background: #e68900;
+}
+.btn-stop {
+    background: #f44336;
+    color: white;
+}
+.btn-stop:hover {
+    background: #da190b;
+}
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+}
+.stat-card {
+    background: var(--light);
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    border-left: 4px solid var(--primary-color);
+}
+.stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+.stat-label {
+    color: #6b7280;
+    margin-top: 0.5rem;
+}
