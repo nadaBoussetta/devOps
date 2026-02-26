@@ -6,7 +6,7 @@
 - [Technologies utilisées](#technologies-utilisées)
 - [Lancement du projet](#lancement-du-projet)
 - [Tests et qualité logicielle](#tests-et-qualité-logicielle)
-- [Équipe](#équipe)
+
 
 ## Présentation du projet
 Ce projet est une application web permettant de rechercher des bibliothèques en Île-de-France. L'utilisateur peut rechercher des bibliothèques par adresse, horaires et rayon de distance, noter les bibliothèques, gérer ses favoris, et interagir via un feed social avec publications et commentaires.
