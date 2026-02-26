@@ -78,9 +78,8 @@ Pour démarrer l'application complète (**backend** et **frontend**) :
 2. Exécutez la commande suivante :
    ```bash
    cmd /c launch.bat
-3.Le script launch.bat va :
-- Lancer le backend dans un premier terminal et lancer le frontend dans un second terminal
-- Une fois les deux services démarrés, vous pourrez accéder à l'application via votre navigateur à l'adresse suivante : **http://localhost:5500/index.html**
+3.Le script launch.bat va lancer le backend dans un premier terminal et lancer le frontend dans un second terminal
+4.Une fois les deux services démarrés, vous pourrez accéder à l'application via votre navigateur à l'adresse suivante : **http://localhost:5500/index.html**
 
 ## Équipe
 
