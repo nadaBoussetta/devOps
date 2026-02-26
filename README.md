@@ -2,7 +2,7 @@
 
 [![Sonar & Coverage](https://github.com/nadaBoussetta/devOps/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/nadaBoussetta/devOps/actions/workflows/ci.yml)
 
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=nadaBoussetta_devOps&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=nadaBoussetta_devOps)  [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=nadaBoussetta_devOps&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=nadaBoussetta_devOps)  [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=nadaBoussetta_devOps&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=nadaBoussetta_devOps)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=nadaBoussetta_devOps&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=nadaBoussetta_devOps)  [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=nadaBoussetta_devOps&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=nadaBoussetta_devOps)  [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=nadaBoussetta_devOps&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=nadaBoussetta_devOps) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=nadaBoussetta_devOps&metric=coverage)](https://sonarcloud.io/summary/new_code?id=nadaBoussetta_devOps)
 
 [![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=nadaBoussetta_devOps)](https://sonarcloud.io/summary/new_code?id=nadaBoussetta_devOps)  [![SonarQube Cloud](https://sonarcloud.io/images/project_badges/sonarcloud-light.svg)](https://sonarcloud.io/summary/new_code?id=nadaBoussetta_devOps)
 
@@ -67,7 +67,7 @@ Pour garantir la qualité et la maintenabilité du code, nous avons mis en place
 ### Tests
 
 - **JUnit 5** : Tests unitaires et d’intégration pour valider la logique métier et éviter les régressions.
-- 
+
 ## Équipe
 
 | Membre                       | GitHub           |
