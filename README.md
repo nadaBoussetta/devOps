@@ -14,6 +14,7 @@
 - [Public visé](#public-visé)
 - [Concurrence](#concurrence)
 - [Outils et Processus DevOps](#outils-et-processus-devops)
+- [Comment lancer ?](#comment-lancer-)
 - [Équipe](#équipe)
 
 
@@ -67,6 +68,19 @@ Pour garantir la qualité et la maintenabilité du code, nous avons mis en place
 ### Tests
 
 - **JUnit 5** : Tests unitaires et d’intégration pour valider la logique métier et éviter les régressions.
+
+### Comment lancer ?
+Avant de lancer l'application, assurez-vous d'être à la **racine du projet** dans votre terminal.
+
+Pour démarrer l'application complète (**backend** et **frontend**) :
+
+1. Ouvrez un terminal à la racine du projet.
+2. Exécutez la commande suivante :
+   ```bash
+   cmd /c launch.bat
+3.Le script launch.bat va :
+- Lancer le backend dans un premier terminal et lancer le frontend dans un second terminal
+- Une fois les deux services démarrés, vous pourrez accéder à l'application via votre navigateur à l'adresse suivante : **http://localhost:5500/index.html**
 
 ## Équipe
 
