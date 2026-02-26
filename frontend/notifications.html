@@ -3,143 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notifications - Bibliothèques IDF</title>
+    <title>Bibliothèques Île-de-France</title>
+
     <link rel="stylesheet" href="css/style.css">
-    <style>
-        .notification-badge {
-            display: inline-block;
-            background: #f44336;
-            color: white;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            text-align: center;
-            line-height: 24px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            margin-left: 0.5rem;
-        }
-        .notification-item {
-            padding: 1rem;
-            border-left: 4px solid var(--primary-color);
-            background: #f9f9f9;
-            margin-bottom: 1rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .notification-item:hover {
-            background: #f0f0f0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .notification-item.non-lue {
-            background: #e3f2fd;
-            border-left-color: #2196F3;
-        }
-        .notification-item.lue {
-            opacity: 0.7;
-        }
-        .notification-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-        .notification-type {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            background: var(--primary-color);
-            color: white;
-            border-radius: 1rem;
-            font-size: 0.75rem;
-            font-weight: bold;
-        }
-        .notification-date {
-            color: #6b7280;
-            font-size: 0.875rem;
-        }
-        .notification-titre {
-            font-weight: bold;
-            color: var(--primary-color);
-            margin-bottom: 0.5rem;
-        }
-        .notification-message {
-            color: #333;
-            line-height: 1.5;
-        }
-        .notification-actions {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 0.75rem;
-        }
-        .btn-small {
-            padding: 0.4rem 0.8rem;
-            font-size: 0.875rem;
-            border: none;
-            border-radius: 0.25rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .btn-mark-read {
-            background: #4CAF50;
-            color: white;
-        }
-        .btn-mark-read:hover {
-            background: #45a049;
-        }
-        .btn-delete {
-            background: #f44336;
-            color: white;
-        }
-        .btn-delete:hover {
-            background: #da190b;
-        }
-        .filter-buttons {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-        }
-        .filter-btn {
-            padding: 0.5rem 1rem;
-            border: 2px solid var(--primary-color);
-            background: white;
-            color: var(--primary-color);
-            border-radius: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .filter-btn.active {
-            background: var(--primary-color);
-            color: white;
-        }
-        .filter-btn:hover {
-            background: var(--primary-color);
-            color: white;
-        }
-    </style>
+    <link rel="stylesheet" href="css/notification.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Parisienne&display=swap" rel="stylesheet">
+
+    <link rel="icon" href="resources/logo_pic.png" type="image/png">
+
 </head>
 <body>
-    <nav class="navbar">
-        <div class="container">
-            <h1 class="logo"> Bibliothèques IDF</h1>
-            <ul class="nav-links">
-                <li><a href="index.html">Accueil</a></li>
-                <li><a href="recherche.html">Recherche</a></li>
-                <li><a href="livres.html">Livres</a></li>
-                <li><a href="feed.html">Feed Social</a></li>
-                <li><a href="favoris.html">Mes Favoris</a></li>
-                <li><a href="sessions.html">Sessions</a></li>
-                <li><a href="notifications.html" class="active">Notifications</a></li>
-                <li><a href="login.html" id="auth-link">Connexion</a></li>
-            </ul>
-        </div>
-    </nav>
+
+<div class="header">
+    <img alt="logo" id="logo_pic" src="resources/logo_pic.png" >
+    <h1 id="titre">Bibliothèques d’Île‑de‑France</h1>
+</div>
+
+<div class="menu">
+    <menu>
+        <ul class="menu_1">
+            <li><a href="index.html" >Accueil</a></li>
+            <li><a href="recherche.html">Recherche</a></li>
+            <li><a href="livres.html">Livres</a></li>
+            <li><a href="feed.html">Feed Social</a></li>
+            <li><a href="favoris.html">Mes Favoris</a></li>
+            <li><a href="sessions.html">Sessions</a></li>
+            <li><a href="notifications.html">Notifications</a></li>
+            <li><a href="login.html" id="auth-link">Connexion</a></li>
+
+
+        </ul>
+    </menu>
+</div>
+
+<div class="partie_1"></div>
 
     <main class="container">
         <section class="notifications-section">
-            <h2>Notifications</h2>
-            <p>Gérez vos notifications et restez informé des mises à jour importantes.</p>
+            <h2 class="tit-s">Notifications</h2>
+            <p class="tit-s">Gérez vos notifications et restez informé des mises à jour importantes.</p>
 
             <!-- Filtres -->
             <div class="filter-buttons">
@@ -150,20 +54,20 @@
 
             <!-- Actions -->
             <div style="margin-bottom: 1rem;">
-                <button class="btn btn-secondary" onclick="marquerToutesCommeLues()">Marquer tout comme lu</button>
-                <button class="btn btn-danger" onclick="supprimerNotificationsLues()">Supprimer les lues</button>
+                <button class="btn btn-primary" onclick="marquerToutesCommeLues()">Marquer tout comme lu</button>
+                <button class="btn btn-primary" onclick="supprimerNotificationsLues()">Supprimer les lues</button>
             </div>
 
             <!-- Liste des notifications -->
             <div id="notifications-container" class="loading">
-                <p>Chargement de vos notifications...</p>
+                <p class="tit-s">Chargement de vos notifications...</p>
             </div>
         </section>
     </main>
 
     <footer>
         <div class="container">
-            <p>&copy; 2026 Bibliothèques Île-de-France. Tous droits réservés.</p>
+            <p>&copy; 2024 Bibliothèques Île-de-France. Tous droits réservés.</p>
         </div>
     </footer>
 

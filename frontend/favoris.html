@@ -3,39 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mes Favoris - Bibliothèques IDF</title>
+    <title>Bibliothèques Île-de-France</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Parisienne&display=swap" rel="stylesheet">
+
+    <link rel="icon" href="resources/logo_pic.png" type="image/png">
+
 </head>
 <body>
-    <nav class="navbar">
-        <div class="container">
-            <h1 class="logo"> Bibliothèques IDF</h1>
-            <ul class="nav-links">
-                <li><a href="index.html">Accueil</a></li>
-                <li><a href="recherche.html">Recherche</a></li>
-                <li><a href="livres.html">Livres</a></li>
-                <li><a href="feed.html">Feed Social</a></li>
-                <li><a href="favoris.html" class="active">Mes Favoris</a></li>
-                <li><a href="sessions.html">Sessions</a></li>
-                <li><a href="login.html" id="auth-link">Connexion</a></li>
-            </ul>
-        </div>
-    </nav>
+
+<div class="header">
+    <img alt="logo" id="logo_pic" src="resources/logo_pic.png" >
+    <h1 id="titre">Bibliothèques d’Île‑de‑France</h1>
+</div>
+
+<div class="menu">
+    <menu>
+        <ul class="menu_1">
+            <li><a href="index.html" >Accueil</a></li>
+            <li><a href="recherche.html">Recherche</a></li>
+            <li><a href="livres.html">Livres</a></li>
+            <li><a href="feed.html">Feed Social</a></li>
+            <li><a href="favoris.html">Mes Favoris</a></li>
+            <li><a href="sessions.html">Sessions</a></li>
+            <li><a href="notifications.html">Notifications</a></li>
+            <li><a href="login.html" id="auth-link">Connexion</a></li>
+
+
+        </ul>
+    </menu>
+</div>
+
+<div class="partie_1"></div>
 
     <main class="container">
         <section class="favoris-section">
-            <h2>Mes Bibliothèques Favorites</h2>
-            <p>Voici les bibliothèques que vous avez ajoutées à vos favoris.</p>
+            <h2 class="tit-s">Mes Bibliothèques Favorites</h2>
+            <p class="tit-s">Voici les bibliothèques que vous avez ajoutées à vos favoris.</p>
 
             <div id="favoris-container" class="loading">
-                <p>Chargement de vos favoris...</p>
+                <p class="tit-s">Chargement de vos favoris...</p>
             </div>
         </section>
     </main>
 
     <footer>
         <div class="container">
-            <p>&copy; 2026 Bibliothèques Île-de-France. Tous droits réservés.</p>
+            <p>&copy; 2024 Bibliothèques Île-de-France. Tous droits réservés.</p>
         </div>
     </footer>
 
