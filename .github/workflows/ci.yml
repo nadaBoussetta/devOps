@@ -23,11 +23,11 @@ jobs:
       - name: Build with JaCoCo
         run: |
           cd backend
-          mvn clean verify
+          mvn clean verify -Dspring-boot.repackage.skip=true
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
         with:
-          projectBaseDir: backend
+          projectBaseDir: backend/server
         env:
-          SONAR_TOKEN: ${{ secrets.a4a8058b7c0e678cf7f191b88682de2d2ae13133 }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
