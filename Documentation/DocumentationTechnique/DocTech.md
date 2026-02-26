@@ -33,6 +33,15 @@ Le projet adopte une architecture Maven multi-module composée de trois niveaux 
 | CI/CD          | GitHub Actions | 
 
 ## Lancement du projet
+Avant de lancer l'application, assurez-vous d'être à la **racine du projet** dans votre terminal.
+
+Pour démarrer l'application complète (**backend** et **frontend**) :
+
+1. Ouvrez un terminal à la racine du projet.
+2. Exécutez la commande suivante :
+   ```bash
+   cmd /c launch.bat
+3.Le script launch.bat va lancer le backend dans un premier terminal et lancer le frontend dans un second terminal. <br>4.Une fois les deux services démarrés, vous pourrez accéder à l'application via votre navigateur à l'adresse suivante : **http://localhost:5500/index.html**
 
 ## Tests et qualité logicielle
 
