@@ -57,7 +57,9 @@ Pour mieux comprendre ce qui rend une bibliothèque attractive, notre équipe a 
 
 https://docs.google.com/forms/d/e/1FAIpQLSfBo74v6iYrtgw3JT_3I3TNfxV2FgsowrZedcDw3OZZpTeXMQ/viewform
 
-Les résultat : 
+*- Les résultat : *
+
+Les résultats du formulaire montrent que les étudiants fréquentent surtout les bibliothèques parce qu’ils ont du mal à travailler chez eux. Entre le bruit, les distractions et la petite taille des studios étudiants à Paris, ils recherchent un endroit calme et propice à la concentration. Ils y vont aussi lorsqu’ils ont une heure de libre entre deux cours, pas forcément pour travailler, mais pour se poser dans un lieu calme. Les travailleurs ont des motivations similaires : à la maison, il y a souvent des perturbations (enfants, téléphone, tâches domestiques…), ce qui les pousse à chercher un espace calme et structuré pour travailler efficacement.
 
 # Pourquoi ?
 
@@ -135,7 +137,7 @@ Lien Sonar : https://sonarcloud.io/summary/overall?id=nadaBoussetta_devOps&branc
 
 Durant ce projet, nous avons utilisé le tableau Kanban intégré à GitHub pour organiser et suivre l’avancement des tâches. Nous avons commencé par définir un backlog initial comprenant les premiers tickets (initialisation du projet, conception de l’architecture et développement des premières fonctionnalités), puis le tableau a évolué progressivement avec l’ajout, la priorisation et le suivi des nouvelles tâches au fil de l’avancement du projet.
 
-```{r, echo=FALSE, out.width="50%", out.height="45%", fig.align="center", fig.pos="H"}
+```{r, echo=FALSE, out.width="50%", out.height="30%", fig.align="center", fig.pos="H"}
 knitr::include_graphics("initial.png")
 ```
 
