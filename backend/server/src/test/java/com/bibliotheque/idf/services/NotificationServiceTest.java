@@ -1,4 +1,4 @@
-package devOps.services;
+package com.bibliotheque.idf.services;
 
 import devOps.dtos.NotificationDTO;
 import devOps.enums.TypeNotification;
@@ -8,6 +8,7 @@ import devOps.models.UtilisateurEntity;
 import devOps.repositories.LibraryRepository;
 import devOps.repositories.NotificationRepository;
 import devOps.repositories.UtilisateurRepository;
+import devOps.services.NotificationService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

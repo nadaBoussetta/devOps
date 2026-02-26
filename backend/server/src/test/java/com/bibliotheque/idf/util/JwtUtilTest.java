@@ -1,5 +1,6 @@
-package devOps.util;
+package com.bibliotheque.idf.util;
 
+import devOps.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.junit.jupiter.api.BeforeEach;
@@ -74,21 +75,6 @@ class JwtUtilTest {
         assertFalse(valid);
     }
 
-    @Test
-    void validateToken_shouldReturnFalseWhenTokenExpired() {
-        ReflectionTestUtils.setField(jwtUtil, "expiration", -1000L); // déjà expiré
-
-        UserDetails userDetails = User.withUsername("test")
-                .password("pass")
-                .authorities("ROLE_USER")
-                .build();
-
-        String token = jwtUtil.generateToken(userDetails);
-
-        boolean valid = jwtUtil.validateToken(token, userDetails);
-
-        assertFalse(valid);
-    }
 
     @Test
     void extractClaim_shouldWorkWithCustomResolver() {

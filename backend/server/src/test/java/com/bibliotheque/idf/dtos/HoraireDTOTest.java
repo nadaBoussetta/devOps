@@ -1,5 +1,6 @@
-package devOps.dtos;
+package com.bibliotheque.idf.dtos;
 
+import devOps.dtos.HoraireDTO;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

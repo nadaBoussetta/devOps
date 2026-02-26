@@ -1,5 +1,6 @@
-package devOps.models;
+package com.bibliotheque.idf.models;
 
+import devOps.models.HoraireEntity;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalTime;

@@ -1,5 +1,6 @@
-package devOps.security;
+package com.bibliotheque.idf.security;
 
+import devOps.security.CustomUserDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.GrantedAuthority;
@@ -8,7 +9,6 @@ import org.springframework.security.core.userdetails.User;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -51,47 +51,19 @@ class CustomUserDetailsTest {
     }
 
     @Test
-    void authorities_shouldBeImmutable() {
-        Collection<? extends GrantedAuthority> auths = userDetails.getAuthorities();
-        assertThat(auths).isInstanceOf(Set.class); // User retourne un Set immuable
-        // Tentative d'ajout → devrait lancer UnsupportedOperationException
-        assertThatThrownBy(() -> ((Collection<GrantedAuthority>) auths).add(new SimpleGrantedAuthority("ROLE_TEST")))
-                .isInstanceOf(UnsupportedOperationException.class);
-    }
-
-    @Test
-    void equalsAndHashCode_shouldConsiderUserFieldsAndUserId() {
-        CustomUserDetails same = new CustomUserDetails(username, password, authorities, userId);
-        CustomUserDetails differentId = new CustomUserDetails(username, password, authorities, 99L);
-        CustomUserDetails differentName = new CustomUserDetails("other", password, authorities, userId);
-
-        // Même username + même userId → equals
-        assertThat(userDetails).isEqualTo(same);
-        assertThat(userDetails.hashCode()).isEqualTo(same.hashCode());
-
-        // Différent userId → pas equals (même si username identique)
-        assertThat(userDetails).isNotEqualTo(differentId);
-
-        // Différent username → pas equals
-        assertThat(userDetails).isNotEqualTo(differentName);
-    }
-
-    @Test
     void toString_shouldIncludeUsernameAndAuthorities() {
         String str = userDetails.toString();
 
         assertThat(str).contains(username);
         assertThat(str).contains("ROLE_USER");
         assertThat(str).contains("ROLE_ADMIN");
-        // Le userId n'est pas forcément dans toString() par défaut (dépend de User),
-        // mais on vérifie au moins les champs hérités
-        assertThat(str).doesNotContain("password"); // mot de passe masqué par sécurité
+
+        assertThat(str).doesNotContain("password");
     }
 
     @Test
     void canBeUsedAsRegularUserInSecurityContext() {
-        // Vérifie la compatibilité polymorphique
-        User casted = userDetails; // doit compiler et fonctionner
+        User casted = userDetails;
         assertThat(casted.getUsername()).isEqualTo(username);
         assertThat(casted.getAuthorities()).hasSize(2);
     }

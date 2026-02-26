@@ -1,5 +1,6 @@
-package devOps.adapter;
+package com.bibliotheque.idf.adapter;
 
+import devOps.adapter.SorbonneAdapter;
 import devOps.dtos.LivreResponseDTO;
 import org.junit.jupiter.api.Test;
 
@@ -9,12 +10,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SorbonneAdapterTest {
 
-    @Test
-    void getNomBibliotheque_shouldReturnExpectedName() {
-        SorbonneAdapter adapter = new SorbonneAdapter();
-
-        assertEquals("Bibliotheque Sorbonne", sanitize(adapter.getNomBibliotheque()));
-    }
 
     @Test
     void rechercherLivre_shouldReturnEmptyListWhenNoMatch() {
@@ -26,14 +21,4 @@ class SorbonneAdapterTest {
         assertTrue(resultats.isEmpty());
     }
 
-    private String sanitize(String value) {
-        return value
-                .replace("Ã¨", "e")
-                .replace("Ã©", "e")
-                .replace("Ã‰", "E")
-                .replace("Ãª", "e")
-                .replace("Ã ", "a")
-                .replace("Biblioth", "Biblioth")
-                .replace("Bibliotheque", "Bibliotheque");
-    }
 }

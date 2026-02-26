@@ -1,5 +1,6 @@
-package devOps.dtos;
+package com.bibliotheque.idf.dtos;
 
+import devOps.dtos.FavoriDTO;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;

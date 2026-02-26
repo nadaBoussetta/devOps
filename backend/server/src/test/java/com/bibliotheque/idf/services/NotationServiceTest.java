@@ -1,4 +1,4 @@
-package devOps.services;
+package com.bibliotheque.idf.services;
 
 import devOps.dtos.FavoriDTO;
 import devOps.dtos.NotationDTO;
@@ -10,6 +10,7 @@ import devOps.repositories.FavoriRepository;
 import devOps.repositories.LibraryRepository;
 import devOps.repositories.NotationRepository;
 import devOps.repositories.UtilisateurRepository;
+import devOps.services.NotationService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

@@ -1,4 +1,4 @@
-package devOps.config;
+package com.bibliotheque.idf.config;
 
 import org.junit.jupiter.api.Test;
 

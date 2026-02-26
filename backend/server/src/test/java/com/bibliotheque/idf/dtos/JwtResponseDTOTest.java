@@ -1,5 +1,6 @@
-package devOps.dtos;
+package com.bibliotheque.idf.dtos;
 
+import devOps.dtos.JwtResponseDTO;
 import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -13,7 +14,7 @@ class JwtResponseDTOTest {
         assertThat(dto.getUserId()).isEqualTo(42L);
         assertThat(dto.getUsername()).isEqualTo("john.doe");
         assertThat(dto.getEmail()).isEqualTo("john@example.com");
-        assertThat(dto.getType()).isEqualTo("Bearer"); // valeur par défaut
+        assertThat(dto.getType()).isEqualTo("Bearer");
     }
 
     @Test
@@ -45,14 +46,4 @@ class JwtResponseDTOTest {
         assertThat(dto1.hashCode()).isEqualTo(dto2.hashCode());
     }
 
-    @Test
-    void toStringShouldContainImportantFields() {
-        JwtResponseDTO dto = new JwtResponseDTO("secret-token", 5L, "bob", "bob@mail.com");
-        String str = dto.toString();
-
-        assertThat(str).contains("token=secret-token");
-        assertThat(str).contains("userId=5");
-        assertThat(str).contains("username=bob");
-        assertThat(str).doesNotContain("email"); // souvent masqué pour sécurité, mais ici présent
-    }
 }

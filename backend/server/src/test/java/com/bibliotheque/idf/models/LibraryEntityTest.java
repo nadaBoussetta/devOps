@@ -1,5 +1,7 @@
-package devOps.models;
+package com.bibliotheque.idf.models;
 
+import devOps.models.HoraireEntity;
+import devOps.models.LibraryEntity;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,7 +26,7 @@ class LibraryEntityTest {
         library.setNoteGlobale(4.0);
         library.setNombreNotations(1);
 
-        library.updateNoteGlobale(2); // moyenne de (4 + 2) / 2 = 3
+        library.updateNoteGlobale(2);
 
         assertEquals(2, library.getNombreNotations());
         assertEquals(3.0, library.getNoteGlobale());

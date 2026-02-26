@@ -1,10 +1,11 @@
-package devOps.services;
+package com.bibliotheque.idf.services;
 
 import devOps.dtos.SessionDTO;
 import devOps.models.SessionEntity;
 import devOps.models.UtilisateurEntity;
 import devOps.repositories.SessionRepository;
 import devOps.repositories.UtilisateurRepository;
+import devOps.services.SessionService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

@@ -1,4 +1,4 @@
-package devOps.services;
+package com.bibliotheque.idf.services;
 
 import devOps.dtos.CommentDTO;
 import devOps.dtos.PublicationDTO;
@@ -10,6 +10,7 @@ import devOps.repositories.CommentRepository;
 import devOps.repositories.LibraryRepository;
 import devOps.repositories.PublicationRepository;
 import devOps.repositories.UtilisateurRepository;
+import devOps.services.FeedService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

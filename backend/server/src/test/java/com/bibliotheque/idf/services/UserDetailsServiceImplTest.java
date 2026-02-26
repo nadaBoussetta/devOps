@@ -1,7 +1,8 @@
-package devOps.services;
+package com.bibliotheque.idf.services;
 
 import devOps.models.UtilisateurEntity;
 import devOps.repositories.UtilisateurRepository;
+import devOps.services.UserDetailsServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
