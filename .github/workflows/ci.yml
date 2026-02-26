@@ -22,7 +22,7 @@ jobs:
 
       - name: Build with JaCoCo
         run: |
-          cd backend/server
+          cd backend
           mvn clean verify
 
       - name: SonarCloud Scan
