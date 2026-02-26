@@ -5,76 +5,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bibliothèques Île-de-France</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Parisienne&display=swap" rel="stylesheet">
+
+    <link rel="icon" href="resources/logo_pic.png" type="image/png">
+
 </head>
 <body>
-    <nav class="navbar">
-        <div class="container">
-            <h1 class="logo"> Bibliothèques IDF</h1>
-            <ul class="nav-links">
-                <li><a href="index.html" class="active">Accueil</a></li>
-                <li><a href="recherche.html">Recherche</a></li>
-                <li><a href="livres.html">Livres</a></li>
-                <li><a href="feed.html">Feed Social</a></li>
-                <li><a href="favoris.html">Mes Favoris</a></li>
-                <li><a href="sessions.html">Sessions</a></li>
-                <li><a href="notifications.html">Notifications</a></li>
-                <li><a href="login.html" id="auth-link">Connexion</a></li>
-            </ul>
-        </div>
-    </nav>
+
+<div class="header">
+    <img alt="logo" id="logo_pic" src="resources/logo_pic.png" >
+    <h1 id="titre">Bibliothèques d’Île‑de‑France</h1>
+</div>
+
+<div class="menu">
+    <menu>
+        <ul class="menu_1">
+            <li><a href="index.html" >Accueil</a></li>
+            <li><a href="recherche.html">Recherche</a></li>
+            <li><a href="livres.html">Livres</a></li>
+            <li><a href="feed.html">Feed Social</a></li>
+            <li><a href="favoris.html">Mes Favoris</a></li>
+            <li><a href="sessions.html">Sessions</a></li>
+            <li><a href="notifications.html">Notifications</a></li>
+            <li><a href="login.html" id="auth-link">Connexion</a></li>
+
+
+        </ul>
+    </menu>
+</div>
+
+<div class="partie_1"></div>
+<div class="partie_2">
+    <h1 id="t_1"> Bibliothèques d’Île‑de‑France </h1>
+
+</div>
+
 
     <main class="container">
         <section class="hero">
-            <h2>Trouvez VOTRE bibliothèques en Île-de-France</h2>
-            <p>Recherchez des bibliothèques selon votre localisation, consultez les livres disponibles, 
+            <h2>Trouvez la bibliothèque idéale en Île-de-France</h2>
+            <p>Recherchez des bibliothèques selon votre localisation, consultez les livres disponibles,
                partagez vos expériences et recevez des recommandations personnalisées.</p>
             <div class="cta-buttons">
-                <a href="recherche.html" class="btn btn-secondary">Rechercher une bibliothèque</a>
-                <a href="livres.html" class="btn btn-secondary">Chercher un livre</a>
+                <a href="recherche.html" class="btn btn-primary">Rechercher une bibliothèque</a>
+                <a href="livres.html" class="btn btn-primary">Chercher un livre</a>
             </div>
         </section>
 
         <section class="features">
-            <h3>Ce qu'on vous propose</h3>
+            <h3>Fonctionnalités</h3>
             <div class="feature-grid">
+
                 <div class="feature-card">
-                    <div class="feature-icon"></div>
+                    <div class="feature-icon"><i class="fa-solid fa-location-dot"></i></div>
                     <h4>Recherche par localisation</h4>
                     <p>Trouvez les bibliothèques les plus proches de vous, ouvertes selon vos horaires.</p>
                 </div>
+
                 <div class="feature-card">
-                    <div class="feature-icon"></div>
+                    <div class="feature-icon"><i class="fa-solid fa-book"></i></div>
                     <h4>Recherche de livres</h4>
-                    <p>Découvrez dans quelles bibliothèques vos livres sont disponibles.</p>
+                    <p>Découvrez dans quelles bibliothèques universitaires vos livres sont disponibles.</p>
                 </div>
+
                 <div class="feature-card">
-                    <div class="feature-icon"></div>
+                    <div class="feature-icon"><i class="fa-solid fa-comments"></i></div>
                     <h4>Feed social</h4>
-                    <p>Partagez vos avis, commentez et échangez avec notre communauté.</p>
+                    <p>Partagez vos avis, commentez et échangez avec la communauté.</p>
                 </div>
+
                 <div class="feature-card">
-                    <div class="feature-icon"></div>
+                    <div class="feature-icon"><i class="fa-solid fa-star"></i></div>
                     <h4>Recommandations</h4>
                     <p>Recevez des suggestions personnalisées basées sur vos préférences.</p>
                 </div>
+
             </div>
         </section>
 
-        <section class="bibliotheques-list">
-            <h3>Bibliothèques disponibles</h3>
-            <div id="bibliotheques-container" class="loading">
-                <p>Chargement des bibliothèques...</p>
-            </div>
-        </section>
+
+
     </main>
 
     <footer>
         <div class="container">
-            <p>&copy; 2026 Bibliothèques Île-de-France. Tous droits réservés.</p>
+            <p>&copy; 2024 Bibliothèques Île-de-France. Tous droits réservés.</p>
         </div>
     </footer>
 
     <script src="js/api.js"></script>
-    <script src="js/index.js"></script>
+
 </body>
 </html>

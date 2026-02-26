@@ -3,124 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sessions de Révision - Bibliothèques IDF</title>
+    <title>Bibliothèques Île-de-France</title>
     <link rel="stylesheet" href="css/style.css">
-    <style>
-        .session-timer {
-            font-size: 2.5rem;
-            font-weight: bold;
-            text-align: center;
-            color: var(--primary-color);
-            margin: 1rem 0;
-        }
-        .progress-bar {
-            width: 100%;
-            height: 30px;
-            background: #e0e0e0;
-            border-radius: 15px;
-            overflow: hidden;
-            margin: 1rem 0;
-        }
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary-color), #4CAF50);
-            transition: width 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-        }
-        .session-controls {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            margin: 1rem 0;
-        }
-        .btn-timer {
-            padding: 0.75rem 1.5rem;
-            font-size: 1rem;
-            border: none;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .btn-start {
-            background: #4CAF50;
-            color: white;
-        }
-        .btn-start:hover {
-            background: #45a049;
-        }
-        .btn-pause {
-            background: #ff9800;
-            color: white;
-        }
-        .btn-pause:hover {
-            background: #e68900;
-        }
-        .btn-stop {
-            background: #f44336;
-            color: white;
-        }
-        .btn-stop:hover {
-            background: #da190b;
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin: 2rem 0;
-        }
-        .stat-card {
-            background: var(--light);
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            text-align: center;
-            border-left: 4px solid var(--primary-color);
-        }
-        .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-        .stat-label {
-            color: #6b7280;
-            margin-top: 0.5rem;
-        }
-    </style>
+    <link rel="stylesheet" href="css/sessions.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Parisienne&display=swap" rel="stylesheet">
+
+    <link rel="icon" href="resources/logo_pic.png" type="image/png">
+
 </head>
 <body>
-    <nav class="navbar">
-        <div class="container">
-            <h1 class="logo"> Bibliothèques IDF</h1>
-            <ul class="nav-links">
-                <li><a href="index.html">Accueil</a></li>
-                <li><a href="recherche.html">Recherche</a></li>
-                <li><a href="livres.html">Livres</a></li>
-                <li><a href="feed.html">Feed Social</a></li>
-                <li><a href="favoris.html">Mes Favoris</a></li>
-                <li><a href="sessions.html" class="active">Sessions</a></li>
-                <li><a href="login.html" id="auth-link">Connexion</a></li>
-            </ul>
-        </div>
-    </nav>
+
+<div class="header">
+    <img alt="logo" id="logo_pic" src="resources/logo_pic.png" >
+    <h1 id="titre">Bibliothèques d’Île‑de‑France</h1>
+</div>
+
+<div class="menu">
+    <menu>
+        <ul class="menu_1">
+            <li><a href="index.html" >Accueil</a></li>
+            <li><a href="recherche.html">Recherche</a></li>
+            <li><a href="livres.html">Livres</a></li>
+            <li><a href="feed.html">Feed Social</a></li>
+            <li><a href="favoris.html">Mes Favoris</a></li>
+            <li><a href="sessions.html">Sessions</a></li>
+            <li><a href="notifications.html">Notifications</a></li>
+            <li><a href="login.html" id="auth-link">Connexion</a></li>
+
+
+        </ul>
+    </menu>
+</div>
+
+<div class="partie_1"></div>
 
     <main class="container">
         <section class="sessions-section">
-            <h2>Sessions de Révision</h2>
-            <p>Organisez vos sessions de révision et suivez votre progression.</p>
+            <h2 class="tit-s">Sessions de Révision</h2>
+            <p class="tit-s">Organisez vos sessions de révision et suivez votre progression.</p>
 
             <!-- Section Créer une session -->
             <div class="create-session">
-                <h3>Créer une nouvelle session</h3>
+                <h3 class="tit-s">Créer une nouvelle session</h3>
                 <form id="create-session-form">
-                    <div class="form-group">
-                        <label for="objectif">Objectif</label>
+                    <div class="form-group" style="margin:15px;">
+                        <label for="objectif" style="color: black;">Objectif</label>
                         <input type="text" id="objectif" placeholder="Ex: Lire 20 pages, Réviser les chapitres 1-3" required>
                     </div>
-                    <div class="form-group">
-                        <label for="duree">Durée (minutes)</label>
+                    <div class="form-group" style="margin:15px;">
+                        <label for="duree" style="color:black">Durée (minutes)</label>
                         <input type="number" id="duree" min="5" max="480" value="60" required>
                     </div>
                     <button type="submit" class="btn btn-primary">Créer une session</button>
@@ -129,7 +62,7 @@
 
             <!-- Section Session en cours -->
             <div id="session-en-cours" style="display: none;">
-                <h3>Session en cours</h3>
+                <h3 class="tit-s">Session en cours</h3>
                 <div class="card">
                     <h4 id="session-objectif"></h4>
                     <div class="session-timer" id="session-timer">00:00:00</div>
@@ -150,7 +83,7 @@
 
             <!-- Section Statistiques -->
             <div id="statistiques-section">
-                <h3>Statistiques hebdomadaires</h3>
+                <h3 class="tit-s">Statistiques hebdomadaires</h3>
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-value" id="stat-sessions">0</div>
@@ -169,7 +102,7 @@
 
             <!-- Section Historique des sessions -->
             <div class="sessions-list">
-                <h3>Historique des sessions</h3>
+                <h3 class="tit-s">Historique des sessions</h3>
                 <div id="sessions-container" class="loading">
                     <p>Chargement de vos sessions...</p>
                 </div>
@@ -179,7 +112,7 @@
 
     <footer>
         <div class="container">
-            <p>&copy; 2026 Bibliothèques Île-de-France. Tous droits réservés.</p>
+            <p>&copy; 2024 Bibliothèques Île-de-France. Tous droits réservés.</p>
         </div>
     </footer>
 
