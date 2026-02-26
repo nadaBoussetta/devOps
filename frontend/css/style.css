@@ -79,7 +79,7 @@ body {
 {
     margin-left: 0;
     transition : 1s;
-    font-family: "Parisienne", cursive;
+    font-family: 'Arial', sans-serif;
 }
 #titre:hover
 {
@@ -200,7 +200,7 @@ a:hover
     text-decoration: none;
     display: inline-block;
     transition: 0.3s ease;
-    font-family: "Parisienne", cursive;
+    font-family: 'Arial', sans-serif;
 }
 
 /* Bouton principal */
@@ -229,7 +229,7 @@ a:hover
 
 .features {
     margin: 15px;
-    font-family: "Parisienne", cursive;
+    font-family: 'Arial', sans-serif;
 }
 
 .features h3 {
@@ -319,7 +319,7 @@ a:hover
 }
 .tit-s{
     margin : 15px;
-    font-family: "Parisienne", cursive;
+    font-family: 'Arial', sans-serif;
 
 }
 
