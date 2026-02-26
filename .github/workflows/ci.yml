@@ -23,7 +23,7 @@ jobs:
       - name: Build with JaCoCo
         run: |
           cd backend
-          mvn clean verify
+          mvn clean verify -Dspring-boot.repackage.skip=true
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
