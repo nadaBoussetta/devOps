@@ -5,18 +5,12 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- Option A : Si tu as vraiment un parent multi-module -->
-    <!--
     <parent>
-        <groupId>devOps</groupId>
-        <artifactId>backend</artifactId>
-        <version>1.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.5</version>
+        <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    -->
-
-    <!-- Option B : Si ce module est indépendant ou racine → commente/supprime le parent -->
-    <!-- <parent> ... </parent> -->
 
     <groupId>devOps</groupId>
     <artifactId>server</artifactId>
@@ -24,22 +18,27 @@
     <packaging>jar</packaging>
 
     <name>server</name>
+    <description>Module principal de l'application Bibliotheque IDF</description>
 
     <properties>
         <java.version>17</java.version>
-        <spring-boot.version>3.2.5</spring-boot.version> <!-- ou ta version réelle -->
-        <jjwt.version>0.12.6</jjwt.version> <!-- mise à jour recommandée 2025/2026 -->
-        <mapstruct.version>1.6.0</mapstruct.version> <!-- version plus récente -->
+        <springdoc.version>2.6.0</springdoc.version>
+        <jjwt.version>0.11.5</jjwt.version>
+        <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <lombok.version>1.18.32</lombok.version>
     </properties>
 
     <dependencies>
 
-        <!-- Module interne -->
+        <!-- Module interne - COMMENTÉ pour éviter l'erreur "artifact introuvable" -->
+        <!-- Décommente quand rest-api sera installé -->
+        <!--
         <dependency>
             <groupId>devOps</groupId>
             <artifactId>rest-api</artifactId>
-            <version>${project.version}</version>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
+        -->
 
         <!-- Spring Boot Starters -->
         <dependency>
@@ -59,7 +58,7 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <!-- PostgreSQL + H2 (test/runtime) -->
+        <!-- Bases de données -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -75,6 +74,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -84,8 +84,14 @@
             <artifactId>mapstruct</artifactId>
             <version>${mapstruct.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+            <version>${mapstruct.version}</version>
+            <scope>provided</scope>
+        </dependency>
 
-        <!-- JJWT (une seule version, moderne) -->
+        <!-- JJWT -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
@@ -108,7 +114,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.6.0</version> <!-- version récente -->
+            <version>${springdoc.version}</version>
         </dependency>
 
         <!-- Tests -->
@@ -118,7 +124,19 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Optionnel : si tu utilises XMLUnit -->
+        <!-- Explicit JUnit 5 + Mockito (une seule fois) -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- XMLUnit (optionnel) -->
         <dependency>
             <groupId>org.xmlunit</groupId>
             <artifactId>xmlunit-core</artifactId>
@@ -128,27 +146,43 @@
     </dependencies>
 
     <build>
-        <plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
 
+        <plugins>
+            <!-- Spring Boot repackage -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>devOps.SampleDataJpaApplication</mainClass> <!-- mets le vrai nom si différent -->
+                    <mainClass>devOps.SampleDataJpaApplication</mainClass>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
+            <!-- Compiler avec Lombok + MapStruct -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.13.0</version>
+                <version>3.11.0</version>
                 <configuration>
-                    <release>${java.version}</release>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>1.18.34</version> <!-- mise à jour -->
+                            <version>${lombok.version}</version>
                         </path>
                         <path>
                             <groupId>org.mapstruct</groupId>
@@ -159,10 +193,11 @@
                 </configuration>
             </plugin>
 
+            <!-- JaCoCo -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.12</version>
+                <version>0.8.11</version>
                 <executions>
                     <execution>
                         <goals>
@@ -179,6 +214,16 @@
                 </executions>
             </plugin>
 
+            <!-- Surefire (JUnit 5 runner) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.1.2</version>
+                <configuration>
+                    <!-- Optionnel : décommente pour ignorer les échecs de tests -->
+                    <!-- <testFailureIgnore>true</testFailureIgnore> -->
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
