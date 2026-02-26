@@ -22,8 +22,9 @@ jobs:
 
       - name: Build with JaCoCo
         run: |
-          cd backend
-          mvn clean verify -Dspring-boot.repackage.skip=true
+            cd backend
+            mvn clean verify -Dspring-boot.repackage.skip=true
+            ls server/target/classes || echo "CLASSES NOT FOUND"
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
