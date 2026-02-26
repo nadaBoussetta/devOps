@@ -1,14 +1,10 @@
-[![Tests OK](https://github.com/nadaBoussetta/devOps/actions/workflows/main.yml/badge.svg)](https://github.com/nadaBoussetta/devOps/actions/workflows/main.yml)
+[![Tests OK](https://github.com/nadaBoussetta/devOps/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/nadaBoussetta/devOps/actions/workflows/main.yml)
 
-
-[![Sonar & Coverage](https://github.com/nadaBoussetta/devOps/actions/workflows/ci.yml/badge.svg)](https://github.com/nadaBoussetta/devOps/actions/workflows/ci.yml)
-
+[![Sonar & Coverage](https://github.com/nadaBoussetta/devOps/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/nadaBoussetta/devOps/actions/workflows/ci.yml)
 
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=nadaBoussetta_devOps&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=nadaBoussetta_devOps)
 
-
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=nadaBoussetta_devOps&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=nadaBoussetta_devOps)
-
 
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=nadaBoussetta_devOps&metric=coverage)](https://sonarcloud.io/summary/new_code?id=nadaBoussetta_devOps)
 
