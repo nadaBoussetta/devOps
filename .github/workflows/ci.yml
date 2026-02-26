@@ -30,4 +30,4 @@ jobs:
         with:
           projectBaseDir: backend/server
         env:
-          SONAR_TOKEN: ${{ secrets.a4a8058b7c0e678cf7f191b88682de2d2ae13133 }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
