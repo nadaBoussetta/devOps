@@ -118,12 +118,14 @@ Cette organisation permet de séparer clairement les responsabilités et facilit
 
 ## Tests
 
-Nous avons mis en place des tests unitaires pour garantir le bon fonctionnement de l’application.
-Les tests ont été réalisés avec JUnit 5 et Mockito afin de vérifier la logique métier tout en simulant les dépendances (repositories, services externes, etc.).
+Pour assurer la fiabilité de notre application, nous avons mis en place des tests unitaires avec JUnit 5 et Mockito.
 
-Nous avons testé l’ensemble des services principaux du projet, notamment avec des classes de test comme LibraryServiceTest, ainsi que les autres services liés aux fonctionnalités de l’application.
+Nous avons principalement testé les services, car ils contiennent la logique métier (recherche de bibliothèques, gestion des sessions, notifications, feed, etc.).
+Nous avons également testé certaines entités, des DTO ainsi qu’un composant lié à la sécurité.
 
-Ces tests permettent de vérifier le bon comportement des méthodes, la gestion des cas d’erreur et d’éviter les régressions lors des évolutions du projet.
+Grâce à Mockito, les repositories sont simulés, ce qui nous permet de tester la logique indépendamment de la base de données.
+
+Ces tests nous permettent de vérifier le bon fonctionnement des fonctionnalités, de gérer les cas d’erreur et d’éviter les régressions lorsque le projet évolue.
 
 ## Qualité du code
 
@@ -323,6 +325,9 @@ Léa peut également répondre aux questions des autres utilisateurs via les com
 knitr::include_graphics("feedsocial.png")
 ```
 
+### Petite Feature : Option d'ajouter des commentaire
+
+
 ## Feature 4 : Création d'une session 
 
 - **But :** L’utilisateur peut créer une session d’une durée définie. L’application affiche un timer, permet de faire des pauses ou de terminer la session avant la fin, enregistre la session terminée et conserve un historique des sessions.
@@ -382,7 +387,6 @@ La session est enregistrée dans l’historique.
 Leila peut consulter l’historique de ses sessions passées, voir la durée totale de chaque session et le titre.
 Elle peut également supprimer une session si elle le souhaite.    
 
-
 - ScreenShot : 
 
 ```{r, echo=FALSE, out.width="100%", fig.align="center", fig.pos="H"}
@@ -393,7 +397,9 @@ knitr::include_graphics("creationSession.png")
 knitr::include_graphics("historiqueSession.png")
 ```
 
-## Feature 5 - Petite feature :  Favoris 
+### Petite Feature : Consulter l'historique des sessions
+
+## Feature 5 :  Favoris 
 
 - **But :** L’utilisateur peut enregistrer ses bibliothèques favorites pour y accéder rapidement et recevoir des recommandations personnalisées selon ses préférences et évaluations passées.
 
@@ -435,7 +441,7 @@ L’application lui propose des suggestions basées sur ses bibliothèques favor
 knitr::include_graphics("favori.png")
 ```
 
-## Feature 6 - Petite feature : Recevoir des notifications
+## Feature 6 : Recevoir des notifications
 
 - **But :** L’application envoie des notifications à l’utilisateur pour l’informer des événements importants liés à ses sessions de révision et aux bibliothèques (affluence faible, fermeture imminente, disponibilité de livres ou recommandations personnalisées).
 
