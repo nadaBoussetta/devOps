@@ -4,10 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bibliothèques Île-de-France</title>
-
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/notification.css">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Parisienne&display=swap" rel="stylesheet">
 
@@ -41,37 +38,36 @@
 <div class="partie_1"></div>
 
     <main class="container">
-        <section class="notifications-section">
-            <h2 class="tit-s">Notifications</h2>
-            <p class="tit-s">Gérez vos notifications et restez informé des mises à jour importantes.</p>
+        <section class="feed-section">
+            <h2 class="tit-s">Feed Social</h2>
+            <p class="tit-s">Partagez vos expériences et découvrez celles des autres utilisateurs.</p>
 
-            <!-- Filtres -->
-            <div class="filter-buttons">
-                <button class="filter-btn active" onclick="filterNotifications('tous')">Toutes</button>
-                <button class="filter-btn" onclick="filterNotifications('non-lues')">Non lues</button>
-                <button class="filter-btn" onclick="filterNotifications('lues')">Lues</button>
+            <div class="create-post">
+                <h3 class="tit-s">Créer une publication</h3>
+                <form id="create-post-form">
+                    <div class="form-group">
+                        <textarea id="post-content" placeholder="Partagez votre expérience..." rows="4" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Publier</button>
+                </form>
             </div>
 
-            <!-- Actions -->
-            <div style="margin-bottom: 1rem;">
-                <button class="btn btn-primary" onclick="marquerToutesCommeLues()">Marquer tout comme lu</button>
-                <button class="btn btn-primary" onclick="supprimerNotificationsLues()">Supprimer les lues</button>
-            </div>
-
-            <!-- Liste des notifications -->
-            <div id="notifications-container" class="loading">
-                <p class="tit-s">Chargement de vos notifications...</p>
+            <div class="posts-container">
+                <h3 class="tit-s">Publications récentes</h3>
+                <div id="posts-list" class="loading">
+                    <p>Chargement des publications...</p>
+                </div>
             </div>
         </section>
     </main>
 
     <footer>
         <div class="container">
-            <p>&copy; 2026 Bibliothèques Île-de-France. Tous droits réservés.</p>
+            <p>&copy; 2024 Bibliothèques Île-de-France. Tous droits réservés.</p>
         </div>
     </footer>
 
     <script src="js/api.js"></script>
-    <script src="js/notifications.js"></script>
+    <script src="js/feed.js"></script>
 </body>
 </html>

@@ -583,29 +583,4 @@ footer .container {
         gap: 1rem;
         font-size: 0.875rem;
     }
-
-    .password-wrapper {
-        position: relative;
-        display: flex;
-        align-items: center;
-    }
-
-    .password-wrapper input {
-        width: 100%;
-        padding-right: 3rem;
-    }
-
-    .toggle-password {
-        position: absolute;
-        right: 10px;
-        background: none;
-        border: none;
-        cursor: pointer;
-        color: rgb(2, 71, 100);
-        font-size: 1.1rem;
-    }
-
-    .toggle-password:hover {
-        color: rgba(212,175,55,0.9);
-    }
 }

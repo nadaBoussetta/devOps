@@ -15,7 +15,7 @@
 
 <div class="header">
     <img alt="logo" id="logo_pic" src="resources/logo_pic.png" >
-    <h1>Bibliothèques d’Île‑de‑France</h1>
+    <h1 id="titre">Bibliothèques d’Île‑de‑France</h1>
 </div>
 
 <div class="menu">
@@ -38,34 +38,23 @@
 <div class="partie_1"></div>
 
     <main class="container">
-        <section class="search-section">
-            <h2 class="tit-s">Rechercher un livre</h2>
-            <p class="tit-s">Découvrez dans quelles bibliothèques universitaires votre livre est disponible.</p>
+        <section class="favoris-section">
+            <h2 class="tit-s">Mes Bibliothèques Favorites</h2>
+            <p class="tit-s">Voici les bibliothèques que vous avez ajoutées à vos favoris.</p>
 
-            <form id="book-search-form" class="search-form">
-                <div class="form-group">
-                    <label for="titre">Titre du livre</label>
-                    <input type="text" id="titre" placeholder="Ex: Les Misérables" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Rechercher</button>
-            </form>
-        </section>
-
-        <section class="results-section">
-            <h3 class="tit-s">Résultats</h3>
-            <div id="book-results-container">
-                <p class="info-message">Effectuez une recherche pour voir les résultats.</p>
+            <div id="favoris-container" class="loading">
+                <p class="tit-s">Chargement de vos favoris...</p>
             </div>
         </section>
     </main>
 
     <footer>
         <div class="container">
-            <p>&copy; 2026 Bibliothèques Île-de-France. Tous droits réservés.</p>
+            <p>&copy; 2024 Bibliothèques Île-de-France. Tous droits réservés.</p>
         </div>
     </footer>
 
     <script src="js/api.js"></script>
-    <script src="js/livres.js"></script>
+    <script src="js/favoris.js"></script>
 </body>
 </html>

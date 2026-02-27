@@ -38,36 +38,34 @@
 <div class="partie_1"></div>
 
     <main class="container">
-        <section class="feed-section">
-            <h2 class="tit-s">Feed Social</h2>
-            <p class="tit-s">Partagez vos expériences et découvrez celles des autres utilisateurs.</p>
+        <section class="search-section">
+            <h2 class="tit-s">Rechercher un livre</h2>
+            <p class="tit-s">Découvrez dans quelles bibliothèques universitaires votre livre est disponible.</p>
 
-            <div class="create-post">
-                <h3 class="tit-s">Créer une publication</h3>
-                <form id="create-post-form">
-                    <div class="form-group">
-                        <textarea id="post-content" placeholder="Partagez votre expérience..." rows="4" required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Publier</button>
-                </form>
-            </div>
-
-            <div class="posts-container">
-                <h3 class="tit-s">Publications récentes</h3>
-                <div id="posts-list" class="loading">
-                    <p>Chargement des publications...</p>
+            <form id="book-search-form" class="search-form">
+                <div class="form-group">
+                    <label for="titre">Titre du livre</label>
+                    <input type="text" id="titre_livre" placeholder="Ex: Les Misérables" required>
                 </div>
+                <button type="submit" class="btn btn-primary">Rechercher</button>
+            </form>
+        </section>
+
+        <section class="results-section">
+            <h3 class="tit-s">Résultats</h3>
+            <div id="book-results-container">
+                <p class="info-message">Effectuez une recherche pour voir les résultats.</p>
             </div>
         </section>
     </main>
 
     <footer>
         <div class="container">
-            <p>&copy; 2026 Bibliothèques Île-de-France. Tous droits réservés.</p>
+            <p>&copy; 2024 Bibliothèques Île-de-France. Tous droits réservés.</p>
         </div>
     </footer>
 
     <script src="js/api.js"></script>
-    <script src="js/feed.js"></script>
+    <script src="js/livres.js"></script>
 </body>
 </html>

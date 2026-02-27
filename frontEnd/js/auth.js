@@ -11,9 +11,11 @@ document.addEventListener('DOMContentLoaded', () => {
         button.addEventListener('click', () => {
             const tab = button.getAttribute('data-tab');
             
+            // Mise à jour des onglets actifs
             tabButtons.forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
-
+            
+            // Affichage du formulaire correspondant
             authForms.forEach(form => form.classList.remove('active'));
             document.getElementById(`${tab}-form`).classList.add('active');
         });
@@ -23,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const registerForm = document.getElementById('register');
     registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-
+        
         const username = document.getElementById('register-username').value;
         const email = document.getElementById('register-email').value;
         const password = document.getElementById('register-password').value;
@@ -34,7 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
             messageDiv.className = 'message success';
             messageDiv.textContent = 'Inscription réussie ! Vous pouvez maintenant vous connecter.';
             registerForm.reset();
-
+            
+            // Basculer vers l'onglet de connexion après 2 secondes
             setTimeout(() => {
                 document.querySelector('.tab-btn[data-tab="login"]').click();
             }, 2000);
@@ -48,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login');
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-
+        
         const username = document.getElementById('login-username').value;
         const password = document.getElementById('login-password').value;
         const messageDiv = document.getElementById('login-message');
@@ -57,7 +60,8 @@ document.addEventListener('DOMContentLoaded', () => {
             await AuthAPI.login(username, password);
             messageDiv.className = 'message success';
             messageDiv.textContent = 'Connexion réussie ! Redirection...';
-
+            
+            // Redirection vers la page d'accueil
             setTimeout(() => {
                 window.location.href = 'index.html';
             }, 1000);
@@ -65,21 +69,5 @@ document.addEventListener('DOMContentLoaded', () => {
             messageDiv.className = 'message error';
             messageDiv.textContent = 'Identifiants invalides';
         }
-    });
-
-    document.querySelectorAll(".toggle-password").forEach(button => {
-        button.addEventListener("click", () => {
-            const inputId = button.getAttribute("data-target");
-            const input = document.getElementById(inputId);
-            const icon = button.querySelector("i");
-
-            if (input.type === "password") {
-                input.type = "text";
-                icon.classList.replace("fa-eye", "fa-eye-slash");
-            } else {
-                input.type = "password";
-                icon.classList.replace("fa-eye-slash", "fa-eye");
-            }
-        });
     });
 });
