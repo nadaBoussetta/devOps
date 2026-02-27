@@ -46,11 +46,9 @@ function createFavoriCard(favori) {
 
     card.innerHTML = `
         <div class="card-header">
-            <h4 class="card-title">${typeIcon} ${favori.nom}</h4>
+            <h4 class="card-title">${typeIcon} ${favori.bibliothequeNom}</h4>
             ${ouvertBadge}
         </div>
-        <p><strong>📍 Adresse:</strong> ${favori.adresse}</p>
-        <p><strong>⭐ Note:</strong> ${noteStars} ${favori.noteGlobale ? favori.noteGlobale.toFixed(1) : '0.0'} (${favori.nombreNotations || 0} avis)</p>
         <button onclick="supprimerFavori(${favori.id})">❌ Retirer des favoris</button>
     `;
 
