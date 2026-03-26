@@ -2,13 +2,13 @@ package com.bibliotheque.idf.services;
 
 import devOps.services.GeolocationService;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.client.RestTemplate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class GeolocationServiceTest {
 
-    private final GeolocationService geolocationService = new GeolocationService();
-
+    private final GeolocationService geolocationService = new GeolocationService(new RestTemplate());
     @Test
     void geocodeAdresse_shouldReturnKnownCoordinates() {
         double[] coords = geolocationService.geocodeAdresse("Paris");
