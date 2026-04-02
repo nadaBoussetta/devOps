@@ -10,6 +10,23 @@
 
 
     <link rel="icon" href="resources/logo_pic.png" type="image/png">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <style>
+        #map {
+            height: 500px;
+            width: 100%;
+            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .map-section {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+    </style>
 
 </head>
 <body>
@@ -70,6 +87,11 @@
             </form>
         </section>
 
+        <section class="map-section" id="map-section" style="display: none;">
+            <h3 class="tit-s">Carte des bibliothèques</h3>
+            <div id="map"></div>
+        </section>
+
         <section class="results-section">
             <h3 class="tit-s">Résultats</h3>
             <div id="results-container">
@@ -84,6 +106,8 @@
         </div>
     </footer>
 
+    <!-- Leaflet JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <script src="js/api.js"></script>
     <script src="js/recherche.js"></script>
 </body>

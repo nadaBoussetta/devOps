@@ -1,12 +1,33 @@
-/**
- * Script pour la page de recherche de bibliothèques.
- * Affiche les résultats avec toutes les informations et bouton favoris.
- */
+let map; // Variable globale pour la carte Leaflet
+let markers = []; // Stockage des marqueurs
 
 document.addEventListener('DOMContentLoaded', () => {
     const searchForm = document.getElementById('search-form');
     searchForm.addEventListener('submit', handleSearch);
+    
+    // Initialiser la carte (centrée sur Paris par défaut)
+    initializeMap();
 });
+
+/**
+ * Initialise la carte Leaflet avec OpenStreetMap.
+ */
+function initializeMap() {
+    map = L.map('map').setView([48.8566, 2.3522], 12); // Paris par défaut
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
+    }).addTo(map);
+}
+
+/**
+ * Efface tous les marqueurs de la carte.
+ */
+function clearMarkers() {
+    markers.forEach(marker => map.removeLayer(marker));
+    markers = [];
+}
 
 /**
  * Gère la soumission du formulaire de recherche.
@@ -27,12 +48,83 @@ async function handleSearch(e) {
 
         if (resultats.length === 0) {
             resultsContainer.innerHTML = '<p class="info-message">Aucune bibliothèque trouvée avec ces critères.</p>';
+            document.getElementById('map-section').style.display = 'none';
             return;
         }
 
+        // Afficher la carte et les résultats
+        document.getElementById('map-section').style.display = 'block';
         displayResults(resultats);
+        displayMap(resultats);
     } catch (error) {
-        resultsContainer.innerHTML = `<p class="error-message">Erreur lors de la recherche: ${error.message}</p>`;
+        resultsContainer.innerHTML = <p class="error-message">Erreur lors de la recherche: ${error.message}</p>;
+        document.getElementById('map-section').style.display = 'none';
+    }
+}
+
+/**
+ * Affiche la carte avec les marqueurs des bibliothèques et de l'adresse recherchée.
+ */
+function displayMap(resultats) {
+    clearMarkers();
+
+    if (resultats.length === 0) return;
+
+    // Récupérer les coordonnées de l'adresse recherchée (depuis le premier résultat)
+    const searchLat = resultats[0].searchLatitude;
+    const searchLon = resultats[0].searchLongitude;
+
+    // Ajouter un marqueur pour l'adresse recherchée (en rouge)
+    if (searchLat && searchLon) {
+        const searchMarker = L.marker([searchLat, searchLon], {
+            icon: L.icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            })
+        }).addTo(map);
+        
+        searchMarker.bindPopup(<b>Votre adresse</b><br/>${resultats[0].searchLatitude.toFixed(4)}, ${resultats[0].searchLongitude.toFixed(4)});
+        markers.push(searchMarker);
+    }
+
+    // Ajouter les marqueurs pour les bibliothèques (en bleu)
+    resultats.forEach((biblio, index) => {
+        if (biblio.latitude && biblio.longitude) {
+            const marker = L.marker([biblio.latitude, biblio.longitude], {
+                icon: L.icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                })
+            }).addTo(map);
+            
+            marker.bindPopup(`
+                <b>${biblio.nom}</b><br/>
+                ${biblio.adresse}<br/>
+                Distance: ${biblio.distance} km<br/>
+                Type: ${biblio.type || '-'}
+            `);
+            
+            markers.push(marker);
+        }
+    });
+
+    // Centrer la carte sur l'adresse recherchée
+    if (searchLat && searchLon) {
+        map.setView([searchLat, searchLon], 12);
+    }
+
+    // Ajuster le zoom pour voir tous les marqueurs
+    if (markers.length > 0) {
+        const group = new L.featureGroup(markers);
+        map.fitBounds(group.getBounds().pad(0.1));
     }
 }
 
@@ -96,7 +188,7 @@ function formatHorairesDetailles(horaires) {
 
     let html = '<ul style="list-style: none; padding-left: 0;">';
     horairesTries.forEach(h => {
-        html += `<li><strong>${h.jourSemaine}:</strong> ${h.heureOuverture} - ${h.heureFermeture}</li>`;
+        html += <li><strong>${h.jourSemaine}:</strong> ${h.heureOuverture} - ${h.heureFermeture}</li>;
     });
     html += '</ul>';
 
@@ -112,7 +204,7 @@ async function ajouterAuxFavoris(bibliothequeId) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': Bearer ${localStorage.getItem('token')}
             },
             body: JSON.stringify({ bibliothequeId })
         });
