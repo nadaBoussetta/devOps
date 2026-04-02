@@ -34,9 +34,16 @@ public class LibraryService {
 
     public List<LibraryResponseDTO> rechercherBibliotheques(RechercheDTO recherche) {
 
-        double[] coordonnees = geolocationService.geocodeAdresse(recherche.getAdresse());
-        double latRecherche = coordonnees[0];
-        double lonRecherche = coordonnees[1];
+        double[] coordonneesRecherche = geolocationService.geocodeAdresse(recherche.getAdresse());
+
+        if (coordonneesRecherche == null) {
+            // Si l'adresse n'est pas trouvée, retourner une liste vide
+            return new ArrayList<>();
+        }
+
+        double latRecherche = coordonneesRecherche[0];
+        double lonRecherche = coordonneesRecherche[1];
+
 
         // Recherche dans l'API Ile-de-France
         List<IleDeFranceLibraryDTO> idfLibraries = ileDeFranceLibraryApiService.searchLibraries(latRecherche, lonRecherche, recherche.getRayon());
@@ -44,6 +51,8 @@ public class LibraryService {
 
         for (IleDeFranceLibraryDTO idfLib : idfLibraries) {
             LibraryResponseDTO dto = convertIleDeFranceToDTO(idfLib, latRecherche, lonRecherche);
+            dto.setSearchLatitude(latRecherche);
+            dto.setSearchLongitude(lonRecherche);
             resultats.add(dto);
         }
 
