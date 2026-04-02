@@ -3,25 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bibliothèques Île-de-France</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Mes Favoris - Bibliothèques d’Île‑de‑France</title>
+    <link rel="stylesheet" href="css/favoris.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Parisienne&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <link rel="icon" href="resources/logo_pic.png" type="image/png">
-
 </head>
 <body>
+<div class="main-wrapper">
+    <div class="background-image"></div>
 
-<div class="header">
-    <img alt="logo" id="logo_pic" src="resources/logo_pic.png" >
-    <h1 id="titre">Bibliothèques d’Île‑de‑France</h1>
-</div>
+    <aside class="sidebar">
+        <div class="big-number">05</div>
+        <div class="interior-label">Espace Personnel</div>
+        <h1>Mes Favoris</h1>
+        <p class="description">
+            Retrouvez ici toutes les bibliothèques que vous avez enregistrées pour un accès rapide à leurs horaires et services.
+        </p>
+        <a href="recherche.html" class="read-more">Ajouter d'autres lieux</a>
+    </aside>
 
-<div class="menu">
-    <menu>
-        <ul class="menu_1">
-            <li><a href="index.html" >Accueil</a></li>
+    <nav>
+        <div class="logo">Bibliothèques IDF</div>
+        <ul class="nav-links">
+            <li><a href="MyFeed.html">Accueil</a></li>
             <li><a href="recherche.html">Recherche</a></li>
             <li><a href="livres.html">Livres</a></li>
             <li><a href="feed.html">Feed Social</a></li>
@@ -29,32 +34,34 @@
             <li><a href="sessions.html">Sessions</a></li>
             <li><a href="notifications.html">Notifications</a></li>
             <li><a href="login.html" id="auth-link">Connexion</a></li>
-
-
         </ul>
-    </menu>
-</div>
 
-<div class="partie_1"></div>
+        <div class="search-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+        </div>
+    </nav>
 
-    <main class="container">
-        <section class="favoris-section">
-            <h2 class="tit-s">Mes Bibliothèques Favorites</h2>
-            <p class="tit-s">Voici les bibliothèques que vous avez ajoutées à vos favoris.</p>
+    <main class="content-overlay">
+        <section class="results-section">
+            <h2 class="section-title">Mes Bibliothèques</h2>
 
-            <div id="favoris-container" class="loading">
-                <p class="tit-s">Chargement de vos favoris...</p>
+            <div id="favoris-container">
+                <p class="info-message">Chargement de vos favoris...</p>
             </div>
         </section>
     </main>
 
     <footer>
-        <div class="container">
+        <div class="footer-container">
             <p>&copy; 2024 Bibliothèques Île-de-France. Tous droits réservés.</p>
         </div>
     </footer>
+</div>
 
-    <script src="js/api.js"></script>
-    <script src="js/favoris.js"></script>
+<script src="js/api.js"></script>
+<script src="js/favoris.js"></script>
 </body>
 </html>

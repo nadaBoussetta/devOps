@@ -1,0 +1,257 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;500&display=swap');
+
+:root {
+    --bg-dark: #1a1a1e;
+    --bg-overlay: rgba(26, 26, 30, 0.85);
+    --text-white: #ffffff;
+    --text-gray: #a0a0a5;
+    --accent-orange: rgba(2, 71, 100, 0.65);
+    --nav-bg: rgba(40, 40, 45, 0.6);
+    --dark: #1a1a1e; /* Ajout de la variable manquante */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-white);
+    overflow-x: hidden; /* Empêche le défilement horizontal */
+}
+
+.main-wrapper {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* Background Image */
+.background-image {
+    position: fixed; /* Changé en fixed pour couvrir tout l'arrière-plan */
+    top: 0;
+    right: 0;
+    width: 70%;
+    height: 100%;
+    background-image: url('../resources/biblio.jpg'); /* Chemin corrigé relatif au dossier css/ */
+    background-size: cover;
+    background-position: center;
+    z-index: 1;
+}
+
+.background-image::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, var(--bg-dark) 0%, transparent 20%);
+}
+
+/* Sidebar / Content Area */
+.sidebar {
+    position: relative;
+    width: 35%;
+    min-height: 100vh;
+    background-color: var(--bg-dark);
+    z-index: 10;
+    padding: 120px 60px 80px; /* Augmenté le padding top pour laisser de la place au nav */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: 20px 0 50px rgba(0,0,0,0.5);
+}
+
+.big-number {
+    position: absolute;
+    top: 10%;
+    left: 40px;
+    font-size: 25rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.03);
+    line-height: 1;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.interior-label {
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    font-size: 0.8rem;
+    color: var(--text-gray);
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem; /* Réduit de 8rem à 4rem pour une meilleure lisibilité */
+    line-height: 1.1;
+    margin-bottom: 40px;
+}
+
+.description {
+    color: var(--text-gray);
+    font-size: 0.95rem;
+    line-height: 1.8;
+    max-width: 300px;
+    margin-bottom: 60px;
+}
+
+.read-more {
+    text-decoration: none;
+    color: var(--text-white);
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--text-gray);
+    padding-bottom: 5px;
+    width: fit-content;
+    transition: 0.3s;
+}
+
+.read-more:hover {
+    color: var(--accent-orange);
+    border-color: var(--accent-orange);
+}
+
+/* Navigation */
+nav {
+    position: fixed; /* Changé en fixed pour rester visible au scroll */
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 1200px;
+    background-color: var(--nav-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 30px;
+    z-index: 100;
+    border-radius: 10px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.logo {
+    font-weight: 700;
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    flex: 1;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--text-white);
+    font-size: 0.8rem;
+    opacity: 0.8;
+    transition: 0.3s;
+    padding: 8px 10px;
+    border-radius: 5px;
+    white-space: nowrap;
+}
+
+.nav-links a:hover {
+    opacity: 1;
+    background-color: rgba(230, 126, 69, 0.2);
+}
+
+.search-icon {
+    cursor: pointer;
+}
+
+/* --- CONTENT AREA --- */
+.content-overlay {
+    position: relative;
+    z-index: 5;
+    padding: 150px 5% 50px 37%;
+}
+
+h1, .section-title {
+    font-family: 'Playfair Display', serif;
+    margin-bottom: 30px;
+}
+
+h1 { font-size: 4rem; }
+.section-title { font-size: 2.5rem; }
+
+/* --- FORM & INPUTS (Mêmes propriétés partout) --- */
+.search-form-container {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    padding: 30px;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    max-width: 700px;
+    margin-bottom: 50px;
+}
+/* --- SECTION FAVORIS --- */
+
+/* On réutilise la grille pour afficher les favoris proprement */
+#favoris-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 25px;
+    margin-top: 20px;
+}
+
+/* La carte favorite (identique à library-card ou book-card) */
+.favorite-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 25px;
+    border-radius: 15px;
+    transition: 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.favorite-card:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--accent-orange);
+}
+
+.favorite-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    color: var(--text-white);
+}
+
+.favorite-card p {
+    font-size: 0.9rem;
+    color: var(--text-gray);
+    margin-bottom: 8px;
+}
+
+/* Petit badge ou bouton de suppression */
+.remove-favorite {
+    margin-top: 15px;
+    background: transparent;
+    border: 1px solid rgba(255, 0, 0, 0.3);
+    color: #ff6b6b;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.remove-favorite:hover {
+    background: rgba(255, 107, 107, 0.2);
+    border-color: #ff6b6b;
+}

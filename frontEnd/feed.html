@@ -3,25 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bibliothèques Île-de-France</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Feed Social - Bibliothèques d’Île‑de‑France</title>
+    <link rel="stylesheet" href="css/recherche.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Parisienne&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <link rel="icon" href="resources/logo_pic.png" type="image/png">
-
 </head>
 <body>
+<div class="main-wrapper">
+    <div class="background-image"></div>
 
-<div class="header">
-    <img alt="logo" id="logo_pic" src="resources/logo_pic.png" >
-    <h1 id="titre">Bibliothèques d’Île‑de‑France</h1>
-</div>
+    <aside class="sidebar">
+        <div class="big-number">04</div>
+        <div class="interior-label">Communauté</div>
+        <h1>Feed Social</h1>
+        <p class="description">
+            Partagez vos lectures, vos lieux de révision préférés et échangez avec les autres étudiants d'Île-de-France.
+        </p>
+        <a href="#" class="read-more">Règles du feed</a>
+    </aside>
 
-<div class="menu">
-    <menu>
-        <ul class="menu_1">
-            <li><a href="index.html" >Accueil</a></li>
+    <nav>
+        <div class="logo">Bibliothèques IDF</div>
+        <ul class="nav-links">
+            <li><a href="MyFeed.html">Accueil</a></li>
             <li><a href="recherche.html">Recherche</a></li>
             <li><a href="livres.html">Livres</a></li>
             <li><a href="feed.html">Feed Social</a></li>
@@ -29,45 +34,46 @@
             <li><a href="sessions.html">Sessions</a></li>
             <li><a href="notifications.html">Notifications</a></li>
             <li><a href="login.html" id="auth-link">Connexion</a></li>
-
-
         </ul>
-    </menu>
-</div>
 
-<div class="partie_1"></div>
+        <div class="search-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+        </div>
+    </nav>
 
-    <main class="container">
-        <section class="feed-section">
-            <h2 class="tit-s">Feed Social</h2>
-            <p class="tit-s">Partagez vos expériences et découvrez celles des autres utilisateurs.</p>
+    <main class="content-overlay">
+        <section class="search-section">
+            <h2 class="section-title">Quoi de neuf ?</h2>
 
-            <div class="create-post">
-                <h3 class="tit-s">Créer une publication</h3>
-                <form id="create-post-form">
-                    <div class="form-group">
-                        <textarea id="post-content" placeholder="Partagez votre expérience..." rows="4" required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Publier</button>
-                </form>
-            </div>
-
-            <div class="posts-container">
-                <h3 class="tit-s">Publications récentes</h3>
-                <div id="posts-list" class="loading">
-                    <p>Chargement des publications...</p>
+            <form id="book-search-form" class="search-form-container">
+                <div class="form-group">
+                    <label for="titre_pub"> Votre publication</label>
+                    <input type="text" id="titre_pub" placeholder="Partagez votre expérience ou une astuce de révision..." required>
                 </div>
+
+                <button type="submit" class="btn btn-primary">Publier sur le feed</button>
+            </form>
+        </section>
+
+        <section class="results-section">
+            <h3 class="section-title">Publications récentes</h3>
+            <div id="posts-list">
+                <p class="info-message">Chargement des publications...</p>
             </div>
         </section>
     </main>
 
     <footer>
-        <div class="container">
+        <div class="footer-container">
             <p>&copy; 2024 Bibliothèques Île-de-France. Tous droits réservés.</p>
         </div>
     </footer>
+</div>
 
-    <script src="js/api.js"></script>
-    <script src="js/feed.js"></script>
+<script src="js/api.js"></script>
+<script src="js/feed.js"></script>
 </body>
 </html>

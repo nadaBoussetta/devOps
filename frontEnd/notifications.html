@@ -3,28 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bibliothèques Île-de-France</title>
-
-    <link rel="stylesheet" href="css/style.css">
+    <title>Notifications - Bibliothèques d’Île‑de‑France</title>
     <link rel="stylesheet" href="css/notification.css">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Parisienne&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <link rel="icon" href="resources/logo_pic.png" type="image/png">
-
 </head>
 <body>
+<div class="main-wrapper">
+    <div class="background-image"></div>
 
-<div class="header">
-    <img alt="logo" id="logo_pic" src="resources/logo_pic.png" >
-    <h1 id="titre">Bibliothèques d’Île‑de‑France</h1>
-</div>
+    <aside class="sidebar">
+        <div class="big-number">07</div>
+        <div class="interior-label">Espace Personnel</div>
+        <h1>Notifications</h1>
+        <p class="description">
+            Restez informé de vos réservations, des retours de livres et des actualités de vos bibliothèques préférées.
+        </p>
+        <a href="MyFeed.html" class="read-more">Retour à l'accueil</a>
+    </aside>
 
-<div class="menu">
-    <menu>
-        <ul class="menu_1">
-            <li><a href="index.html" >Accueil</a></li>
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">Bibliothèques IDF</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Accueil</a></li>
             <li><a href="recherche.html">Recherche</a></li>
             <li><a href="livres.html">Livres</a></li>
             <li><a href="feed.html">Feed Social</a></li>
@@ -32,46 +35,55 @@
             <li><a href="sessions.html">Sessions</a></li>
             <li><a href="notifications.html">Notifications</a></li>
             <li><a href="login.html" id="auth-link">Connexion</a></li>
-
-
         </ul>
-    </menu>
-</div>
 
-<div class="partie_1"></div>
+        <div class="search-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+        </div>
+    </nav>
 
-    <main class="container">
+    <main class="content-overlay">
         <section class="notifications-section">
-            <h2 class="tit-s">Notifications</h2>
-            <p class="tit-s">Gérez vos notifications et restez informé des mises à jour importantes.</p>
+            <h2 class="section-title">Vos alertes</h2>
 
-            <!-- Filtres -->
-            <div class="filter-buttons">
-                <button class="filter-btn active" onclick="filterNotifications('tous')">Toutes</button>
-                <button class="filter-btn" onclick="filterNotifications('non-lues')">Non lues</button>
-                <button class="filter-btn" onclick="filterNotifications('lues')">Lues</button>
+            <div class="notif-toolbar">
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="tous">Toutes</button>
+                    <button class="filter-btn" data-filter="non-lues">Non lues</button>
+                    <button class="filter-btn" data-filter="lues">Lues</button>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-small" onclick="marquerToutesCommeLues()">Tout marquer comme lu</button>
+                    <button class="btn-small btn-outline" onclick="supprimerNotificationsLues()">Nettoyer</button>
+                </div>
             </div>
 
-            <!-- Actions -->
-            <div style="margin-bottom: 1rem;">
-                <button class="btn btn-primary" onclick="marquerToutesCommeLues()">Marquer tout comme lu</button>
-                <button class="btn btn-primary" onclick="supprimerNotificationsLues()">Supprimer les lues</button>
-            </div>
-
-            <!-- Liste des notifications -->
-            <div id="notifications-container" class="loading">
-                <p class="tit-s">Chargement de vos notifications...</p>
+            <div id="notifications-container">
+                <div class="notif-card unread">
+                    <div class="notif-icon"><i class="fa-solid fa-book-bookmark"></i></div>
+                    <div class="notif-content">
+                        <h4>Livre disponible</h4>
+                        <p>Le livre "Les Misérables" est à nouveau disponible à la bibliothèque Sainte-Geneviève.</p>
+                        <span class="notif-time">Il y a 2 heures</span>
+                    </div>
+                    <div class="notif-actions">
+                        <button class="circle-btn"><i class="fa-solid fa-check"></i></button>
+                    </div>
+                </div>
             </div>
         </section>
     </main>
 
     <footer>
-        <div class="container">
-            <p>&copy; 2024 Bibliothèques Île-de-France. Tous droits réservés.</p>
-        </div>
+        <p>&copy; 2024 Bibliothèques Île-de-France. Tous droits réservés.</p>
     </footer>
+</div>
 
-    <script src="js/api.js"></script>
-    <script src="js/notifications.js"></script>
+<script src="js/api.js"></script>
+<script src="js/notifications.js"></script>
 </body>
 </html>
