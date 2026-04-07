@@ -32,6 +32,12 @@ public class LibraryService {
     @Autowired
     private IleDeFranceLibraryApiService ileDeFranceLibraryApiService;
 
+    @Autowired
+    private HoraireParser horaireParser;
+
+    @Autowired
+    private HoraireSearchService horaireSearchService;
+
     public List<LibraryResponseDTO> rechercherBibliotheques(RechercheDTO recherche) {
 
         double[] coordonneesRecherche = geolocationService.geocodeAdresse(recherche.getAdresse());
@@ -55,6 +61,9 @@ public class LibraryService {
             dto.setSearchLongitude(lonRecherche);
             resultats.add(dto);
         }
+
+        // Appliquer le filtre par plage horaire
+        horaireSearchService.markOpenStatus(resultats, recherche.getHeureDebut(), recherche.getHeureFin());
 
         // La logique de tri peut être appliquée ici si nécessaire
         resultats.sort(Comparator
@@ -154,10 +163,12 @@ public class LibraryService {
         );
         dto.setDistance(Math.round(distance * 100.0) / 100.0);
 
-        // Gérer les horaires d'ouverture (l'API IDF fournit une chaîne de caractères)
-        // Pour l'instant, nous ne pouvons pas déterminer l'ouverture avec précision sans une logique de parsing complexe.
-        dto.setOuvert(false); // Par défaut à false
-        dto.setHoraires(new ArrayList<>()); // Pas d'horaires structurés directement disponibles
+        // Parser les horaires d'ouverture (l'API IDF fournit une chaîne de caractères non structurée)
+        List<HoraireDTO> horaires = horaireParser.parseHoraires(idfLib.getHeuresOuverture());
+        dto.setHoraires(horaires);
+
+        // Par défaut à false, sera mis à jour lors du filtrage par plage horaire
+        dto.setOuvert(false);
 
         return dto;
     }

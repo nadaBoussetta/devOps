@@ -26,6 +26,83 @@
             background-color: #f9f9f9;
             border-radius: 8px;
         }
+
+        /* Styles pour l'autocomplétion */
+        .address-input-wrapper {
+            position: relative;
+        }
+
+        .autocomplete-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            border-radius: 0 0 4px 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .autocomplete-suggestion {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.2s;
+        }
+
+        .autocomplete-suggestion:hover {
+            background-color: #f5f5f5;
+        }
+
+        .autocomplete-suggestion:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-suggestion-main {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .autocomplete-suggestion-sub {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 3px;
+        }
+
+        .geolocation-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2em;
+            color: #007bff;
+            padding: 5px 10px;
+            transition: color 0.2s;
+        }
+
+        .geolocation-btn:hover {
+            color: #0056b3;
+        }
+
+        .geolocation-btn.loading {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: translateY(-50%) rotate(0deg); }
+            to { transform: translateY(-50%) rotate(360deg); }
+        }
+
+        .form-group {
+            position: relative;
+        }
     </style>
 
 </head>
@@ -33,7 +110,7 @@
 
 <div class="header">
     <img alt="logo" id="logo_pic" src="resources/logo_pic.png" >
-    <h1 id="titre">Bibliothèques d’Île‑de‑France</h1>
+    <h1 id="titre">Bibliothèques d'Île‑de‑France</h1>
 </div>
 
 <div class="menu">
@@ -63,7 +140,11 @@
         <form id="search-form" class="search-form">
             <div class="form-group">
                 <label for="adresse">Adresse ou lieu</label>
-                <input type="text" id="adresse" placeholder="Ex: 5 Rue de la Sorbonne, Paris" required>
+                <div class="address-input-wrapper">
+                    <input type="text" id="adresse" placeholder="Ex: 5 Rue de la Sorbonne, Paris" required autocomplete="off">
+                    <button type="button" id="geolocation-btn" class="geolocation-btn" title="Utiliser ma localisation">📍</button>
+                    <div id="autocomplete-suggestions" class="autocomplete-suggestions" style="display: none;"></div>
+                </div>
                 <small>Exemples: Sorbonne, République, Tour Eiffel, Paris</small>
             </div>
 
