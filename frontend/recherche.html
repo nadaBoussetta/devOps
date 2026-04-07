@@ -103,6 +103,161 @@
         .form-group {
             position: relative;
         }
+
+        /* ===== Styles pour la recherche avancée (itinéraire) ===== */
+        .btn-advanced {
+            background: linear-gradient(135deg, #6f42c1, #4a2d8f);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-left: 0.75rem;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .btn-advanced:hover {
+            background: linear-gradient(135deg, #5a32a3, #3b2270);
+            transform: translateY(-1px);
+        }
+        .btn-advanced:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .itineraire-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #f0ebfa;
+            border-radius: 10px;
+            border-left: 5px solid #6f42c1;
+        }
+        .itineraire-section h3 {
+            color: #4a2d8f;
+            margin-bottom: 0.5rem;
+        }
+        .itineraire-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: #555;
+        }
+        .itineraire-meta span {
+            background: white;
+            padding: 0.3rem 0.75rem;
+            border-radius: 20px;
+            border: 1px solid #d0b8f5;
+        }
+        .itineraire-badge-ok {
+            background: #d4edda !important;
+            border-color: #28a745 !important;
+            color: #155724 !important;
+            font-weight: 600;
+        }
+        .itineraire-badge-partial {
+            background: #fff3cd !important;
+            border-color: #ffc107 !important;
+            color: #856404 !important;
+            font-weight: 600;
+        }
+
+        .itineraire-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+        .itineraire-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            position: relative;
+        }
+        .itineraire-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 19px;
+            top: 44px;
+            width: 2px;
+            height: calc(100% - 10px);
+            background: #c3a6f5;
+        }
+        .step-number {
+            min-width: 40px;
+            height: 40px;
+            background: #6f42c1;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            flex-shrink: 0;
+            margin-top: 0.25rem;
+            z-index: 1;
+        }
+        .step-content {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            flex: 1;
+            margin-bottom: 1.25rem;
+            box-shadow: 0 1px 4px rgba(111,66,193,0.1);
+            border: 1px solid #e0d0f8;
+        }
+        .step-content h4 {
+            margin: 0 0 0.4rem 0;
+            color: #3b2270;
+            font-size: 1rem;
+        }
+        .step-creneau {
+            display: inline-block;
+            background: #6f42c1;
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .step-details {
+            font-size: 0.88rem;
+            color: #555;
+            line-height: 1.6;
+        }
+        .step-details strong {
+            color: #333;
+        }
+        .itineraire-message {
+            margin-top: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            font-size: 0.92rem;
+        }
+        .itineraire-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .itineraire-message.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        .itineraire-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .itineraire-map-route {
+            stroke: #6f42c1;
+            stroke-width: 3;
+            stroke-dasharray: 8, 5;
+        }
     </style>
 
 </head>
@@ -164,7 +319,12 @@
                 <input type="number" id="rayon" min="0.5" max="50" step="0.5" value="5" required>
             </div>
 
-            <button type="submit" class="btn btn-primary">Rechercher</button>
+            <div class="form-actions" style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem;">
+                <button type="submit" class="btn btn-primary">Rechercher</button>
+                <button type="button" id="btn-itineraire" class="btn-advanced">
+                    &#128205; Recherche Avancée (Itinéraire Optimisé)
+                </button>
+            </div>
         </form>
     </section>
 
@@ -178,6 +338,14 @@
         <div id="results-container">
             <p class="info-message">Effectuez une recherche pour voir les résultats.</p>
         </div>
+    </section>
+
+    <!-- Section résultat de l'itinéraire optimisé (cachée par défaut) -->
+    <section id="itineraire-section" class="itineraire-section" style="display: none;">
+        <h3>&#128205; Itinéraire Optimisé</h3>
+        <div id="itineraire-meta" class="itineraire-meta"></div>
+        <div id="itineraire-steps" class="itineraire-steps"></div>
+        <div id="itineraire-message" class="itineraire-message"></div>
     </section>
 </main>
 

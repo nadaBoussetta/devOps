@@ -6,6 +6,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchForm = document.getElementById('search-form');
     searchForm.addEventListener('submit', handleSearch);
 
+    // Bouton de recherche avancée (itinéraire optimisé)
+    const btnItineraire = document.getElementById('btn-itineraire');
+    if (btnItineraire) {
+        btnItineraire.addEventListener('click', handleItineraire);
+    }
+
     // Initialiser la géolocalisation
     initializeGeolocation();
 
@@ -439,4 +445,224 @@ async function ajouterAuxFavoris(bibliothequeId) {
         console.error(err);
         alert(err.message);
     }
+}
+
+// =============================================================================
+// RECHERCHE AVANCÉE - ITÍNÉRAIRE OPTIMISÉ
+// =============================================================================
+
+/**
+ * Gestionnaire du bouton "Recherche Avancée".
+ * Déclenche le calcul de l'itinéraire optimisé sans toucher à la recherche standard.
+ */
+async function handleItineraire() {
+    const adresse = document.getElementById('adresse').value.trim();
+    const heureDebut = document.getElementById('heureDebut').value;
+    const heureFin = document.getElementById('heureFin').value;
+    const rayon = parseFloat(document.getElementById('rayon').value);
+
+    if (!adresse) {
+        alert('Veuillez saisir une adresse avant de lancer la recherche avancée.');
+        return;
+    }
+
+    const btnItineraire = document.getElementById('btn-itineraire');
+    btnItineraire.disabled = true;
+    btnItineraire.textContent = 'Calcul en cours...';
+
+    // Masquer les résultats précédents de l'itinéraire
+    const itineraireSection = document.getElementById('itineraire-section');
+    itineraireSection.style.display = 'none';
+
+    try {
+        const itineraire = await BibliothequeAPI.rechercherItineraire(adresse, heureDebut, heureFin, rayon);
+        displayItineraire(itineraire);
+    } catch (error) {
+        const itineraireSection = document.getElementById('itineraire-section');
+        itineraireSection.style.display = 'block';
+        document.getElementById('itineraire-meta').innerHTML = '';
+        document.getElementById('itineraire-steps').innerHTML = '';
+        const msgEl = document.getElementById('itineraire-message');
+        msgEl.className = 'itineraire-message error';
+        msgEl.textContent = 'Erreur lors du calcul de l\'itinéraire : ' + error.message;
+    } finally {
+        btnItineraire.disabled = false;
+        btnItineraire.innerHTML = '&#128205; Recherche Avancée (Itinéraire Optimisé)';
+    }
+}
+
+/**
+ * Affiche l'itinéraire optimisé dans la section dédiée.
+ * @param {Object} itineraire - La réponse de l'API /bibliotheques/itineraire
+ */
+function displayItineraire(itineraire) {
+    const itineraireSection = document.getElementById('itineraire-section');
+    const metaContainer = document.getElementById('itineraire-meta');
+    const stepsContainer = document.getElementById('itineraire-steps');
+    const messageEl = document.getElementById('itineraire-message');
+
+    itineraireSection.style.display = 'block';
+
+    // --- Métadonnées de l'itinéraire ---
+    const couvertBadgeClass = itineraire.creneauCompletementCouvert
+        ? 'itineraire-badge-ok'
+        : 'itineraire-badge-partial';
+    const couvertLabel = itineraire.creneauCompletementCouvert
+        ? '&#10003; Créneau complet couvert'
+        : '&#9888; Créneau partiellement couvert';
+
+    metaContainer.innerHTML = `
+        <span>&#128205; Départ : <strong>${itineraire.adresseDepart}</strong></span>
+        <span>&#128336; Créneau demandé : <strong>${itineraire.heureDebutDemandee} – ${itineraire.heureFinDemandee}</strong></span>
+        <span>&#128218; ${itineraire.etapes ? itineraire.etapes.length : 0} étape(s)</span>
+        <span>&#128663; Distance totale : <strong>${itineraire.distanceTotale || 0} km</strong></span>
+        <span class="${couvertBadgeClass}">${couvertLabel}</span>
+    `;
+
+    // --- Étapes de l'itinéraire ---
+    stepsContainer.innerHTML = '';
+
+    if (!itineraire.etapes || itineraire.etapes.length === 0) {
+        stepsContainer.innerHTML = '<p style="color:#555;">Aucune étape trouvée.</p>';
+    } else {
+        itineraire.etapes.forEach(etape => {
+            const stepEl = createItineraireStep(etape);
+            stepsContainer.appendChild(stepEl);
+        });
+
+        // Afficher l'itinéraire sur la carte
+        displayItineraireOnMap(itineraire);
+    }
+
+    // --- Message de synthèse ---
+    if (itineraire.message) {
+        messageEl.className = 'itineraire-message ' +
+            (itineraire.creneauCompletementCouvert ? 'success' : 'warning');
+        messageEl.textContent = itineraire.message;
+    } else {
+        messageEl.textContent = '';
+    }
+
+    // Faire défiler jusqu'à la section
+    itineraireSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/**
+ * Crée l'élément HTML pour une étape de l'itinéraire.
+ * @param {Object} etape - Une étape de l'itinéraire
+ * @returns {HTMLElement}
+ */
+function createItineraireStep(etape) {
+    const biblio = etape.bibliotheque;
+    const stepDiv = document.createElement('div');
+    stepDiv.className = 'itineraire-step';
+
+    const typeIcon = biblio.type === 'UNIVERSITAIRE' ? '&#127979;' : '&#128218;';
+
+    stepDiv.innerHTML = `
+        <div class="step-number">${etape.ordre}</div>
+        <div class="step-content">
+            <h4>${typeIcon} ${biblio.nom}</h4>
+            <span class="step-creneau">&#128336; ${etape.creneauDebut} – ${etape.creneauFin}</span>
+            <div class="step-details">
+                <p><strong>&#128205; Adresse :</strong> ${biblio.adresse}</p>
+                <p><strong>&#128663; Distance depuis étape précédente :</strong> ${etape.distanceDepuisPrecedent} km</p>
+                <p><strong>&#128663; Distance cumulée :</strong> ${etape.distanceCumulee} km</p>
+                <details>
+                    <summary style="cursor:pointer;font-weight:600;margin-top:0.5rem;">&#128336; Voir les horaires complets</summary>
+                    <div style="margin-top:0.4rem;">${formatHorairesDetailles(biblio.horaires)}</div>
+                </details>
+            </div>
+        </div>
+    `;
+
+    return stepDiv;
+}
+
+/**
+ * Affiche l'itinéraire sur la carte Leaflet avec des marqueurs numérotés
+ * et une ligne en pointillé reliant les étapes.
+ * @param {Object} itineraire - La réponse complète de l'itinéraire
+ */
+function displayItineraireOnMap(itineraire) {
+    // Afficher la section carte
+    document.getElementById('map-section').style.display = 'block';
+    clearMarkers();
+
+    const points = [];
+
+    // Marqueur de départ (rouge)
+    if (itineraire.latitudeDepart && itineraire.longitudeDepart) {
+        const departMarker = L.marker(
+            [itineraire.latitudeDepart, itineraire.longitudeDepart],
+            {
+                icon: L.icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                })
+            }
+        ).addTo(map);
+        departMarker.bindPopup(`<b>&#128205; Départ</b><br/>${itineraire.adresseDepart}`);
+        markers.push(departMarker);
+        points.push([itineraire.latitudeDepart, itineraire.longitudeDepart]);
+    }
+
+    // Marqueurs numérotés pour chaque étape (violet)
+    const couleurs = [
+        'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png',
+        'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+        'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+        'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
+        'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-yellow.png'
+    ];
+
+    itineraire.etapes.forEach((etape, index) => {
+        const biblio = etape.bibliotheque;
+        if (!biblio.latitude || !biblio.longitude) return;
+
+        const couleurUrl = couleurs[index % couleurs.length];
+        const marker = L.marker([biblio.latitude, biblio.longitude], {
+            icon: L.icon({
+                iconUrl: couleurUrl,
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            })
+        }).addTo(map);
+
+        marker.bindPopup(`
+            <b>Étape ${etape.ordre} : ${biblio.nom}</b><br/>
+            ${biblio.adresse}<br/>
+            <strong>Créneau :</strong> ${etape.creneauDebut} – ${etape.creneauFin}<br/>
+            <strong>Distance cumulée :</strong> ${etape.distanceCumulee} km
+        `);
+        markers.push(marker);
+        points.push([biblio.latitude, biblio.longitude]);
+    });
+
+    // Tracer la ligne de trajet en pointillés
+    if (points.length > 1) {
+        const polyline = L.polyline(points, {
+            color: '#6f42c1',
+            weight: 3,
+            dashArray: '8, 6',
+            opacity: 0.8
+        }).addTo(map);
+        markers.push(polyline);
+    }
+
+    // Ajuster le zoom pour voir tout l'itinéraire
+    setTimeout(() => {
+        if (markers.length > 0) {
+            const group = new L.featureGroup(markers);
+            map.fitBounds(group.getBounds(), { padding: [50, 50], maxZoom: 15 });
+        }
+        map.invalidateSize();
+    }, 300);
 }
