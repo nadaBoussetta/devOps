@@ -18,16 +18,6 @@ import java.util.List;
 
 /**
  * Service implémentant l'algorithme d'optimisation d'itinéraire entre bibliothèques.
- *
- * <p>L'algorithme fonctionne de manière greedy (gloutonne) :
- * à chaque étape, il sélectionne parmi les bibliothèques candidates celle qui :
- * <ol>
- *   <li>Ouvre au plus tôt à l'heure courante (ou avant)</li>
- *   <li>Est la plus proche du point courant (adresse de départ ou dernière bibliothèque)</li>
- *   <li>Couvre le maximum de temps restant</li>
- * </ol>
- * Le processus se répète jusqu'à couvrir l'intégralité du créneau demandé
- * ou jusqu'à épuisement des bibliothèques disponibles.
  */
 @Service
 public class ItineraireOptimisationService {
@@ -44,13 +34,8 @@ public class ItineraireOptimisationService {
     @Autowired
     private HoraireParser horaireParser;
 
-    /**
-     * Calcule l'itinéraire optimisé pour couvrir le créneau horaire demandé.
-     *
-     * @param recherche DTO contenant l'adresse, les heures et le rayon de recherche
-     * @return l'itinéraire optimisé avec la séquence de bibliothèques
-     */
     public ItineraireResponseDTO calculerItineraire(RechercheDTO recherche) {
+
         // 1. Géocoder l'adresse de départ
         double[] coordonnees = geolocationService.geocodeAdresse(recherche.getAdresse());
 
@@ -79,28 +64,17 @@ public class ItineraireOptimisationService {
         // 3. Convertir en LibraryResponseDTO avec horaires parsés
         List<LibraryResponseDTO> candidats = new ArrayList<>();
         for (IleDeFranceLibraryDTO idfLib : idfLibraries) {
-            LibraryResponseDTO dto = convertIleDeFranceToDTO(idfLib, latDepart, lonDepart);
-            candidats.add(dto);
+            candidats.add(convertIleDeFranceToDTO(idfLib, latDepart, lonDepart));
         }
 
-        // 4. Déterminer le jour de la semaine actuel
+        // 4. Jour actuel
         String jourActuel = getJourActuel();
 
         // 5. Parser les heures demandées
-        LocalTime heureDebutDemandee;
-        LocalTime heureFinDemandee;
-        try {
-            heureDebutDemandee = LocalTime.parse(recherche.getHeureDebut(), TIME_FORMATTER);
-            heureFinDemandee = LocalTime.parse(recherche.getHeureFin(), TIME_FORMATTER);
-        } catch (Exception e) {
-            response.setEtapes(new ArrayList<>());
-            response.setDistanceTotale(0.0);
-            response.setCreneauCompletementCouvert(false);
-            response.setMessage("Format d'heure invalide. Utilisez le format HH:mm.");
-            return response;
-        }
+        LocalTime heureDebutDemandee = LocalTime.parse(recherche.getHeureDebut(), TIME_FORMATTER);
+        LocalTime heureFinDemandee = LocalTime.parse(recherche.getHeureFin(), TIME_FORMATTER);
 
-        // 6. Lancer l'algorithme d'optimisation
+        // 6. Initialisation de l'itinéraire
         List<ItineraireEtapeDTO> etapes = new ArrayList<>();
         LocalTime heureCourante = heureDebutDemandee;
         double latCourante = latDepart;
@@ -108,16 +82,28 @@ public class ItineraireOptimisationService {
         double distanceCumulee = 0.0;
         List<Long> bibliothequesDejaSelectionnees = new ArrayList<>();
 
+        boolean debutCouvert = false;
+
         while (heureCourante.isBefore(heureFinDemandee)) {
-            // Trouver la meilleure bibliothèque pour le créneau restant
+
             MeilleurCandidat meilleur = trouverMeilleurCandidat(
                     candidats, jourActuel, heureCourante, heureFinDemandee,
                     latCourante, lonCourante, bibliothequesDejaSelectionnees);
 
             if (meilleur == null) {
-                // Aucune bibliothèque disponible pour couvrir le reste du créneau
-                break;
+                // Aucune bibliothèque ouverte à l'heureCourante
+                LocalTime prochainDebut = trouverProchainCreneauDisponible(candidats, jourActuel, heureCourante);
+                if (prochainDebut == null) break; // pas de bibliothèques restantes
+                if (!debutCouvert) {
+                    // Marquer le début réel couvert après attente
+                    heureCourante = prochainDebut;
+                } else {
+                    break; // fin partielle
+                }
+                continue;
             }
+
+            debutCouvert = true;
 
             // Calculer la distance depuis le point courant
             double distanceEtape = DistanceCalculator.calculateDistance(
@@ -138,14 +124,13 @@ public class ItineraireOptimisationService {
 
             etapes.add(etape);
 
-            // Mettre à jour la position courante et l'heure couverte
+            // Mise à jour
             latCourante = meilleur.bibliotheque.getLatitude();
             lonCourante = meilleur.bibliotheque.getLongitude();
             heureCourante = meilleur.heureFermeture;
             bibliothequesDejaSelectionnees.add(meilleur.bibliotheque.getId());
         }
 
-        // 7. Construire la réponse
         response.setEtapes(etapes);
         response.setDistanceTotale(distanceCumulee);
 
@@ -165,33 +150,23 @@ public class ItineraireOptimisationService {
             boolean couvertCompletement = !finCouverte.isBefore(heureFinDemandee);
             response.setCreneauCompletementCouvert(couvertCompletement);
 
-            if (couvertCompletement) {
-                response.setMessage("Itinéraire optimal trouvé ! Le créneau " +
-                        recherche.getHeureDebut() + " - " + recherche.getHeureFin() +
+            if (couvertCompletement && heureDebutCouverte.equals(recherche.getHeureDebut())) {
+                response.setMessage("Itinéraire optimal trouvé ! Le créneau "
+                        + recherche.getHeureDebut() + " - " + recherche.getHeureFin() +
                         " est entièrement couvert en " + etapes.size() + " étape(s).");
             } else {
                 response.setMessage("Itinéraire partiel : le créneau est couvert de " +
                         heureDebutCouverte + " à " + heureFinCouverte +
-                        ". Aucune bibliothèque disponible pour couvrir la fin du créneau jusqu'à " +
-                        recherche.getHeureFin() + ". Essayez d'augmenter le rayon de recherche.");
+                        ". Aucune bibliothèque disponible pour couvrir la totalité du créneau demandé. "
+                        + "Essayez d'augmenter le rayon de recherche.");
             }
         }
 
         return response;
     }
 
-    /**
-     * Trouve le meilleur candidat parmi les bibliothèques disponibles pour couvrir
-     * le prochain sous-créneau horaire à partir de l'heure courante.
-     *
-     * <p>Stratégie de sélection :
-     * <ol>
-     *   <li>La bibliothèque doit être ouverte à l'heure courante (ouverture <= heureCourante)</li>
-     *   <li>Parmi les candidates valides, on privilégie celle qui ferme le plus tard
-     *       (maximise la couverture horaire)</li>
-     *   <li>En cas d'égalité sur la fermeture, on choisit la plus proche</li>
-     * </ol>
-     */
+    // --- Méthodes auxiliaires ---
+
     private MeilleurCandidat trouverMeilleurCandidat(
             List<LibraryResponseDTO> candidats,
             String jour,
@@ -204,81 +179,52 @@ public class ItineraireOptimisationService {
         MeilleurCandidat meilleur = null;
 
         for (LibraryResponseDTO biblio : candidats) {
-            // Ignorer les bibliothèques déjà sélectionnées
-            if (dejaSelectionnees.contains(biblio.getId())) {
-                continue;
-            }
+            if (dejaSelectionnees.contains(biblio.getId()) || biblio.getHoraires() == null) continue;
 
-            if (biblio.getHoraires() == null || biblio.getHoraires().isEmpty()) {
-                continue;
-            }
-
-            // Chercher l'horaire du jour concerné
             for (HoraireDTO horaire : biblio.getHoraires()) {
-                if (!jour.equalsIgnoreCase(horaire.getJourSemaine())) {
-                    continue;
-                }
+                if (!jour.equalsIgnoreCase(horaire.getJourSemaine())) continue;
 
-                LocalTime ouverture;
-                LocalTime fermeture;
-                try {
-                    ouverture = LocalTime.parse(horaire.getHeureOuverture(), TIME_FORMATTER);
-                    fermeture = LocalTime.parse(horaire.getHeureFermeture(), TIME_FORMATTER);
-                } catch (Exception e) {
-                    continue;
-                }
+                LocalTime ouverture = LocalTime.parse(horaire.getHeureOuverture(), TIME_FORMATTER);
+                LocalTime fermeture = LocalTime.parse(horaire.getHeureFermeture(), TIME_FORMATTER);
 
-                // La bibliothèque doit être ouverte à l'heure courante
-                // (ouverture <= heureCourante ET fermeture > heureCourante)
-                if (ouverture.isAfter(heureCourante)) {
-                    // La bibliothèque n'est pas encore ouverte à l'heure courante
-                    continue;
-                }
-                if (!fermeture.isAfter(heureCourante)) {
-                    // La bibliothèque est déjà fermée
-                    continue;
-                }
+                if (fermeture.isBefore(heureCourante) || ouverture.isAfter(heureFinDemandee)) continue;
 
-                // Calculer la distance depuis le point courant
+                if (ouverture.isAfter(heureCourante)) continue;
+
                 double distance = DistanceCalculator.calculateDistance(
-                        latCourante, lonCourante,
-                        biblio.getLatitude(), biblio.getLongitude());
+                        latCourante, lonCourante, biblio.getLatitude(), biblio.getLongitude());
 
                 MeilleurCandidat candidat = new MeilleurCandidat(biblio, fermeture, distance);
 
-                // Sélectionner le meilleur candidat :
-                // 1. Priorité à celui qui ferme le plus tard (couvre le plus de temps)
-                // 2. En cas d'égalité, priorité au plus proche
-                if (meilleur == null) {
+                if (meilleur == null || fermeture.isAfter(meilleur.heureFermeture)
+                        || (fermeture.equals(meilleur.heureFermeture) && distance < meilleur.distance)) {
                     meilleur = candidat;
-                } else {
-                    int comparaisonFermeture = fermeture.compareTo(meilleur.heureFermeture);
-                    if (comparaisonFermeture > 0) {
-                        // Ferme plus tard → meilleure couverture
-                        meilleur = candidat;
-                    } else if (comparaisonFermeture == 0 && distance < meilleur.distance) {
-                        // Même fermeture → choisir le plus proche
-                        meilleur = candidat;
-                    }
                 }
             }
         }
-
         return meilleur;
     }
 
-    /**
-     * Retourne le jour de la semaine actuel au format LUNDI, MARDI, etc.
-     */
+    private LocalTime trouverProchainCreneauDisponible(List<LibraryResponseDTO> candidats, String jour, LocalTime heureCourante) {
+        LocalTime prochain = null;
+        for (LibraryResponseDTO biblio : candidats) {
+            if (biblio.getHoraires() == null) continue;
+            for (HoraireDTO horaire : biblio.getHoraires()) {
+                if (!jour.equalsIgnoreCase(horaire.getJourSemaine())) continue;
+                LocalTime ouverture = LocalTime.parse(horaire.getHeureOuverture(), TIME_FORMATTER);
+                if (ouverture.isAfter(heureCourante)) {
+                    if (prochain == null || ouverture.isBefore(prochain)) prochain = ouverture;
+                }
+            }
+        }
+        return prochain;
+    }
+
     private String getJourActuel() {
         int dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
-        // Calendar.DAY_OF_WEEK: 1 = DIMANCHE, 2 = LUNDI, ..., 7 = SAMEDI
         return JOURS_SEMAINE[(dayOfWeek + 5) % 7];
     }
 
-    /**
-     * Convertit un DTO IleDeFrance en LibraryResponseDTO avec horaires parsés.
-     */
     private LibraryResponseDTO convertIleDeFranceToDTO(IleDeFranceLibraryDTO idfLib, double latRef, double lonRef) {
         LibraryResponseDTO dto = new LibraryResponseDTO();
         dto.setId(Math.abs((long) idfLib.getNomEtablissement().hashCode() * 31
@@ -291,26 +237,18 @@ public class ItineraireOptimisationService {
         dto.setNombreNotations(0);
         dto.setSearchLatitude(latRef);
         dto.setSearchLongitude(lonRef);
-
         double distance = DistanceCalculator.calculateDistance(
-                latRef, lonRef,
-                idfLib.getGeo().getLat(), idfLib.getGeo().getLon());
+                latRef, lonRef, idfLib.getGeo().getLat(), idfLib.getGeo().getLon());
         dto.setDistance(Math.round(distance * 100.0) / 100.0);
-
         dto.setHoraires(horaireParser.parseHoraires(idfLib.getHeuresOuverture()));
         dto.setOuvert(false);
-
         return dto;
     }
 
-    /**
-     * Classe interne représentant un candidat optimal lors de la sélection.
-     */
     private static class MeilleurCandidat {
         final LibraryResponseDTO bibliotheque;
         final LocalTime heureFermeture;
         final double distance;
-
         MeilleurCandidat(LibraryResponseDTO bibliotheque, LocalTime heureFermeture, double distance) {
             this.bibliotheque = bibliotheque;
             this.heureFermeture = heureFermeture;
