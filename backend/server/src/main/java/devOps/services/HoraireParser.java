@@ -30,24 +30,18 @@ public class HoraireParser {
     }
 
     private static final String[] JOURS_SEMAINE = {"LUNDI", "MARDI", "MERCREDI", "JEUDI", "VENDREDI", "SAMEDI", "DIMANCHE"};
-    private static final int[] JOURS_INDEX = {0, 1, 2, 3, 4, 5, 6};
 
     /**
      * Parse une chaîne d'horaires non structurée et retourne une liste de HoraireDTO structurés par jour.
-     * 
-     * Exemples de formats supportés :
-     * - "du lundi au vendredi de 14h à 17h30, le samedi de 14h à 19h"
-     * - "lundi-vendredi 14h-17h30, samedi 14h-19h"
-     * - "lundi 09:00-12:00 et 14:00-18:00"
      * 
      * @param heuresOuverture texte brut des horaires
      * @return liste de HoraireDTO structurés
      */
     public List<HoraireDTO> parseHoraires(String heuresOuverture) {
-        Map<String, HoraireDTO> horaireMap = new LinkedHashMap<>();
+        List<HoraireDTO> resultat = new ArrayList<>();
         
         if (heuresOuverture == null || heuresOuverture.trim().isEmpty()) {
-            return new ArrayList<>();
+            return resultat;
         }
 
         String texte = heuresOuverture.toLowerCase().trim();
@@ -57,23 +51,19 @@ public class HoraireParser {
         texte = texte.replaceAll("à", "à");
         texte = texte.replaceAll("-", "à");
 
-        // Diviser par les séparateurs principaux (virgule, point-virgule, "et")
-        String[] segments = texte.split("[,;]|\\s+et\\s+");
+        // Diviser par les séparateurs principaux (virgule, point-virgule)
+        // On ne divise plus par "et" car il peut séparer des créneaux
+        String[] segments = texte.split("[,;]");
 
         for (String segment : segments) {
             segment = segment.trim();
             if (segment.isEmpty()) continue;
 
-            parseSegment(segment, horaireMap);
+            parseSegment(segment, resultat);
         }
 
-        // Convertir la map en liste triée
-        List<HoraireDTO> resultat = new ArrayList<>();
-        for (String jour : JOURS_SEMAINE) {
-            if (horaireMap.containsKey(jour)) {
-                resultat.add(horaireMap.get(jour));
-            }
-        }
+        // Trier le résultat par jour de la semaine
+        resultat.sort(Comparator.comparingInt(h -> Arrays.asList(JOURS_SEMAINE).indexOf(h.getJourSemaine())));
 
         return resultat;
     }
@@ -81,64 +71,41 @@ public class HoraireParser {
     /**
      * Parse un segment d'horaire (ex: "du lundi au vendredi de 14h à 17h30")
      */
-    private void parseSegment(String segment, Map<String, HoraireDTO> horaireMap) {
-        // Extraire les jours et les heures
-        Pattern pattern = Pattern.compile(
-            "(?:du\\s+)?([a-z]+)(?:\\s+au\\s+([a-z]+)|(?:\\s*[à-]\\s*)?([a-z]+))?.*?(?:de\\s+)?([0-9]{1,2})h(?::?([0-9]{2}))?\\s*(?:à|-)\\s*([0-9]{1,2})h(?::?([0-9]{2}))?",
-            Pattern.CASE_INSENSITIVE
-        );
-
-        Matcher matcher = pattern.matcher(segment);
-
-        if (matcher.find()) {
-            String jourDebut = matcher.group(1);
-            String jourFin = matcher.group(2) != null ? matcher.group(2) : matcher.group(3);
+    private void parseSegment(String segment, List<HoraireDTO> resultat) {
+        // 1. Extraire les jours
+        Pattern jourPattern = Pattern.compile("(?:du\\s+)?([a-z]+)(?:\\s+au\\s+([a-z]+)|(?:\\s*[à-]\\s*)?([a-z]+))?", Pattern.CASE_INSENSITIVE);
+        Matcher jourMatcher = jourPattern.matcher(segment);
+        
+        if (jourMatcher.find()) {
+            String jourDebutStr = jourMatcher.group(1);
+            String jourFinStr = jourMatcher.group(2) != null ? jourMatcher.group(2) : jourMatcher.group(3);
             
-            int heureDebut = Integer.parseInt(matcher.group(4));
-            int minuteDebut = matcher.group(5) != null ? Integer.parseInt(matcher.group(5)) : 0;
+            String jdDebut = JOUR_MAPPING.get(jourDebutStr);
+            String jdFin = jourFinStr != null ? JOUR_MAPPING.get(jourFinStr) : jdDebut;
             
-            int heureFin = Integer.parseInt(matcher.group(6));
-            int minuteFin = matcher.group(7) != null ? Integer.parseInt(matcher.group(7)) : 0;
-
-            LocalTime timeDebut = LocalTime.of(heureDebut, minuteDebut);
-            LocalTime timeFin = LocalTime.of(heureFin, minuteFin);
-
-            String jdDebut = JOUR_MAPPING.get(jourDebut);
-            String jdFin = jourFin != null ? JOUR_MAPPING.get(jourFin) : jdDebut;
-
-            if (jdDebut != null && jdFin != null) {
-                // Ajouter les horaires pour tous les jours de la plage
-                List<String> jours = getJoursBetween(jdDebut, jdFin);
-                for (String jour : jours) {
-                    HoraireDTO horaire = new HoraireDTO();
-                    horaire.setJourSemaine(jour);
-                    horaire.setHeureOuverture(timeDebut.format(TIME_FORMATTER));
-                    horaire.setHeureFermeture(timeFin.format(TIME_FORMATTER));
-                    horaireMap.put(jour, horaire);
-                }
-            }
-        } else {
-            // Essayer un format plus simple : "lundi 14h-17h30"
-            Pattern simplePattern = Pattern.compile(
-                "([a-z]+)\\s+([0-9]{1,2})h(?::?([0-9]{2}))?\\s*(?:à|-)\\s*([0-9]{1,2})h(?::?([0-9]{2}))?",
-                Pattern.CASE_INSENSITIVE
-            );
-            
-            Matcher simpleMatcher = simplePattern.matcher(segment);
-            if (simpleMatcher.find()) {
-                String jour = simpleMatcher.group(1);
-                int heureDebut = Integer.parseInt(simpleMatcher.group(2));
-                int minuteDebut = simpleMatcher.group(3) != null ? Integer.parseInt(simpleMatcher.group(3)) : 0;
-                int heureFin = Integer.parseInt(simpleMatcher.group(4));
-                int minuteFin = simpleMatcher.group(5) != null ? Integer.parseInt(simpleMatcher.group(5)) : 0;
-
-                String jd = JOUR_MAPPING.get(jour);
-                if (jd != null) {
-                    HoraireDTO horaire = new HoraireDTO();
-                    horaire.setJourSemaine(jd);
-                    horaire.setHeureOuverture(LocalTime.of(heureDebut, minuteDebut).format(TIME_FORMATTER));
-                    horaire.setHeureFermeture(LocalTime.of(heureFin, minuteFin).format(TIME_FORMATTER));
-                    horaireMap.put(jd, horaire);
+            if (jdDebut != null) {
+                List<String> jours = getJoursBetween(jdDebut, jdFin != null ? jdFin : jdDebut);
+                
+                // 2. Extraire tous les créneaux horaires dans ce segment
+                Pattern heurePattern = Pattern.compile("([0-9]{1,2})h(?::?([0-9]{2}))?\\s*(?:à|-)\\s*([0-9]{1,2})h(?::?([0-9]{2}))?", Pattern.CASE_INSENSITIVE);
+                Matcher heureMatcher = heurePattern.matcher(segment);
+                
+                while (heureMatcher.find()) {
+                    int hDebut = Integer.parseInt(heureMatcher.group(1));
+                    int mDebut = heureMatcher.group(2) != null ? Integer.parseInt(heureMatcher.group(2)) : 0;
+                    int hFin = Integer.parseInt(heureMatcher.group(3));
+                    int mFin = heureMatcher.group(4) != null ? Integer.parseInt(heureMatcher.group(4)) : 0;
+                    
+                    LocalTime timeDebut = LocalTime.of(hDebut, mDebut);
+                    LocalTime timeFin = LocalTime.of(hFin, mFin);
+                    
+                    for (String jour : jours) {
+                        HoraireDTO horaire = new HoraireDTO();
+                        horaire.setJourSemaine(jour);
+                        horaire.setHeureOuverture(timeDebut.format(TIME_FORMATTER));
+                        horaire.setHeureFermeture(timeFin.format(TIME_FORMATTER));
+                        resultat.add(horaire);
+                    }
                 }
             }
         }
@@ -161,7 +128,6 @@ public class HoraireParser {
                 resultat.add(JOURS_SEMAINE[i]);
             }
         } else {
-            // Cas où on passe par la fin de semaine
             for (int i = indexDebut; i < JOURS_SEMAINE.length; i++) {
                 resultat.add(JOURS_SEMAINE[i]);
             }
@@ -186,21 +152,13 @@ public class HoraireParser {
                 LocalTime ouverture = LocalTime.parse(horaire.getHeureOuverture(), TIME_FORMATTER);
                 LocalTime fermeture = LocalTime.parse(horaire.getHeureFermeture(), TIME_FORMATTER);
 
-                // Vérifier si la plage demandée est couverte par les horaires
-                return !ouverture.isAfter(heureDebut) && !fermeture.isBefore(heureFin);
+                // Si la plage demandée est incluse dans l'un des créneaux, elle est ouverte
+                if (!ouverture.isAfter(heureDebut) && !fermeture.isBefore(heureFin)) {
+                    return true;
+                }
             }
         }
 
         return false;
-    }
-
-    /**
-     * Détermine si une bibliothèque est actuellement ouverte.
-     */
-    public boolean isCurrentlyOpen(List<HoraireDTO> horaires) {
-        LocalTime now = LocalTime.now();
-        String jourAujourdhui = JOURS_SEMAINE[Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1];
-
-        return isOpenDuring(horaires, now, now, jourAujourdhui);
     }
 }

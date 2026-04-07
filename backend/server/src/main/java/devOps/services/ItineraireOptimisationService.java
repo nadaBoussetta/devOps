@@ -1,11 +1,6 @@
 package devOps.services;
 
-import devOps.dtos.HoraireDTO;
-import devOps.dtos.IleDeFranceLibraryDTO;
-import devOps.dtos.ItineraireEtapeDTO;
-import devOps.dtos.ItineraireResponseDTO;
-import devOps.dtos.LibraryResponseDTO;
-import devOps.dtos.RechercheDTO;
+import devOps.dtos.*;
 import devOps.util.DistanceCalculator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -93,12 +88,15 @@ public class ItineraireOptimisationService {
             if (meilleur == null) {
                 // Aucune bibliothèque ouverte à l'heureCourante
                 LocalTime prochainDebut = trouverProchainCreneauDisponible(candidats, jourActuel, heureCourante);
-                if (prochainDebut == null) break; // pas de bibliothèques restantes
+                if (prochainDebut == null || !prochainDebut.isBefore(heureFinDemandee)) break; // pas de bibliothèques restantes ou après la fin demandée
+                
                 if (!debutCouvert) {
                     // Marquer le début réel couvert après attente
                     heureCourante = prochainDebut;
                 } else {
-                    break; // fin partielle
+                    // On pourrait attendre, mais pour l'instant on s'arrête si on a un trou dans l'itinéraire
+                    // ou on saute le trou
+                    heureCourante = prochainDebut;
                 }
                 continue;
             }
@@ -118,7 +116,10 @@ public class ItineraireOptimisationService {
             etape.setOrdre(etapes.size() + 1);
             etape.setBibliotheque(meilleur.bibliotheque);
             etape.setCreneauDebut(heureCourante.format(TIME_FORMATTER));
-            etape.setCreneauFin(meilleur.heureFermeture.format(TIME_FORMATTER));
+            
+            // La fin de l'étape est soit la fermeture de la bibliothèque, soit la fin demandée
+            LocalTime finEtape = meilleur.heureFermeture.isAfter(heureFinDemandee) ? heureFinDemandee : meilleur.heureFermeture;
+            etape.setCreneauFin(finEtape.format(TIME_FORMATTER));
             etape.setDistanceDepuisPrecedent(distanceEtape);
             etape.setDistanceCumulee(distanceCumulee);
 
@@ -127,7 +128,7 @@ public class ItineraireOptimisationService {
             // Mise à jour
             latCourante = meilleur.bibliotheque.getLatitude();
             lonCourante = meilleur.bibliotheque.getLongitude();
-            heureCourante = meilleur.heureFermeture;
+            heureCourante = finEtape;
             bibliothequesDejaSelectionnees.add(meilleur.bibliotheque.getId());
         }
 
@@ -147,10 +148,10 @@ public class ItineraireOptimisationService {
             response.setHeureFinCouverte(heureFinCouverte);
 
             LocalTime finCouverte = LocalTime.parse(heureFinCouverte, TIME_FORMATTER);
-            boolean couvertCompletement = !finCouverte.isBefore(heureFinDemandee);
+            boolean couvertCompletement = !finCouverte.isBefore(heureFinDemandee) && heureDebutCouverte.equals(recherche.getHeureDebut());
             response.setCreneauCompletementCouvert(couvertCompletement);
 
-            if (couvertCompletement && heureDebutCouverte.equals(recherche.getHeureDebut())) {
+            if (couvertCompletement) {
                 response.setMessage("Itinéraire optimal trouvé ! Le créneau "
                         + recherche.getHeureDebut() + " - " + recherche.getHeureFin() +
                         " est entièrement couvert en " + etapes.size() + " étape(s).");
@@ -187,18 +188,20 @@ public class ItineraireOptimisationService {
                 LocalTime ouverture = LocalTime.parse(horaire.getHeureOuverture(), TIME_FORMATTER);
                 LocalTime fermeture = LocalTime.parse(horaire.getHeureFermeture(), TIME_FORMATTER);
 
-                if (fermeture.isBefore(heureCourante) || ouverture.isAfter(heureFinDemandee)) continue;
+                // Si le créneau finit avant l'heure courante ou commence après la fin demandée, on ignore
+                if (fermeture.isBefore(heureCourante) || !fermeture.isAfter(heureCourante) || ouverture.isAfter(heureFinDemandee)) continue;
 
+                // Si la bibliothèque n'est pas encore ouverte à l'heure courante, on ignore (on gère l'attente ailleurs)
                 if (ouverture.isAfter(heureCourante)) continue;
 
                 double distance = DistanceCalculator.calculateDistance(
                         latCourante, lonCourante, biblio.getLatitude(), biblio.getLongitude());
 
-                MeilleurCandidat candidat = new MeilleurCandidat(biblio, fermeture, distance);
-
+                // Stratégie : on prend celle qui ferme le plus tard pour couvrir le plus de temps possible
+                // En cas d'égalité, on prend la plus proche
                 if (meilleur == null || fermeture.isAfter(meilleur.heureFermeture)
                         || (fermeture.equals(meilleur.heureFermeture) && distance < meilleur.distance)) {
-                    meilleur = candidat;
+                    meilleur = new MeilleurCandidat(biblio, fermeture, distance);
                 }
             }
         }
