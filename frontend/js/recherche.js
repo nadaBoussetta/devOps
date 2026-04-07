@@ -236,6 +236,13 @@ function clearMarkers() {
 async function handleSearch(e) {
     e.preventDefault();
 
+    const itineraireSection = document.getElementById('itineraire-section');
+    itineraireSection.style.display = 'none';
+
+    document.getElementById('itineraire-meta').innerHTML = '';
+    document.getElementById('itineraire-steps').innerHTML = '';
+    document.getElementById('itineraire-message').innerHTML = '';
+
     const adresse = document.getElementById('adresse').value;
     const heureDebut = document.getElementById('heureDebut').value;
     const heureFin = document.getElementById('heureFin').value;
@@ -456,6 +463,12 @@ async function ajouterAuxFavoris(bibliothequeId) {
  * Déclenche le calcul de l'itinéraire optimisé sans toucher à la recherche standard.
  */
 async function handleItineraire() {
+
+    const resultsContainer = document.getElementById('results-container');
+    resultsContainer.innerHTML = '';
+
+    document.getElementById('map-section').style.display = 'none';
+
     const adresse = document.getElementById('adresse').value.trim();
     const heureDebut = document.getElementById('heureDebut').value;
     const heureFin = document.getElementById('heureFin').value;
