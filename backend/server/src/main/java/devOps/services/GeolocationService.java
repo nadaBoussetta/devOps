@@ -5,6 +5,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 @Service
 public class GeolocationService {
 
@@ -24,22 +27,57 @@ public class GeolocationService {
             return null;
         }
 
-        // 1️⃣ tentative normale
-        double[] result = callApi(adresse);
+        // 🔥 1️⃣ normalisation intelligente
+        String normalized = normalizeAddress(adresse);
+
+        // 2️⃣ tentative normale (optimisée)
+        double[] result = callApi(normalized);
         if (result != null) return result;
 
-        // 2️⃣ fallback : simplification (adresse + ville)
-        String simplified = simplifyAddress(adresse);
+        // 3️⃣ fallback : simplification (sans numéro)
+        String simplified = simplifyAddress(normalized);
         result = callApi(simplified);
         if (result != null) return result;
 
-        // 3️⃣ dernier fallback : ville seule
-        String city = extractCity(adresse);
+        // 4️⃣ fallback final : ville seule
+        String city = extractCity(normalized);
         return callApi(city);
     }
 
     /**
-     * APPEL API PRINCIPAL
+     * NORMALISATION INTELLIGENTE
+     * 👉 remet la ville en premier
+     */
+    private String normalizeAddress(String adresse) {
+
+        adresse = adresse.trim().replaceAll("\\s+", " ");
+
+        // détecter code postal
+        Pattern cpPattern = Pattern.compile("\\b\\d{5}\\b");
+        Matcher matcher = cpPattern.matcher(adresse);
+
+        String codePostal = "";
+        if (matcher.find()) {
+            codePostal = matcher.group();
+            adresse = adresse.replace(codePostal, "").trim();
+        }
+
+        // détecter ville (dernier mot souvent)
+        String[] parts = adresse.split(" ");
+        if (parts.length > 1) {
+            String ville = parts[parts.length - 1];
+
+            // reconstruire : ville + reste
+            String reste = adresse.substring(0, adresse.lastIndexOf(ville)).trim();
+
+            return ville + " " + reste + (codePostal.isEmpty() ? "" : " " + codePostal);
+        }
+
+        return adresse;
+    }
+
+    /**
+     * APPEL API
      */
     private double[] callApi(String query) {
 
@@ -47,7 +85,8 @@ public class GeolocationService {
             UriComponentsBuilder builder = UriComponentsBuilder
                     .fromHttpUrl(API_URL)
                     .queryParam("q", query)
-                    .queryParam("limit", 5);
+                    .queryParam("limit", 5)
+                    .queryParam("autocomplete", 1); // 🔥 améliore pertinence
 
             JsonNode response = restTemplate.getForObject(builder.toUriString(), JsonNode.class);
 
@@ -94,25 +133,30 @@ public class GeolocationService {
     }
 
     /**
-     * SUPPRESSION DU NUMÉRO POUR AMÉLIORER MATCHING
+     * SIMPLIFICATION
      */
     private String simplifyAddress(String adresse) {
         return adresse
-                .replaceAll("\\d+", "")     // enlève numéro
-                .replaceAll("\\s+", " ")    // clean espaces
+                .replaceAll("\\d+", "")
+                .replaceAll("\\s+", " ")
                 .trim();
     }
 
     /**
-     * EXTRAIRE VILLE EN DERNIER RECOURS
+     * EXTRAIRE VILLE
      */
     private String extractCity(String adresse) {
-        String[] parts = adresse.split(",");
 
-        if (parts.length > 1) {
-            return parts[parts.length - 1].trim();
+        // essayer avec code postal
+        Pattern cpPattern = Pattern.compile("(\\d{5})\\s*(\\w+)");
+        Matcher matcher = cpPattern.matcher(adresse);
+
+        if (matcher.find()) {
+            return matcher.group(2); // ville après CP
         }
 
-        return adresse;
+        // fallback : dernier mot
+        String[] parts = adresse.split(" ");
+        return parts[parts.length - 1];
     }
 }
