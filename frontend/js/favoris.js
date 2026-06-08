@@ -1,76 +1,83 @@
-document.addEventListener('DOMContentLoaded', () => {
-    loadFavoris();
+/**
+ * Script pour la page des favoris.
+ * Affiche les bibliothèques favorites de l'utilisateur.
+ */
+
+document.addEventListener('DOMContentLoaded', async () => {
+    // Vérifier l'authentification
+    if (!isAuthenticated()) {
+        alert('Vous devez être connecté pour accéder à vos favoris.');
+        window.location.href = 'login.html';
+        return;
+    }
+
+    // Charger les favoris
+    await loadFavoris();
 });
 
+/**
+ * Charge et affiche les favoris de l'utilisateur.
+ */
 async function loadFavoris() {
     const container = document.getElementById('favoris-container');
-    container.innerHTML = '<p class="loading">Chargement de vos favoris...</p>';
-
+    
     try {
-        const response = await fetch('http://localhost:8080/api/favoris', {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-
-        if (!response.ok) throw new Error("Impossible de récupérer les favoris");
-        const favoris = await response.json();
-
+        const favoris = await NotationAPI.getMesFavoris();
+        
         if (favoris.length === 0) {
-            container.innerHTML = '<p class="info-message">Vous n’avez aucun favori pour le moment.</p>';
+            container.innerHTML = '<p class="info-message">Vous n\'avez aucune bibliothèque en favoris. Commencez à en ajouter !</p>';
             return;
         }
 
         container.innerHTML = '';
-        favoris.forEach(f => {
-            const card = createFavoriCard(f);
+        container.classList.remove('loading');
+
+        favoris.forEach(favori => {
+            const card = createFavoriCard(favori);
             container.appendChild(card);
         });
-
-    } catch (err) {
-        container.innerHTML = `<p class="error-message">${err.message}</p>`;
-        console.error(err);
+    } catch (error) {
+        container.innerHTML = `<p class="error-message">Erreur lors du chargement: ${error.message}</p>`;
     }
 }
 
+/**
+ * Crée une carte pour un favori.
+ */
 function createFavoriCard(favori) {
     const card = document.createElement('div');
     card.className = 'card';
-
-    const typeIcon = favori.type === 'UNIVERSITAIRE' ? '🎓' : '📚'; // si tu as type
-    const noteStars = '⭐'.repeat(Math.round(favori.noteGlobale || 0));
-
-    const ouvertBadge = favori.ouvert 
-        ? '<span class="badge badge-success">✓ Ouvert</span>'
-        : '<span class="badge badge-danger">✗ Fermé</span>';
-
+    
+    const dateAjout = new Date(favori.dateAjout).toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    });
+    
     card.innerHTML = `
         <div class="card-header">
-            <h4 class="card-title">${typeIcon} ${favori.bibliothequeNom}</h4>
-            ${ouvertBadge}
+            <h4 class="card-title">📚 ${favori.bibliothequeNom}</h4>
+            <span class="badge badge-success">★ Favori</span>
         </div>
-        <button onclick="supprimerFavori(${favori.id})">❌ Retirer des favoris</button>
+        <p><strong>Ajouté le:</strong> ${dateAjout}</p>
+        <div class="card-actions">
+            <button onclick="removeFavori(${favori.id}, ${favori.bibliothequeId})" class="btn btn-danger">Supprimer des favoris</button>
+        </div>
     `;
-
+    
     return card;
 }
 
-async function supprimerFavori(favoriId) {
-    if (!confirm("Voulez-vous vraiment supprimer ce favori ?")) return;
-
-    try {
-        const response = await fetch(`http://localhost:8080/api/favoris/${favoriId}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-
-        if (!response.ok) throw new Error("Impossible de supprimer le favori");
-        alert("Favori supprimé !");
-        loadFavoris(); // recharge la liste
-    } catch (err) {
-        console.error(err);
-        alert(err.message);
+/**
+ * Supprime un favori.
+ */
+async function removeFavori(favoriId, bibliothequeId) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce favori ?')) {
+        try {
+            await NotationAPI.supprimerFavori(bibliothequeId);
+            await loadFavoris();
+        } catch (error) {
+            alert('Erreur lors de la suppression: ' + error.message);
+        }
     }
 }

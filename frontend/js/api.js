@@ -97,7 +97,7 @@ const AuthAPI = {
         removeToken();
         localStorage.removeItem('userId');
         localStorage.removeItem('username');
-        window.location.href = 'index.html';
+        window.location.href = 'MyFeed.html';
     }
 };
 
