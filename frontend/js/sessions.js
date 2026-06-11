@@ -91,35 +91,53 @@ async function loadSessionEnCours() {
  * Affiche la session en cours.
  */
 function displaySessionEnCours() {
-    const container = document.getElementById('session-en-cours');
-    
+    const setupContainer = document.getElementById('setup-container');
+    const activeContainer = document.getElementById('session-active-container');
+
+    if (!setupContainer || !activeContainer) return;
+
     if (sessionEnCours) {
-        container.style.display = 'block';
-        document.getElementById('session-objectif').textContent = sessionEnCours.objectif;
+
+        setupContainer.style.display = 'none';
+        activeContainer.style.display = 'block';
+
+        document.getElementById('session-objectif-display').textContent =
+            sessionEnCours.objectif;
+
         updateTimerDisplay();
         updateProgressBar();
+
     } else {
-        container.style.display = 'none';
+
+        setupContainer.style.display = 'block';
+        activeContainer.style.display = 'none';
+
     }
 }
 
 /**
  * Met à jour l'affichage du minuteur.
  */
+
 function updateTimerDisplay() {
     if (!sessionEnCours) return;
 
-    const totalSeconds = sessionEnCours.dureeMinutes * 60;
-    const elapsedSeconds = sessionEnCours.tempsEcoulesMinutes * 60;
-    const remainingSeconds = totalSeconds - elapsedSeconds;
+    const totalSeconds = Math.floor(sessionEnCours.dureeMinutes * 60);
+    const elapsedSeconds = Math.floor(sessionEnCours.tempsEcoulesMinutes * 60);
+
+    const remainingSeconds = Math.max(
+        totalSeconds - elapsedSeconds,
+        0
+    );
 
     const hours = Math.floor(remainingSeconds / 3600);
     const minutes = Math.floor((remainingSeconds % 3600) / 60);
     const seconds = remainingSeconds % 60;
 
-    const timerDisplay = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    document.getElementById('session-timer').textContent = timerDisplay;
-    document.getElementById('temps-restant').textContent = sessionEnCours.tempsRestantMinutes;
+    document.getElementById('session-timer').textContent =
+        `${String(hours).padStart(2, '0')}:` +
+        `${String(minutes).padStart(2, '0')}:` +
+        `${String(seconds).padStart(2, '0')}`;
 }
 
 /**
@@ -140,22 +158,36 @@ function updateProgressBar() {
  * Démarre la session.
  */
 function startSession() {
+
     if (!sessionEnCours || isRunning) return;
 
     isRunning = true;
-    document.getElementById('btn-start').style.display = 'none';
-    document.getElementById('btn-pause').style.display = 'inline-block';
+
+    const btnPause = document.getElementById('btn-pause');
+    const btnResume = document.getElementById('btn-resume');
+
+    if (btnPause) btnPause.style.display = 'inline-flex';
+    if (btnResume) btnResume.style.display = 'none';
 
     timerInterval = setInterval(() => {
-        sessionEnCours.tempsEcoulesMinutes += 1/60; // Incrémenter par 1 seconde
+
+        sessionEnCours.tempsEcoulesMinutes += (1 / 60);
+
         updateTimerDisplay();
         updateProgressBar();
 
-        // Vérifier si la session est complétée
-        if (sessionEnCours.tempsEcoulesMinutes >= sessionEnCours.dureeMinutes) {
-            pauseSession();
-            alert('Session complétée !');
+        if (
+            sessionEnCours.tempsEcoulesMinutes >=
+            sessionEnCours.dureeMinutes
+        ) {
+
+            clearInterval(timerInterval);
+            isRunning = false;
+
+            alert('Session terminée !');
+            completerSession();
         }
+
     }, 1000);
 }
 
@@ -163,14 +195,19 @@ function startSession() {
  * Met en pause la session.
  */
 function pauseSession() {
+
     if (!isRunning) return;
 
     isRunning = false;
-    clearInterval(timerInterval);
-    document.getElementById('btn-pause').style.display = 'none';
-    document.getElementById('btn-resume').style.display = 'inline-block';
 
-    // Sauvegarder le temps écoulé
+    clearInterval(timerInterval);
+
+    const btnPause = document.getElementById('btn-pause');
+    const btnResume = document.getElementById('btn-resume');
+
+    if (btnPause) btnPause.style.display = 'none';
+    if (btnResume) btnResume.style.display = 'inline-flex';
+
     updateSessionTime();
 }
 
@@ -178,28 +215,45 @@ function pauseSession() {
  * Reprend la session.
  */
 function resumeSession() {
+
+    const btnResume = document.getElementById('btn-resume');
+
+    if (btnResume) {
+        btnResume.style.display = 'none';
+    }
+
     startSession();
-    document.getElementById('btn-resume').style.display = 'none';
 }
 
 /**
  * Complète la session.
  */
 async function completerSession() {
+
     if (!sessionEnCours) return;
 
-    if (confirm('Êtes-vous sûr de vouloir terminer cette session ?')) {
-        try {
-            pauseSession();
-            await SessionAPI.completerSession(sessionEnCours.id);
-            alert('Session complétée avec succès !');
-            sessionEnCours = null;
-            document.getElementById('session-en-cours').style.display = 'none';
-            await loadSessions();
-            await loadStatistiques();
-        } catch (error) {
-            alert('Erreur lors de la complétion de la session: ' + error.message);
-        }
+    try {
+
+        clearInterval(timerInterval);
+
+        await SessionAPI.completerSession(
+            sessionEnCours.id
+        );
+
+        sessionEnCours = null;
+        isRunning = false;
+
+        displaySessionEnCours();
+
+        await loadSessions();
+        await loadStatistiques();
+
+    } catch (error) {
+
+        alert(
+            'Erreur lors de la complétion : ' +
+            error.message
+        );
     }
 }
 
@@ -220,21 +274,45 @@ async function updateSessionTime() {
  * Gère la création d'une nouvelle session.
  */
 async function handleCreateSession(e) {
+
     e.preventDefault();
 
-    const objectif = document.getElementById('objectif').value;
-    const duree = parseInt(document.getElementById('duree').value);
+    const objectif = document.getElementById('objectif').value.trim();
+    const duree = parseInt(
+        document.getElementById('duree').value,
+        10
+    );
 
     try {
-        sessionEnCours = await SessionAPI.creerSession(objectif, duree);
+
+        const nouvelleSession =
+            await SessionAPI.creerSession(objectif, duree);
+
+        sessionEnCours = {
+            ...nouvelleSession,
+            tempsEcoulesMinutes: 0
+        };
+
+        document.getElementById(
+            'create-session-form'
+        ).reset();
+
         displaySessionEnCours();
-        document.getElementById('create-session-form').reset();
+
+        startSession();
+
         await loadSessions();
+
     } catch (error) {
-        alert('Erreur lors de la création de la session: ' + error.message);
+
+        console.error(error);
+
+        alert(
+            'Erreur lors de la création de la session : ' +
+            error.message
+        );
     }
 }
-
 /**
  * Charge et affiche toutes les sessions.
  */

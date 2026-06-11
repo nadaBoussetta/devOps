@@ -60,7 +60,7 @@ body {
     height: 100vh;
     background-color: var(--bg-dark);
     z-index: 10;
-    padding: 0 60px;
+    padding: 13vh 60px 60px;
     display: flex;
     flex-direction: column;
     justify-content: center;
