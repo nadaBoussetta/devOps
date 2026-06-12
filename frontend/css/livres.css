@@ -165,7 +165,8 @@ nav {
 .books-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-    gap: 16px;
+    gap: 28px;
+    margin-top: 16px;
 }
 
 /* ── Book card ───────────────────────────────────────────── */
@@ -335,3 +336,40 @@ nav {
     .btn-search { width: 100%; justify-content: center; }
     .page-header h1 { font-size: 1.5rem; }
 }
+
+/* ── Badge disponibilité IDF ─────────────────────────────── */
+.idf-badge {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+    font-size: 0.78rem; font-weight: 500;
+    padding: 8px 12px; border-radius: 10px;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+}
+.idf-loading {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.08);
+    color: var(--text-gray);
+}
+.idf-dispo {
+    background: rgba(52, 211, 153, 0.1);
+    border-color: rgba(52, 211, 153, 0.35);
+    color: #34d399;
+}
+.idf-indispo {
+    background: rgba(248, 113, 113, 0.08);
+    border-color: rgba(248, 113, 113, 0.25);
+    color: #f87171;
+}
+.idf-inconnu {
+    background: rgba(251, 191, 36, 0.08);
+    border-color: rgba(251, 191, 36, 0.25);
+    color: #fbbf24;
+}
+.idf-badge .badge-link {
+    color: #34d399; text-decoration: none; font-size: 0.74rem;
+    display: flex; align-items: center; gap: 4px;
+    border-bottom: 1px solid rgba(52,211,153,0.3);
+    transition: border-color 0.2s;
+    margin-left: auto;
+}
+.idf-badge .badge-link:hover { border-color: #34d399; }

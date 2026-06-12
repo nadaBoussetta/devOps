@@ -1,16 +1,19 @@
 package devOps.services;
 
-import devOps.dtos.*;
-import devOps.models.*;
-import devOps.repositories.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import devOps.dtos.SessionDTO;
+import devOps.models.SessionEntity;
+import devOps.models.UtilisateurEntity;
+import devOps.repositories.SessionRepository;
+import devOps.repositories.UtilisateurRepository;
 
 @Service
 public class SessionService {
@@ -40,9 +43,7 @@ public class SessionService {
     public SessionDTO getSessionEnCours(Long userId) {
         SessionEntity session = sessionRepository.findByUserIdAndCompleteeIsFalse(userId)
                 .orElseThrow(() -> new RuntimeException("Aucune session en cours"));
-
         updateTempsEcoule(session);
-
         return convertSessionToDTO(session);
     }
 
@@ -62,27 +63,19 @@ public class SessionService {
     public SessionDTO updateTempsEcoule(Long sessionId, Integer tempsEcoulesMinutes) {
         SessionEntity session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new RuntimeException("Session non trouvée"));
-
         session.setTempsEcoulesMinutes(tempsEcoulesMinutes);
-
-        // Vérifier si la session est complétée
         if (tempsEcoulesMinutes >= session.getDureeMinutes()) {
             session.completer();
         }
-
-        SessionEntity updatedSession = sessionRepository.save(session);
-        return convertSessionToDTO(updatedSession);
+        return convertSessionToDTO(sessionRepository.save(session));
     }
-
 
     @Transactional
     public SessionDTO completerSession(Long sessionId) {
         SessionEntity session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new RuntimeException("Session non trouvée"));
-
         session.completer();
-        SessionEntity updatedSession = sessionRepository.save(session);
-        return convertSessionToDTO(updatedSession);
+        return convertSessionToDTO(sessionRepository.save(session));
     }
 
     @Transactional
@@ -91,50 +84,38 @@ public class SessionService {
     }
 
     public SessionStatistiquesDTO getStatistiquesHebdomadaires(Long userId) {
-        List<SessionEntity> sessionsCompleteesHebdo = sessionRepository
+        List<SessionEntity> sessionsHebdo = sessionRepository
                 .findByUserIdAndCompleteeIsTrueOrderByDateCreationDesc(userId).stream()
-                .filter(s -> {
-                    long joursEcoules = ChronoUnit.DAYS.between(s.getDateCreation(), LocalDateTime.now());
-                    return joursEcoules <= 7;
-                })
+                .filter(s -> ChronoUnit.DAYS.between(s.getDateCreation(), LocalDateTime.now()) <= 7)
                 .collect(Collectors.toList());
 
-        Integer totalMinutesHebdo = sessionsCompleteesHebdo.stream()
-                .mapToInt(SessionEntity::getDureeMinutes)
+        // ✅ Fix : utiliser tempsEcoulesMinutes (temps réel) et non dureeMinutes (temps prévu)
+        Integer totalMinutes = sessionsHebdo.stream()
+                .mapToInt(SessionEntity::getTempsEcoulesMinutes)
                 .sum();
 
-        Integer nombreSessionsHebdo = sessionsCompleteesHebdo.size();
-
         return new SessionStatistiquesDTO(
-                nombreSessionsHebdo,
-                totalMinutesHebdo,
+                sessionsHebdo.size(),
+                totalMinutes,
                 calculerStreak(userId)
         );
     }
 
     private Integer calculerStreak(Long userId) {
-        List<SessionEntity> sessionCompleteesTriees = sessionRepository
+        List<SessionEntity> sessions = sessionRepository
                 .findByUserIdAndCompleteeIsTrueOrderByDateCreationDesc(userId);
+        if (sessions.isEmpty()) return 0;
 
-        if (sessionCompleteesTriees.isEmpty()) {
-            return 0;
-        }
+        int streak = 1;
+        LocalDateTime dernierJour = sessions.get(0).getDateFin().toLocalDate().atStartOfDay();
 
-        Integer streak = 1;
-        LocalDateTime dernierJour = sessionCompleteesTriees.get(0).getDateFin().toLocalDate().atStartOfDay();
-
-        for (int i = 1; i < sessionCompleteesTriees.size(); i++) {
-            LocalDateTime jourActuel = sessionCompleteesTriees.get(i).getDateFin().toLocalDate().atStartOfDay();
-            long joursEcart = ChronoUnit.DAYS.between(jourActuel, dernierJour);
-
-            if (joursEcart == 1) {
+        for (int i = 1; i < sessions.size(); i++) {
+            LocalDateTime jourActuel = sessions.get(i).getDateFin().toLocalDate().atStartOfDay();
+            if (ChronoUnit.DAYS.between(jourActuel, dernierJour) == 1) {
                 streak++;
                 dernierJour = jourActuel;
-            } else {
-                break;
-            }
+            } else break;
         }
-
         return streak;
     }
 
@@ -142,11 +123,7 @@ public class SessionService {
         if (!session.getCompletee()) {
             long minutesEcoulees = ChronoUnit.MINUTES.between(session.getDateDebut(), LocalDateTime.now());
             session.setTempsEcoulesMinutes((int) Math.min(minutesEcoulees, session.getDureeMinutes()));
-
-            if (session.getTempsEcoulesMinutes() >= session.getDureeMinutes()) {
-                session.completer();
-            }
-
+            if (session.getTempsEcoulesMinutes() >= session.getDureeMinutes()) session.completer();
             sessionRepository.save(session);
         }
     }
@@ -177,16 +154,8 @@ public class SessionService {
             this.streak = streak;
         }
 
-        public Integer getNombreSessions() {
-            return nombreSessions;
-        }
-
-        public Integer getTotalMinutes() {
-            return totalMinutes;
-        }
-
-        public Integer getStreak() {
-            return streak;
-        }
+        public Integer getNombreSessions() { return nombreSessions; }
+        public Integer getTotalMinutes()   { return totalMinutes; }
+        public Integer getStreak()         { return streak; }
     }
 }

@@ -1,78 +1,111 @@
 package devOps.controllers;
 
-import devOps.dtos.FavoriDTO;
-import devOps.dtos.NotationDTO;
-import devOps.services.NotationService;
-import devOps.util.SecurityUtil;
-import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
-
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import devOps.dtos.NotificationDTO;
+import devOps.services.NotificationService;
+import devOps.util.SecurityUtil;
 
 @RestController
-@RequestMapping("/api/notations")
+@RequestMapping("/api/notifications")
 @CrossOrigin(origins = "*")
-public class NotationController {
+public class NotificationController {
 
     @Autowired
-    private NotationService notationService;
+    private NotificationService notificationService;
 
-    @PostMapping
-    public ResponseEntity<NotationDTO> noterBibliotheque(
-            @Valid @RequestBody NotationDTO notationDTO,
-            Authentication authentication) {
-        Long userId = extractUserId(authentication);
-        NotationDTO notation = notationService.noterBibliotheque(notationDTO, userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(notation);
+    @GetMapping
+    public ResponseEntity<List<NotificationDTO>> getNotifications() {
+        return ResponseEntity.ok(notificationService.getNotificationsByUser(uid()));
     }
 
-    @GetMapping("/mes-notations")
-    public ResponseEntity<List<NotationDTO>> getMesNotations(Authentication authentication) {
-        Long userId = extractUserId(authentication);
-        List<NotationDTO> notations = notationService.getNotationsByUser(userId);
-        return ResponseEntity.ok(notations);
+    @GetMapping("/non-lues")
+    public ResponseEntity<List<NotificationDTO>> getNonLues() {
+        return ResponseEntity.ok(notificationService.getNotificationsNonLuesByUser(uid()));
     }
 
-    @GetMapping("/bibliotheque/{bibliothequeId}")
-    public ResponseEntity<List<NotationDTO>> getNotationsByBibliotheque(@PathVariable Long bibliothequeId) {
-        List<NotationDTO> notations = notationService.getNotationsByBibliotheque(bibliothequeId);
-        return ResponseEntity.ok(notations);
+    @GetMapping("/count-non-lues")
+    public ResponseEntity<Map<String, Integer>> countNonLues() {
+        Map<String, Integer> r = new HashMap<>();
+        r.put("count", notificationService.countNotificationsNonLues(uid()));
+        return ResponseEntity.ok(r);
     }
 
-    @PostMapping("/favoris/{bibliothequeId}")
-    public ResponseEntity<FavoriDTO> ajouterFavori(
-            @PathVariable Long bibliothequeId,
-            Authentication authentication) {
-        Long userId = extractUserId(authentication);
-        FavoriDTO favori = notationService.ajouterFavori(bibliothequeId, userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(favori);
+    @PutMapping("/{id}/lire")
+    public ResponseEntity<NotificationDTO> marquerLue(@PathVariable Long id) {
+        return ResponseEntity.ok(notificationService.marquerCommeLue(id));
     }
 
-    @DeleteMapping("/favoris/{bibliothequeId}")
-    public ResponseEntity<Void> supprimerFavori(
-            @PathVariable Long bibliothequeId,
-            Authentication authentication) {
-        Long userId = extractUserId(authentication);
-        notationService.supprimerFavori(bibliothequeId, userId);
+    @PutMapping("/lire-tout")
+    public ResponseEntity<Void> marquerToutesLues() {
+        notificationService.marquerToutesCommeLues(uid());
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/mes-favoris")
-    public ResponseEntity<List<FavoriDTO>> getMesFavoris(Authentication authentication) {
-        Long userId = extractUserId(authentication);
-        List<FavoriDTO> favoris = notationService.getFavorisByUser(userId);
-        return ResponseEntity.ok(favoris);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> supprimer(@PathVariable Long id) {
+        notificationService.supprimerNotification(id);
+        return ResponseEntity.noContent().build();
     }
 
-    private Long extractUserId(Authentication authentication) {
-        Long userId = SecurityUtil.getCurrentUserId();
-        if (userId == null) {
-            throw new RuntimeException("Utilisateur non authentifié");
-        }
-        return userId;
+    @DeleteMapping("/lues")
+    public ResponseEntity<Void> supprimerLues() {
+        notificationService.supprimerNotificationsLues(uid());
+        return ResponseEntity.noContent().build();
+    }
+
+    // ✅ Endpoints de déclenchement manuel (utile pour tests / démo)
+    @PostMapping("/generer/rappel-lecture")
+    public ResponseEntity<Void> genererRappelLecture(@RequestBody Map<String, String> body) {
+        notificationService.genererRappelLecture(uid(), body.get("titreLivre"));
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/generer/nouvelle-publication")
+    public ResponseEntity<Void> genererNouvellePublication(@RequestBody Map<String, String> body) {
+        notificationService.genererNotificationNouvellePublication(uid(),
+                body.get("auteurUsername"), body.get("extrait"));
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/generer/suggestion-livre")
+    public ResponseEntity<Void> genererSuggestionLivre(@RequestBody Map<String, String> body) {
+        notificationService.genererSuggestionLivre(uid(),
+                body.get("titreLivre"), body.get("auteur"), body.get("raison"));
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/generer/rappel-session")
+    public ResponseEntity<Void> genererRappelSession(@RequestBody Map<String, String> body) {
+        notificationService.genererRappelSession(uid(), body.get("objectif"));
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/generer/objectif-atteint")
+    public ResponseEntity<Void> genererObjectifAtteint(@RequestBody Map<String, Object> body) {
+        notificationService.genererNotificationObjectifAtteint(uid(),
+                (String) body.get("objectif"),
+                ((Number) body.get("minutes")).intValue());
+        return ResponseEntity.noContent().build();
+    }
+
+    private Long uid() {
+        Long id = SecurityUtil.getCurrentUserId();
+        if (id == null) throw new RuntimeException("Non authentifié");
+        return id;
     }
 }

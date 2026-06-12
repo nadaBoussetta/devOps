@@ -1,269 +1,278 @@
 /**
- * Script pour la page des notifications.
- * Feature 6 : Notifications intelligentes.
+ * Notifications — livres, social, sessions, bibliothèques
  */
 
 let allNotifications = [];
-let currentFilter = 'tous';
+let currentFilter    = 'tous';
 
+// ── Config des types ──────────────────────────────────────────────────────────
+const TYPE_CONFIG = {
+    FERMETURE_BIBLIOTHEQUE: { icon: 'fa-door-closed',    color: '#f87171', label: 'Fermeture',       cat: 'bibliotheque' },
+    AFFLUENCE_FAIBLE:       { icon: 'fa-chart-bar',      color: '#fbbf24', label: 'Affluence faible', cat: 'bibliotheque' },
+    LIVRE_DISPONIBLE:       { icon: 'fa-book-open',      color: '#34d399', label: 'Livre dispo',      cat: 'livre'        },
+    NOUVELLE_BIBLIOTHEQUE:  { icon: 'fa-building-columns',color: '#60a5fa', label: 'Nouveauté',       cat: 'bibliotheque' },
+    RECOMMANDATION:         { icon: 'fa-star',            color: '#a78bfa', label: 'Recommandation',   cat: 'bibliotheque' },
+    RAPPEL_LECTURE:         { icon: 'fa-bookmark',        color: '#34d399', label: 'Rappel lecture',   cat: 'livre'        },
+    NOUVELLE_PUBLICATION:   { icon: 'fa-comment-dots',   color: '#60a5fa', label: 'Nouveau post',     cat: 'social'       },
+    RECHERCHE_LIVRE:        { icon: 'fa-magnifying-glass',color: '#a78bfa', label: 'Suggestion livre', cat: 'livre'        },
+    SESSION_REMINDER:       { icon: 'fa-stopwatch',       color: '#fbbf24', label: 'Rappel session',   cat: 'session'      },
+    OBJECTIF_ATTEINT:       { icon: 'fa-trophy',          color: '#34d399', label: 'Objectif atteint', cat: 'session'      },
+};
+
+// ── Init ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
-    // Vérifier l'authentification
     if (!isAuthenticated()) {
-        alert('Vous devez être connecté pour accéder aux notifications.');
         window.location.href = 'login.html';
         return;
     }
-
-    // Charger les notifications
     await loadNotifications();
+
+    // Filtres
+    document.getElementById('filter-tabs').addEventListener('click', e => {
+        const tab = e.target.closest('.filter-tab');
+        if (!tab) return;
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentFilter = tab.dataset.filter;
+        displayNotifications();
+    });
 });
 
-/**
- * API pour les notifications
- */
-const NotificationAPI = {
-    async getNotifications() {
-        return fetchAPI('/notifications');
-    },
-
-    async getNotificationsNonLues() {
-        return fetchAPI('/notifications/non-lues');
-    },
-
-    async countNotificationsNonLues() {
-        return fetchAPI('/notifications/count-non-lues');
-    },
-
-    async marquerCommeLue(notificationId) {
-        return fetchAPI(`/notifications/${notificationId}/lire`, {
-            method: 'PUT'
-        });
-    },
-
-    async marquerToutesCommeLues() {
-        return fetchAPI('/notifications/lire-tout', {
-            method: 'PUT'
-        });
-    },
-
-    async supprimerNotification(notificationId) {
-        return fetchAPI(`/notifications/${notificationId}`, {
-            method: 'DELETE'
-        });
-    },
-
-    async supprimerNotificationsLues() {
-        return fetchAPI('/notifications/lues', {
-            method: 'DELETE'
-        });
-    }
-};
-
-/**
- * Charge et affiche toutes les notifications.
- */
+// ── Chargement ────────────────────────────────────────────────────────────────
 async function loadNotifications() {
-    const container = document.getElementById('notifications-container');
-
     try {
         allNotifications = await NotificationAPI.getNotifications();
+        updateCounts();
+        buildCategorySummary();
         displayNotifications();
-    } catch (error) {
-        container.innerHTML = `<p class="error-message">Erreur lors du chargement: ${error.message}</p>`;
+    } catch (err) {
+        document.getElementById('notifications-container').innerHTML =
+            `<div class="notif-empty error"><i class="fas fa-exclamation-circle"></i><p>${err.message}</p></div>`;
     }
 }
 
-/**
- * Affiche les notifications en fonction du filtre.
- */
+function updateCounts() {
+    const nonLues = allNotifications.filter(n => !n.lue).length;
+    document.getElementById('count-tous').textContent     = allNotifications.length;
+    document.getElementById('count-non-lues').textContent = nonLues;
+
+    const badge = document.getElementById('header-badge');
+    const bc    = document.getElementById('badge-count');
+    if (nonLues > 0) { bc.textContent = nonLues; badge.style.display = 'flex'; }
+    else             { badge.style.display = 'none'; }
+}
+
+// ── Résumé catégories ─────────────────────────────────────────────────────────
+function buildCategorySummary() {
+    const cats = {
+        livre:       { label: 'Livres',         icon: 'fa-book',             count: 0, color: '#34d399' },
+        social:      { label: 'Social',          icon: 'fa-comment-dots',     count: 0, color: '#60a5fa' },
+        session:     { label: 'Sessions',        icon: 'fa-stopwatch',        count: 0, color: '#fbbf24' },
+        bibliotheque:{ label: 'Bibliothèques',   icon: 'fa-building-columns', count: 0, color: '#a78bfa' },
+    };
+
+    allNotifications.forEach(n => {
+        const cfg = TYPE_CONFIG[n.type];
+        if (cfg && cats[cfg.cat]) cats[cfg.cat].count++;
+    });
+
+    const html = Object.values(cats).map(c => `
+        <div class="cat-pill" style="--cat-color:${c.color}">
+            <i class="fas ${c.icon}"></i>
+            <span class="cat-count">${c.count}</span>
+            <span class="cat-label">${c.label}</span>
+        </div>`).join('');
+
+    document.getElementById('category-summary').innerHTML = html;
+}
+
+// ── Affichage ─────────────────────────────────────────────────────────────────
 function displayNotifications() {
     const container = document.getElementById('notifications-container');
-
-    let filteredNotifications = allNotifications;
+    let list = allNotifications;
 
     if (currentFilter === 'non-lues') {
-        filteredNotifications = allNotifications.filter(n => !n.lue);
-    } else if (currentFilter === 'lues') {
-        filteredNotifications = allNotifications.filter(n => n.lue);
+        list = list.filter(n => !n.lue);
+    } else if (currentFilter !== 'tous') {
+        const types = currentFilter.split(',');
+        list = list.filter(n => types.includes(n.type));
     }
 
-    if (filteredNotifications.length === 0) {
-        container.innerHTML = '<p class="info-message">Aucune notification à afficher.</p>';
+    if (!list.length) {
+        container.innerHTML = `
+            <div class="notif-empty">
+                <i class="fas fa-bell-slash"></i>
+                <p>Aucune notification dans cette catégorie.</p>
+            </div>`;
         return;
     }
 
+    // Grouper par date
+    const grouped = groupByDate(list);
     container.innerHTML = '';
-    container.classList.remove('loading');
 
-    filteredNotifications.forEach(notification => {
-        const element = createNotificationElement(notification);
-        container.appendChild(element);
+    grouped.forEach(({ label, items }) => {
+        const group = document.createElement('div');
+        group.className = 'notif-group';
+        group.innerHTML = `<div class="notif-group-label">${label}</div>`;
+        items.forEach((n, i) => {
+            const el = buildNotifCard(n, i);
+            group.appendChild(el);
+        });
+        container.appendChild(group);
     });
 }
 
-/**
- * Crée un élément DOM pour une notification.
- */
-function createNotificationElement(notification) {
-    const div = document.createElement('div');
-    div.className = `notification-item ${notification.lue ? 'lue' : 'non-lue'}`;
+function groupByDate(notifs) {
+    const today     = new Date(); today.setHours(0,0,0,0);
+    const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
+    const groups    = {};
 
-    const date = new Date(notification.dateCreation).toLocaleDateString('fr-FR', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+    notifs.forEach(n => {
+        const d = new Date(n.dateCreation); d.setHours(0,0,0,0);
+        let label;
+        if (d >= today)          label = "Aujourd'hui";
+        else if (d >= yesterday) label = 'Hier';
+        else                     label = d.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' });
+
+        if (!groups[label]) groups[label] = [];
+        groups[label].push(n);
     });
 
-    const typeEmoji = getTypeEmoji(notification.type);
-    const typeLabel = getTypeLabel(notification.type);
+    return Object.entries(groups).map(([label, items]) => ({ label, items }));
+}
+
+// ── Carte notification ────────────────────────────────────────────────────────
+function buildNotifCard(n, index) {
+    const div  = document.createElement('div');
+    const cfg  = TYPE_CONFIG[n.type] || { icon:'fa-bell', color:'#a0a0a5', label:'Notification' };
+    const time = relativeTime(n.dateCreation);
+
+    div.className = `notif-card${n.lue ? ' lue' : ' non-lue'}`;
+    div.style.animationDelay = `${index * 0.05}s`;
 
     div.innerHTML = `
-        <div class="notification-header">
-            <div>
-                <span class="notification-type">${typeEmoji} ${typeLabel}</span>
-                ${notification.bibliothequeNom ? `<span style="color: #6b7280; margin-left: 0.5rem;">📚 ${notification.bibliothequeNom}</span>` : ''}
+        <div class="notif-icon-wrap" style="--notif-color:${cfg.color}">
+            <i class="fas ${cfg.icon}"></i>
+        </div>
+        <div class="notif-body">
+            <div class="notif-meta">
+                <span class="notif-type-badge" style="--notif-color:${cfg.color}">${cfg.label}</span>
+                ${n.bibliothequeNom ? `<span class="notif-bib"><i class="fas fa-location-dot"></i> ${escH(n.bibliothequeNom)}</span>` : ''}
+                <span class="notif-time"><i class="fas fa-clock"></i> ${time}</span>
             </div>
-            <span class="notification-date">${date}</span>
+            <h4 class="notif-titre">${escH(n.titre)}</h4>
+            <p class="notif-message">${escH(n.message)}</p>
+            ${buildActionLink(n)}
         </div>
-        <div class="notification-titre">${notification.titre}</div>
-        <div class="notification-message">${notification.message}</div>
-        <div class="notification-actions">
-            ${!notification.lue ? `<button class="btn-small btn-mark-read" onclick="marquerCommeLue(${notification.id})">Marquer comme lu</button>` : ''}
-            <button class="btn-small btn-delete" onclick="supprimerNotification(${notification.id})">Supprimer</button>
-        </div>
-    `;
+        <div class="notif-right">
+            ${!n.lue ? `<div class="unread-dot"></div>` : ''}
+            <div class="notif-btns">
+                ${!n.lue ? `
+                <button class="notif-btn" title="Marquer comme lu" onclick="marquerCommeLue(${n.id})">
+                    <i class="fas fa-check"></i>
+                </button>` : ''}
+                <button class="notif-btn notif-btn-del" title="Supprimer" onclick="supprimerNotification(${n.id})">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>`;
 
     return div;
 }
 
-/**
- * Retourne l'emoji correspondant au type de notification.
- */
-function getTypeEmoji(type) {
-    const emojis = {
-        'FERMETURE_BIBLIOTHEQUE': '🔔',
-        'AFFLUENCE_FAIBLE': '📊',
-        'LIVRE_DISPONIBLE': '📖',
-        'NOUVELLE_BIBLIOTHEQUE': '✨',
-        'RECOMMANDATION': '⭐'
+function buildActionLink(n) {
+    const links = {
+        LIVRE_DISPONIBLE:    { label: 'Chercher ce livre',      href: 'livres.html' },
+        RECHERCHE_LIVRE:     { label: 'Voir le livre',          href: 'livres.html' },
+        RAPPEL_LECTURE:      { label: 'Rechercher dans livres', href: 'livres.html' },
+        NOUVELLE_PUBLICATION:{ label: 'Voir le feed',           href: 'feed.html'   },
+        SESSION_REMINDER:    { label: 'Lancer une session',     href: 'sessions.html' },
+        OBJECTIF_ATTEINT:    { label: 'Voir mes sessions',      href: 'sessions.html' },
+        RECOMMANDATION:      { label: 'Voir la bibliothèque',   href: 'recherche.html' },
+        AFFLUENCE_FAIBLE:    { label: 'Réserver ma place',      href: 'recherche.html' },
     };
-    return emojis[type] || '📬';
+    const link = links[n.type];
+    if (!link) return '';
+    return `<a href="${link.href}" class="notif-action-link">${link.label} <i class="fas fa-arrow-right"></i></a>`;
 }
 
-/**
- * Retourne le label correspondant au type de notification.
- */
-function getTypeLabel(type) {
-    const labels = {
-        'FERMETURE_BIBLIOTHEQUE': 'Fermeture',
-        'AFFLUENCE_FAIBLE': 'Affluence',
-        'LIVRE_DISPONIBLE': 'Livre',
-        'NOUVELLE_BIBLIOTHEQUE': 'Nouvelle',
-        'RECOMMANDATION': 'Recommandation'
-    };
-    return labels[type] || 'Notification';
-}
-
-/**
- * Filtre les notifications.
- */
-function filterNotifications(filter) {
-    currentFilter = filter;
-    
-    // Mettre à jour les boutons actifs
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    event.target.classList.add('active');
-
-    displayNotifications();
-}
-
-/**
- * Marque une notification comme lue.
- */
-async function marquerCommeLue(notificationId) {
+// ── Actions ───────────────────────────────────────────────────────────────────
+async function marquerCommeLue(id) {
     try {
-        await NotificationAPI.marquerCommeLue(notificationId);
+        await NotificationAPI.marquerCommeLue(id);
         await loadNotifications();
-    } catch (error) {
-        alert('Erreur: ' + error.message);
-    }
+    } catch (e) { alert(e.message); }
 }
 
-/**
- * Marque toutes les notifications comme lues.
- */
 async function marquerToutesCommeLues() {
-    if (confirm('Marquer toutes les notifications comme lues ?')) {
-        try {
-            await NotificationAPI.marquerToutesCommeLues();
-            await loadNotifications();
-        } catch (error) {
-            alert('Erreur: ' + error.message);
-        }
-    }
+    try {
+        await NotificationAPI.marquerToutesCommeLues();
+        await loadNotifications();
+    } catch (e) { alert(e.message); }
 }
 
-/**
- * Supprime une notification.
- */
-async function supprimerNotification(notificationId) {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cette notification ?')) {
-        try {
-            await NotificationAPI.supprimerNotification(notificationId);
-            await loadNotifications();
-        } catch (error) {
-            alert('Erreur: ' + error.message);
-        }
-    }
+async function supprimerNotification(id) {
+    try {
+        await NotificationAPI.supprimerNotification(id);
+        await loadNotifications();
+    } catch (e) { alert(e.message); }
 }
 
-/**
- * Supprime toutes les notifications lues.
- */
 async function supprimerNotificationsLues() {
-    if (confirm('Supprimer toutes les notifications lues ?')) {
-        try {
-            await NotificationAPI.supprimerNotificationsLues();
-            await loadNotifications();
-        } catch (error) {
-            alert('Erreur: ' + error.message);
-        }
-    }
+    try {
+        await NotificationAPI.supprimerNotificationsLues();
+        await loadNotifications();
+    } catch (e) { alert(e.message); }
 }
 
-/**
- * Met à jour le badge de notifications non lues dans la navigation.
- */
+// ── API ───────────────────────────────────────────────────────────────────────
+const NotificationAPI = {
+    getNotifications:           () => fetchAPI('/notifications'),
+    getNotificationsNonLues:    () => fetchAPI('/notifications/non-lues'),
+    countNotificationsNonLues:  () => fetchAPI('/notifications/count-non-lues'),
+    marquerCommeLue:     (id)   => fetchAPI(`/notifications/${id}/lire`, { method: 'PUT' }),
+    marquerToutesCommeLues:     () => fetchAPI('/notifications/lire-tout', { method: 'PUT' }),
+    supprimerNotification: (id) => fetchAPI(`/notifications/${id}`, { method: 'DELETE' }),
+    supprimerNotificationsLues: () => fetchAPI('/notifications/lues', { method: 'DELETE' }),
+};
+
+// Badge nav — mis à jour toutes les 30s
 async function updateNotificationBadge() {
     try {
-        const result = await NotificationAPI.countNotificationsNonLues();
-        const count = result.count;
-
+        const r = await NotificationAPI.countNotificationsNonLues();
         let badge = document.getElementById('notification-badge');
-        if (count > 0) {
+        if (r.count > 0) {
             if (!badge) {
                 badge = document.createElement('span');
                 badge.id = 'notification-badge';
-                badge.className = 'notification-badge';
-                const notifLink = document.querySelector('a[href="notifications.html"]');
-                if (notifLink) {
-                    notifLink.parentElement.appendChild(badge);
-                }
+                badge.className = 'nav-notif-badge';
+                const a = document.querySelector('a[href="notifications.html"]');
+                if (a) a.parentElement.style.position = 'relative', a.parentElement.appendChild(badge);
             }
-            badge.textContent = count;
-            badge.style.display = 'inline-block';
+            badge.textContent = r.count > 9 ? '9+' : r.count;
+            badge.style.display = 'flex';
         } else if (badge) {
             badge.style.display = 'none';
         }
-    } catch (error) {
-        console.error('Erreur lors de la mise à jour du badge:', error);
-    }
+    } catch {}
 }
-
-// Mettre à jour le badge toutes les 30 secondes
 setInterval(updateNotificationBadge, 30000);
 document.addEventListener('DOMContentLoaded', updateNotificationBadge);
+
+// ── Utilitaires ───────────────────────────────────────────────────────────────
+function relativeTime(dateStr) {
+    const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+    if (diff < 60)    return 'À l\'instant';
+    if (diff < 3600)  return `Il y a ${Math.floor(diff/60)} min`;
+    if (diff < 86400) return `Il y a ${Math.floor(diff/3600)} h`;
+    if (diff < 604800)return `Il y a ${Math.floor(diff/86400)} j`;
+    return new Date(dateStr).toLocaleDateString('fr-FR', { day:'numeric', month:'short' });
+}
+
+function escH(t) {
+    if (!t) return '';
+    const d = document.createElement('div');
+    d.appendChild(document.createTextNode(t));
+    return d.innerHTML;
+}
