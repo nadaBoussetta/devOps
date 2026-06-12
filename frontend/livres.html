@@ -3,25 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bibliothèques Île-de-France</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Livres - Bibliothèques d'Île‑de‑France</title>
+    <link rel="stylesheet" href="css/livres.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Parisienne&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <link rel="icon" href="resources/logo_pic.png" type="image/png">
-
 </head>
 <body>
+<div class="main-wrapper">
+    <div class="background-image"></div>
 
-<div class="header">
-    <img alt="logo" id="logo_pic" src="resources/logo_pic.png" >
-    <h1>Bibliothèques d’Île‑de‑France</h1>
-</div>
-
-<div class="menu">
-    <menu>
-        <ul class="menu_1">
-            <li><a href="index.html" >Accueil</a></li>
+    <nav>
+        <div class="logo">Bibliothèques IDF</div>
+        <ul class="nav-links">
+            <li><a href="MyFeed.html">Accueil</a></li>
             <li><a href="recherche.html">Recherche</a></li>
             <li><a href="livres.html">Livres</a></li>
             <li><a href="feed.html">Feed Social</a></li>
@@ -29,43 +24,84 @@
             <li><a href="sessions.html">Sessions</a></li>
             <li><a href="notifications.html">Notifications</a></li>
             <li><a href="login.html" id="auth-link">Connexion</a></li>
-
-
+            <li><a href="profile.html">Mon Profil</a></li>
         </ul>
-    </menu>
-</div>
+        <div class="search-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+        </div>
+    </nav>
 
-<div class="partie_1"></div>
+    <main class="content-overlay">
 
-    <main class="container">
+        <!-- En-tête -->
+        <div class="page-header">
+            <div class="page-header-icon"><i class="fas fa-book-open"></i></div>
+            <div>
+                <h1>Recherche de livres</h1>
+                <p>Recherchez parmi des millions de livres ! </p>
+            </div>
+        </div>
+
+        <!-- Barre de recherche -->
         <section class="search-section">
-            <h2 class="tit-s">Rechercher un livre</h2>
-            <p class="tit-s">Découvrez dans quelles bibliothèques universitaires votre livre est disponible.</p>
-
-            <form id="book-search-form" class="search-form">
-                <div class="form-group">
-                    <label for="titre">Titre du livre</label>
-                    <input type="text" id="titre" placeholder="Ex: Les Misérables" required>
+            <form id="book-search-form" class="search-bar">
+                <div class="search-input-wrap">
+                    <i class="fas fa-search search-bar-icon"></i>
+                    <input type="text" id="titre_livre"
+                        placeholder="Titre, auteur, ISBN, genre..."
+                        autocomplete="off" required>
+                    <button type="button" class="btn-clear" id="btn-clear" style="display:none">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
-                <button type="submit" class="btn btn-primary">Rechercher</button>
+                <button type="submit" class="btn-search" id="btn-search">
+                    <i class="fas fa-search"></i> Rechercher
+                </button>
             </form>
-        </section>
 
-        <section class="results-section">
-            <h3 class="tit-s">Résultats</h3>
-            <div id="book-results-container">
-                <p class="info-message">Effectuez une recherche pour voir les résultats.</p>
+            <!-- Suggestions rapides -->
+            <div class="quick-tags">
+                <span class="tag-label">Tendances :</span>
+                <button class="quick-tag" onclick="searchQuick('Romans classiques français')">Romans classiques</button>
+                <button class="quick-tag" onclick="searchQuick('Science-fiction 2024')">Sci-Fi 2024</button>
+                <button class="quick-tag" onclick="searchQuick('Développement personnel bestseller')">Développement perso</button>
+                <button class="quick-tag" onclick="searchQuick('Philosophie contemporaine')">Philosophie</button>
+                <button class="quick-tag" onclick="searchQuick('Manga populaire')">Manga</button>
             </div>
         </section>
-    </main>
 
-    <footer>
-        <div class="container">
-            <p>&copy; 2026 Bibliothèques Île-de-France. Tous droits réservés.</p>
+        <!-- Zone de résultats -->
+        <section class="results-section" id="results-section" style="display:none">
+            <div class="results-header">
+                <h2 id="results-title"><i class="fas fa-list"></i> Résultats</h2>
+                <span class="results-count" id="results-count"></span>
+            </div>
+
+            <!-- Réponse IA narrative -->
+            <div class="ai-summary" id="ai-summary" style="display:none">
+                <div class="ai-badge"><i class="fas fa-robot"></i> Agent IA</div>
+                <p id="ai-summary-text"></p>
+            </div>
+
+            <!-- Grille de livres -->
+            <div id="book-results-container"></div>
+        </section>
+
+        <!-- État vide initial -->
+        <div class="empty-state" id="empty-state">
+            <i class="fas fa-book-open"></i>
+            <h3>Cherchez un livre</h3>
+            <p>Notre agent IA va rechercher en ligne les informations complètes sur n'importe quel livre — résumé, auteur, note, genre et plus encore.</p>
         </div>
-    </footer>
 
-    <script src="js/api.js"></script>
-    <script src="js/livres.js"></script>
+    </main>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/livres.js"></script>
 </body>
 </html>

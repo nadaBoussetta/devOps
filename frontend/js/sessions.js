@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadSessionEnCours();
     await loadSessions();
     await loadStatistiques();
+    await loadDashboard();
 
     // Gestion de la création de session
     const createSessionForm = document.getElementById('create-session-form');
@@ -91,35 +92,53 @@ async function loadSessionEnCours() {
  * Affiche la session en cours.
  */
 function displaySessionEnCours() {
-    const container = document.getElementById('session-en-cours');
-    
+    const setupContainer = document.getElementById('setup-container');
+    const activeContainer = document.getElementById('session-active-container');
+
+    if (!setupContainer || !activeContainer) return;
+
     if (sessionEnCours) {
-        container.style.display = 'block';
-        document.getElementById('session-objectif').textContent = sessionEnCours.objectif;
+
+        setupContainer.style.display = 'none';
+        activeContainer.style.display = 'block';
+
+        document.getElementById('session-objectif-display').textContent =
+            sessionEnCours.objectif;
+
         updateTimerDisplay();
         updateProgressBar();
+
     } else {
-        container.style.display = 'none';
+
+        setupContainer.style.display = 'block';
+        activeContainer.style.display = 'none';
+
     }
 }
 
 /**
  * Met à jour l'affichage du minuteur.
  */
+
 function updateTimerDisplay() {
     if (!sessionEnCours) return;
 
-    const totalSeconds = sessionEnCours.dureeMinutes * 60;
-    const elapsedSeconds = sessionEnCours.tempsEcoulesMinutes * 60;
-    const remainingSeconds = totalSeconds - elapsedSeconds;
+    const totalSeconds = Math.floor(sessionEnCours.dureeMinutes * 60);
+    const elapsedSeconds = Math.floor(sessionEnCours.tempsEcoulesMinutes * 60);
+
+    const remainingSeconds = Math.max(
+        totalSeconds - elapsedSeconds,
+        0
+    );
 
     const hours = Math.floor(remainingSeconds / 3600);
     const minutes = Math.floor((remainingSeconds % 3600) / 60);
     const seconds = remainingSeconds % 60;
 
-    const timerDisplay = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    document.getElementById('session-timer').textContent = timerDisplay;
-    document.getElementById('temps-restant').textContent = sessionEnCours.tempsRestantMinutes;
+    document.getElementById('session-timer').textContent =
+        `${String(hours).padStart(2, '0')}:` +
+        `${String(minutes).padStart(2, '0')}:` +
+        `${String(seconds).padStart(2, '0')}`;
 }
 
 /**
@@ -140,22 +159,36 @@ function updateProgressBar() {
  * Démarre la session.
  */
 function startSession() {
+
     if (!sessionEnCours || isRunning) return;
 
     isRunning = true;
-    document.getElementById('btn-start').style.display = 'none';
-    document.getElementById('btn-pause').style.display = 'inline-block';
+
+    const btnPause = document.getElementById('btn-pause');
+    const btnResume = document.getElementById('btn-resume');
+
+    if (btnPause) btnPause.style.display = 'inline-flex';
+    if (btnResume) btnResume.style.display = 'none';
 
     timerInterval = setInterval(() => {
-        sessionEnCours.tempsEcoulesMinutes += 1/60; // Incrémenter par 1 seconde
+
+        sessionEnCours.tempsEcoulesMinutes += (1 / 60);
+
         updateTimerDisplay();
         updateProgressBar();
 
-        // Vérifier si la session est complétée
-        if (sessionEnCours.tempsEcoulesMinutes >= sessionEnCours.dureeMinutes) {
-            pauseSession();
-            alert('Session complétée !');
+        if (
+            sessionEnCours.tempsEcoulesMinutes >=
+            sessionEnCours.dureeMinutes
+        ) {
+
+            clearInterval(timerInterval);
+            isRunning = false;
+
+            alert('Session terminée !');
+            completerSession();
         }
+
     }, 1000);
 }
 
@@ -163,14 +196,19 @@ function startSession() {
  * Met en pause la session.
  */
 function pauseSession() {
+
     if (!isRunning) return;
 
     isRunning = false;
-    clearInterval(timerInterval);
-    document.getElementById('btn-pause').style.display = 'none';
-    document.getElementById('btn-resume').style.display = 'inline-block';
 
-    // Sauvegarder le temps écoulé
+    clearInterval(timerInterval);
+
+    const btnPause = document.getElementById('btn-pause');
+    const btnResume = document.getElementById('btn-resume');
+
+    if (btnPause) btnPause.style.display = 'none';
+    if (btnResume) btnResume.style.display = 'inline-flex';
+
     updateSessionTime();
 }
 
@@ -178,28 +216,45 @@ function pauseSession() {
  * Reprend la session.
  */
 function resumeSession() {
+
+    const btnResume = document.getElementById('btn-resume');
+
+    if (btnResume) {
+        btnResume.style.display = 'none';
+    }
+
     startSession();
-    document.getElementById('btn-resume').style.display = 'none';
 }
 
 /**
  * Complète la session.
  */
 async function completerSession() {
+
     if (!sessionEnCours) return;
 
-    if (confirm('Êtes-vous sûr de vouloir terminer cette session ?')) {
-        try {
-            pauseSession();
-            await SessionAPI.completerSession(sessionEnCours.id);
-            alert('Session complétée avec succès !');
-            sessionEnCours = null;
-            document.getElementById('session-en-cours').style.display = 'none';
-            await loadSessions();
-            await loadStatistiques();
-        } catch (error) {
-            alert('Erreur lors de la complétion de la session: ' + error.message);
-        }
+    try {
+
+        clearInterval(timerInterval);
+
+        await SessionAPI.completerSession(
+            sessionEnCours.id
+        );
+
+        sessionEnCours = null;
+        isRunning = false;
+
+        displaySessionEnCours();
+
+        await loadSessions();
+        await loadStatistiques();
+
+    } catch (error) {
+
+        alert(
+            'Erreur lors de la complétion : ' +
+            error.message
+        );
     }
 }
 
@@ -220,21 +275,45 @@ async function updateSessionTime() {
  * Gère la création d'une nouvelle session.
  */
 async function handleCreateSession(e) {
+
     e.preventDefault();
 
-    const objectif = document.getElementById('objectif').value;
-    const duree = parseInt(document.getElementById('duree').value);
+    const objectif = document.getElementById('objectif').value.trim();
+    const duree = parseInt(
+        document.getElementById('duree').value,
+        10
+    );
 
     try {
-        sessionEnCours = await SessionAPI.creerSession(objectif, duree);
+
+        const nouvelleSession =
+            await SessionAPI.creerSession(objectif, duree);
+
+        sessionEnCours = {
+            ...nouvelleSession,
+            tempsEcoulesMinutes: 0
+        };
+
+        document.getElementById(
+            'create-session-form'
+        ).reset();
+
         displaySessionEnCours();
-        document.getElementById('create-session-form').reset();
+
+        startSession();
+
         await loadSessions();
+
     } catch (error) {
-        alert('Erreur lors de la création de la session: ' + error.message);
+
+        console.error(error);
+
+        alert(
+            'Erreur lors de la création de la session : ' +
+            error.message
+        );
     }
 }
-
 /**
  * Charge et affiche toutes les sessions.
  */
@@ -323,4 +402,114 @@ async function loadStatistiques() {
     } catch (error) {
         console.error('Erreur lors du chargement des statistiques:', error);
     }
+}
+// ── À ajouter à la fin de sessions.js (après loadStatistiques) ──────────────
+
+/**
+ * Met à jour le tableau de bord complet.
+ */
+async function loadDashboard() {
+    try {
+        const sessions = await SessionAPI.getSessionsCompleteees();
+        updateCircle(sessions);
+        updateWeekBars(sessions);
+        updateLastSession(sessions);
+    } catch (e) {
+        console.error('Dashboard:', e);
+    }
+}
+
+// ── Cercle de progression hebdo ───────────────────────────────────────────────
+function updateCircle(sessions) {
+    const OBJECTIF_MINUTES = 300; // 5h par semaine
+
+    const now = new Date();
+    const debutSemaine = new Date(now);
+    debutSemaine.setDate(now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1));
+    debutSemaine.setHours(0, 0, 0, 0);
+
+    const minutesSemaine = sessions
+        .filter(s => new Date(s.dateCreation) >= debutSemaine)
+        .reduce((sum, s) => sum + (s.tempsEcoulesMinutes || 0), 0);
+
+    const pct     = Math.min(100, Math.round((minutesSemaine / OBJECTIF_MINUTES) * 100));
+    const circonf = 327; // 2 * PI * 52
+    const offset  = circonf - (pct / 100) * circonf;
+
+    const circle = document.getElementById('circle-fill');
+    const pctEl  = document.getElementById('circle-pct');
+    const noteEl = document.getElementById('dash-objectif-note');
+
+    if (circle)  circle.style.strokeDashoffset = offset;
+    if (pctEl)   pctEl.textContent = pct + '%';
+    if (noteEl)  noteEl.textContent = minutesToLabel(minutesSemaine) + ' / 5h travaillées';
+}
+
+// ── Barres par jour de la semaine ─────────────────────────────────────────────
+function updateWeekBars(sessions) {
+    const container = document.getElementById('week-bars');
+    if (!container) return;
+
+    const now = new Date();
+    const today = now.getDay() === 0 ? 6 : now.getDay() - 1; // 0=Lundi
+
+    // Calculer les minutes par jour (7 derniers jours)
+    const minutesParJour = Array(7).fill(0);
+    sessions.forEach(s => {
+        const d = new Date(s.dateCreation);
+        const diff = Math.floor((now - d) / 86400000);
+        if (diff >= 0 && diff < 7) {
+            const idx = 6 - diff; // index dans la semaine
+            minutesParJour[idx] += (s.tempsEcoulesMinutes || 0);
+        }
+    });
+
+    const maxMin = Math.max(...minutesParJour, 1);
+
+    container.innerHTML = minutesParJour.map((min, i) => {
+        const h   = Math.max(4, Math.round((min / maxMin) * 76));
+        const cls = i === today ? 'week-bar today' : 'week-bar';
+        const tip = min > 0 ? minutesToLabel(min) : '0 min';
+        return `<div class="week-bar-wrap" title="${tip}">
+                    <div class="${cls}" style="height:${h}px"></div>
+                </div>`;
+    }).join('');
+}
+
+// ── Dernière session ──────────────────────────────────────────────────────────
+function updateLastSession(sessions) {
+    const el = document.getElementById('last-session-info');
+    if (!el) return;
+
+    if (!sessions.length) {
+        el.innerHTML = `<i class="fas fa-history"></i><span style="color:var(--text-gray);font-size:0.82rem">Aucune session</span>`;
+        return;
+    }
+
+    const last = sessions[0];
+    const date = new Date(last.dateCreation).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+
+    el.innerHTML = `
+        <div class="ls-objectif">${escSess(last.objectif)}</div>
+        <div class="ls-meta">
+            <span><i class="fas fa-clock"></i> ${minutesToLabel(last.tempsEcoulesMinutes)}</span>
+            <span><i class="fas fa-calendar"></i> ${date}</span>
+            <span><i class="fas fa-check-circle" style="color:var(--success)"></i> Complétée</span>
+        </div>`;
+}
+
+// ── Utilitaires ───────────────────────────────────────────────────────────────
+function minutesToLabel(min) {
+    const m = Math.round(min || 0);
+    if (m < 60) return m + ' min';
+    const h = Math.floor(m / 60);
+    const r = m % 60;
+    return r > 0 ? `${h}h ${r}min` : `${h}h`;
+}
+
+function escSess(t) {
+    if (!t) return '';
+    const d = document.createElement('div');
+    d.appendChild(document.createTextNode(t));
+    return d.innerHTML;
 }

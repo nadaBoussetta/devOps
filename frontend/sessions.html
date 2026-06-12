@@ -3,27 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bibliothèques Île-de-France</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Sessions de Révision - Bibliothèques d'Île‑de‑France</title>
     <link rel="stylesheet" href="css/sessions.css">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Parisienne&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <link rel="icon" href="resources/logo_pic.png" type="image/png">
-
 </head>
 <body>
+<div class="main-wrapper">
+    <div class="background-image"></div>
 
-<div class="header">
-    <img alt="logo" id="logo_pic" src="resources/logo_pic.png" >
-    <h1 id="titre">Bibliothèques d’Île‑de‑France</h1>
-</div>
+    <aside class="sidebar">
+        <div class="big-number">06</div>
+        <div class="interior-label">Productivité</div>
+        <h1>Sessions</h1>
+        <p class="description">
+            Optimisez votre temps d'étude. Fixez vos objectifs, lancez le chrono et suivez vos progrès.
+        </p>
+        <a href="MyFeed.html" class="read-more">
+            <i class="fas fa-arrow-left"></i> Retour à l'accueil
+        </a>
+    </aside>
 
-<div class="menu">
-    <menu>
-        <ul class="menu_1">
-            <li><a href="index.html" >Accueil</a></li>
+    <nav>
+        <div class="logo">Bibliothèques IDF</div>
+        <ul class="nav-links">
+            <li><a href="MyFeed.html">Accueil</a></li>
             <li><a href="recherche.html">Recherche</a></li>
             <li><a href="livres.html">Livres</a></li>
             <li><a href="feed.html">Feed Social</a></li>
@@ -31,92 +36,140 @@
             <li><a href="sessions.html">Sessions</a></li>
             <li><a href="notifications.html">Notifications</a></li>
             <li><a href="login.html" id="auth-link">Connexion</a></li>
-
-
+            <li><a href="profile.html">Mon Profil</a></li>
         </ul>
-    </menu>
-</div>
+        <div class="search-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+        </div>
+    </nav>
 
-<div class="partie_1"></div>
+    <main class="content-overlay">
 
-    <main class="container">
-        <section class="sessions-section">
-            <h2 class="tit-s">Sessions</h2>
-            <p class="tit-s">Organisez vos sessions de révision et suivez votre progression.</p>
+        <!-- Stats rapides -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                <span class="stat-value" id="stat-sessions">0</span>
+                <span class="stat-label">Sessions cette semaine</span>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                <span class="stat-value" id="stat-minutes">0</span>
+                <span class="stat-label">Minutes travaillées</span>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-fire"></i></div>
+                <span class="stat-value" id="stat-streak">0</span>
+                <span class="stat-label">Jours consécutifs</span>
+            </div>
+        </section>
 
-            <!-- Section Créer une session -->
-            <div class="create-session">
-                <h3 class="tit-s">Créer une nouvelle session</h3>
-                <form id="create-session-form">
-                    <div class="form-group" style="margin:15px;">
-                        <label for="objectif" style="color: black;">Objectif</label>
-                        <input type="text" id="objectif" placeholder="Ex: Lire 20 pages, Réviser les chapitres 1-3" required>
+        <!-- Tableau de bord -->
+        <section class="dashboard-section">
+            <h3 class="section-title-small">Tableau de bord</h3>
+            <div class="dashboard-grid">
+
+                <!-- Cercle de progression hebdo -->
+                <div class="dashboard-card dashboard-circle-card">
+                    <p class="dash-label">Objectif hebdo</p>
+                    <div class="circle-container">
+                        <svg viewBox="0 0 120 120" class="circle-svg">
+                            <circle cx="60" cy="60" r="52" class="circle-bg"/>
+                            <circle cx="60" cy="60" r="52" class="circle-fill" id="circle-fill"/>
+                        </svg>
+                        <div class="circle-inner">
+                            <span class="circle-pct" id="circle-pct">0%</span>
+                            <span class="circle-sub">de 5h</span>
+                        </div>
                     </div>
-                    <div class="form-group" style="margin:15px;">
-                        <label for="duree" style="color:black">Durée (minutes)</label>
+                    <p class="dash-note" id="dash-objectif-note">—</p>
+                </div>
+
+                <!-- Distribution du temps -->
+                <div class="dashboard-card">
+                    <p class="dash-label">Cette semaine</p>
+                    <div class="week-bars" id="week-bars">
+                        <!-- Généré par JS -->
+                    </div>
+                    <div class="week-days">
+                        <span>L</span><span>M</span><span>M</span>
+                        <span>J</span><span>V</span><span>S</span><span>D</span>
+                    </div>
+                </div>
+
+                <!-- Dernière session -->
+                <div class="dashboard-card">
+                    <p class="dash-label">Dernière session</p>
+                    <div class="last-session-info" id="last-session-info">
+                        <i class="fas fa-history"></i>
+                        <span>Aucune session</span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Box session principale -->
+        <section class="session-main-box">
+            <div id="setup-container">
+                <h2 class="section-title">Nouvelle session</h2>
+                <form id="create-session-form" class="glass-form">
+                    <div class="form-group">
+                        <label>Objectif de la séance</label>
+                        <input type="text" id="objectif" placeholder="Ex : Chapitre 4 de Droit Civil" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Durée (minutes)</label>
                         <input type="number" id="duree" min="5" max="480" value="60" required>
                     </div>
-                    <button type="submit" class="btn btn-primary">Créer une session</button>
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-play"></i> Lancer le minuteur
+                    </button>
                 </form>
             </div>
 
-            <!-- Section Session en cours -->
-            <div id="session-en-cours" style="display: none;">
-                <h3 class="tit-s">Session en cours</h3>
-                <div class="card">
-                    <h4 id="session-objectif"></h4>
-                    <div class="session-timer" id="session-timer">00:00:00</div>
+            <div id="session-active-container" style="display:none">
+                <p id="session-objectif-display">Focus en cours...</p>
+                <div class="timer-display" id="session-timer">00:00:00</div>
+                <div class="progress-container">
                     <div class="progress-bar">
-                        <div class="progress-fill" id="progress-fill" style="width: 0%;">
-                            <span id="progress-text">0%</span>
-                        </div>
+                        <div class="progress-fill" id="progress-fill"></div>
                     </div>
-                    <p><strong>Temps restant:</strong> <span id="temps-restant">--</span> minutes</p>
-                    <div class="session-controls">
-                        <button id="btn-start" class="btn btn-timer btn-start" onclick="startSession()">Démarrer</button>
-                        <button id="btn-pause" class="btn btn-timer btn-pause" onclick="pauseSession()" style="display: none;">Pause</button>
-                        <button id="btn-resume" class="btn btn-timer btn-start" onclick="resumeSession()" style="display: none;">Reprendre</button>
-                        <button class="btn btn-timer btn-stop" onclick="completerSession()">Terminer</button>
-                    </div>
+                    <span id="progress-text">0%</span>
                 </div>
-            </div>
-
-            <!-- Section Statistiques -->
-            <div id="statistiques-section">
-                <h3 class="tit-s">Statistiques hebdomadaires</h3>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value" id="stat-sessions">0</div>
-                        <div class="stat-label">Sessions complétées</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="stat-minutes">0</div>
-                        <div class="stat-label">Minutes totales</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="stat-streak">0</div>
-                        <div class="stat-label">Jours consécutifs</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Section Historique des sessions -->
-            <div class="sessions-list">
-                <h3 class="tit-s">Historique des sessions</h3>
-                <div id="sessions-container" class="loading">
-                    <p>Chargement de vos sessions...</p>
+                <div class="timer-controls">
+                    <button id="btn-pause" class="btn-circle" onclick="pauseSession()" title="Pause">
+                        <i class="fa-solid fa-pause"></i>
+                    </button>
+                    <button id="btn-resume" class="btn-circle btn-play" onclick="resumeSession()" style="display:none" title="Reprendre">
+                        <i class="fa-solid fa-play"></i>
+                    </button>
+                    <button class="btn-circle btn-stop" onclick="completerSession()" title="Terminer">
+                        <i class="fa-solid fa-check"></i>
+                    </button>
                 </div>
             </div>
         </section>
+
+        <!-- Historique -->
+        <section class="history-section">
+            <h3 class="section-title-small">Historique récent</h3>
+            <div id="sessions-container" class="glass-list">
+                <p class="info-message"><i class="fas fa-clock"></i> Aucune session enregistrée.</p>
+            </div>
+        </section>
+
     </main>
 
     <footer>
-        <div class="container">
-            <p>&copy; 2026 Bibliothèques Île-de-France. Tous droits réservés.</p>
-        </div>
+        <p>&copy; 2024 Bibliothèques Île-de-France. Tous droits réservés.</p>
     </footer>
+</div>
 
-    <script src="js/api.js"></script>
-    <script src="js/sessions.js"></script>
+<script src="js/api.js"></script>
+<script src="js/sessions.js"></script>
 </body>
 </html>

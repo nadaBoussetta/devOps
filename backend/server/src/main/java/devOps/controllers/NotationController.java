@@ -1,17 +1,23 @@
 package devOps.controllers;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import devOps.dtos.FavoriDTO;
 import devOps.dtos.NotationDTO;
 import devOps.services.NotationService;
 import devOps.util.SecurityUtil;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/notations")
@@ -22,57 +28,47 @@ public class NotationController {
     private NotationService notationService;
 
     @PostMapping
-    public ResponseEntity<NotationDTO> noterBibliotheque(
-            @Valid @RequestBody NotationDTO notationDTO,
-            Authentication authentication) {
-        Long userId = extractUserId(authentication);
-        NotationDTO notation = notationService.noterBibliotheque(notationDTO, userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(notation);
+    public ResponseEntity<NotationDTO> noter(@Valid @RequestBody NotationDTO dto) {
+        return ResponseEntity.ok(notationService.noterBibliotheque(dto, uid()));
     }
 
-    @GetMapping("/mes-notations")
-    public ResponseEntity<List<NotationDTO>> getMesNotations(Authentication authentication) {
-        Long userId = extractUserId(authentication);
-        List<NotationDTO> notations = notationService.getNotationsByUser(userId);
-        return ResponseEntity.ok(notations);
+    @GetMapping("/mes-avis")
+    public ResponseEntity<List<NotationDTO>> getMesAvis() {
+        return ResponseEntity.ok(notationService.getNotationsByUser(uid()));
     }
 
     @GetMapping("/bibliotheque/{bibliothequeId}")
-    public ResponseEntity<List<NotationDTO>> getNotationsByBibliotheque(@PathVariable Long bibliothequeId) {
-        List<NotationDTO> notations = notationService.getNotationsByBibliotheque(bibliothequeId);
-        return ResponseEntity.ok(notations);
+    public ResponseEntity<List<NotationDTO>> getAvisBibliotheque(@PathVariable Long bibliothequeId) {
+        return ResponseEntity.ok(notationService.getNotationsByBibliotheque(bibliothequeId));
     }
 
-    @PostMapping("/favoris/{bibliothequeId}")
-    public ResponseEntity<FavoriDTO> ajouterFavori(
-            @PathVariable Long bibliothequeId,
-            Authentication authentication) {
-        Long userId = extractUserId(authentication);
-        FavoriDTO favori = notationService.ajouterFavori(bibliothequeId, userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(favori);
-    }
-
-    @DeleteMapping("/favoris/{bibliothequeId}")
-    public ResponseEntity<Void> supprimerFavori(
-            @PathVariable Long bibliothequeId,
-            Authentication authentication) {
-        Long userId = extractUserId(authentication);
-        notationService.supprimerFavori(bibliothequeId, userId);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> supprimer(@PathVariable Long id) {
+        notationService.supprimerNotation(id, uid());
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/mes-favoris")
-    public ResponseEntity<List<FavoriDTO>> getMesFavoris(Authentication authentication) {
-        Long userId = extractUserId(authentication);
-        List<FavoriDTO> favoris = notationService.getFavorisByUser(userId);
-        return ResponseEntity.ok(favoris);
+    // ─── Favoris ──────────────────────────────────────────────────────────────
+
+    @PostMapping("/favoris/{bibliothequeId}")
+    public ResponseEntity<FavoriDTO> ajouterFavori(@PathVariable Long bibliothequeId) {
+        return ResponseEntity.ok(notationService.ajouterFavori(bibliothequeId, uid()));
     }
 
-    private Long extractUserId(Authentication authentication) {
-        Long userId = SecurityUtil.getCurrentUserId();
-        if (userId == null) {
-            throw new RuntimeException("Utilisateur non authentifié");
-        }
-        return userId;
+    @DeleteMapping("/favoris/{bibliothequeId}")
+    public ResponseEntity<Void> supprimerFavori(@PathVariable Long bibliothequeId) {
+        notationService.supprimerFavori(bibliothequeId, uid());
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/favoris")
+    public ResponseEntity<List<FavoriDTO>> getMesFavoris() {
+        return ResponseEntity.ok(notationService.getFavorisByUser(uid()));
+    }
+
+    private Long uid() {
+        Long id = SecurityUtil.getCurrentUserId();
+        if (id == null) throw new RuntimeException("Non authentifié");
+        return id;
     }
 }

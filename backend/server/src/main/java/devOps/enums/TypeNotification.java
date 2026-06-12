@@ -5,7 +5,12 @@ public enum TypeNotification {
     AFFLUENCE_FAIBLE("Affluence faible"),
     LIVRE_DISPONIBLE("Livre disponible"),
     NOUVELLE_BIBLIOTHEQUE("Nouvelle bibliothèque"),
-    RECOMMANDATION("Recommandation personnalisée");
+    RECOMMANDATION("Recommandation personnalisée"),
+    RAPPEL_LECTURE("Rappel de lecture"),
+    NOUVELLE_PUBLICATION("Nouvelle publication"),
+    RECHERCHE_LIVRE("Suggestion de livre"),
+    SESSION_REMINDER("Rappel de session"),
+    OBJECTIF_ATTEINT("Objectif atteint");
 
     private final String description;
 

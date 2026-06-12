@@ -1,138 +1,130 @@
 package devOps.services;
 
-import devOps.dtos.*;
-import devOps.models.*;
-import devOps.repositories.*;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import devOps.dtos.FavoriDTO;
+import devOps.dtos.NotationDTO;
+import devOps.models.FavoriEntity;
+import devOps.models.LibraryEntity;
+import devOps.models.NotationEntity;
+import devOps.models.UtilisateurEntity;
+import devOps.repositories.FavoriRepository;
+import devOps.repositories.LibraryRepository;
+import devOps.repositories.NotationRepository;
+import devOps.repositories.UtilisateurRepository;
 
 @Service
 public class NotationService {
 
-    @Autowired
-    private NotationRepository notationRepository;
-
-    @Autowired
-    private FavoriRepository favoriRepository;
-
-    @Autowired
-    private UtilisateurRepository userRepository;
-
-    @Autowired
-    private LibraryRepository bibliothequeRepository;
+    @Autowired private NotationRepository notationRepository;
+    @Autowired private FavoriRepository favoriRepository;
+    @Autowired private UtilisateurRepository userRepository;
+    @Autowired private LibraryRepository bibliothequeRepository;
 
     @Transactional
-    public NotationDTO noterBibliotheque(NotationDTO notationDTO, Long userId) {
+    public NotationDTO noterBibliotheque(NotationDTO dto, Long userId) {
         UtilisateurEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
-
-        LibraryEntity bibliotheque = bibliothequeRepository.findById(notationDTO.getBibliothequeId())
+        LibraryEntity biblio = bibliothequeRepository.findById(dto.getBibliothequeId())
                 .orElseThrow(() -> new RuntimeException("Bibliothèque non trouvée"));
 
         NotationEntity notation = notationRepository
-                .findByUserIdAndBibliothequeId(userId, notationDTO.getBibliothequeId())
+                .findByUserIdAndBibliothequeId(userId, dto.getBibliothequeId())
                 .orElse(new NotationEntity());
 
         notation.setUser(user);
-        notation.setBibliotheque(bibliotheque);
-        notation.setNote(notationDTO.getNote());
-        notation.setCommentaire(notationDTO.getCommentaire());
-        notation.setDateVisite(notationDTO.getDateVisite());
+        notation.setBibliotheque(biblio);
+        notation.setNote(dto.getNote());
+        notation.setCommentaire(dto.getCommentaire());
+        notation.setDateVisite(dto.getDateVisite());
 
-        NotationEntity savedNotation = notationRepository.save(notation);
+        NotationEntity saved = notationRepository.save(notation);
 
-        updateNoteGlobaleBibliotheque(bibliotheque);
+        // Recalculer la note globale
+        List<NotationEntity> toutes = notationRepository.findByBibliothequeIdOrderByDateNotationDesc(biblio.getId());
+        double avg = toutes.stream().mapToInt(NotationEntity::getNote).average().orElse(0);
+        biblio.setNoteGlobale(avg);
+        biblio.setNombreNotations(toutes.size());
+        bibliothequeRepository.save(biblio);
 
-        return convertNotationToDTO(savedNotation);
+        return convertToDTO(saved);
     }
 
     public List<NotationDTO> getNotationsByUser(Long userId) {
-        return notationRepository.findByUserIdOrderByDateNotationDesc(userId).stream()
-                .map(this::convertNotationToDTO)
-                .collect(Collectors.toList());
+        return notationRepository.findByUserIdOrderByDateNotationDesc(userId)
+                .stream().map(this::convertToDTO).collect(Collectors.toList());
     }
-
 
     public List<NotationDTO> getNotationsByBibliotheque(Long bibliothequeId) {
-        return notationRepository.findByBibliothequeIdOrderByDateNotationDesc(bibliothequeId).stream()
-                .map(this::convertNotationToDTO)
-                .collect(Collectors.toList());
+        return notationRepository.findByBibliothequeIdOrderByDateNotationDesc(bibliothequeId)
+                .stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
+    @Transactional
+    public void supprimerNotation(Long notationId, Long userId) {
+        NotationEntity notation = notationRepository.findById(notationId)
+                .orElseThrow(() -> new RuntimeException("Notation non trouvée"));
+        if (!notation.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Non autorisé");
+        }
+        notationRepository.delete(notation);
+    }
+
+    // ─── Favoris ──────────────────────────────────────────────────────────────
 
     @Transactional
     public FavoriDTO ajouterFavori(Long bibliothequeId, Long userId) {
         UtilisateurEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
-
-        LibraryEntity bibliotheque = bibliothequeRepository.findById(bibliothequeId)
+        LibraryEntity biblio = bibliothequeRepository.findById(bibliothequeId)
                 .orElseThrow(() -> new RuntimeException("Bibliothèque non trouvée"));
 
         if (favoriRepository.existsByUser_IdAndLibraryEntity_Id(userId, bibliothequeId)) {
-            throw new RuntimeException("Cette bibliothèque est déjà dans vos favoris");
+            throw new RuntimeException("Déjà en favoris");
         }
 
         FavoriEntity favori = new FavoriEntity();
         favori.setUser(user);
-        favori.setLibraryEntity(bibliotheque);
-
-        FavoriEntity savedFavori = favoriRepository.save(favori);
-        return convertFavoriToDTO(savedFavori);
+        favori.setLibraryEntity(biblio);
+        FavoriEntity saved = favoriRepository.save(favori);
+        return convertFavoriToDTO(saved);
     }
 
     @Transactional
     public void supprimerFavori(Long bibliothequeId, Long userId) {
-        if (!favoriRepository.existsByUser_IdAndLibraryEntity_Id(userId, bibliothequeId)) {
-            throw new RuntimeException("Ce favori n'existe pas");
-        }
-
         favoriRepository.deleteByUser_IdAndLibraryEntity_Id(userId, bibliothequeId);
     }
 
     public List<FavoriDTO> getFavorisByUser(Long userId) {
-        return favoriRepository.findByUser_IdOrderByDateAjoutDesc(userId).stream()
-                .map(this::convertFavoriToDTO)
-                .collect(Collectors.toList());
+        return favoriRepository.findByUser_IdOrderByDateAjoutDesc(userId)
+                .stream().map(this::convertFavoriToDTO).collect(Collectors.toList());
     }
 
-    private void updateNoteGlobaleBibliotheque(LibraryEntity bibliotheque) {
-        List<NotationEntity> notations = notationRepository.findByBibliothequeIdOrderByDateNotationDesc(bibliotheque.getId());
+    // ─── Utilitaires ──────────────────────────────────────────────────────────
 
-        if (!notations.isEmpty()) {
-            double moyenne = notations.stream()
-                    .mapToInt(NotationEntity::getNote)
-                    .average()
-                    .orElse(0.0);
-
-            bibliotheque.setNoteGlobale(Math.round(moyenne * 10.0) / 10.0);
-            bibliotheque.setNombreNotations(notations.size());
-            bibliothequeRepository.save(bibliotheque);
-        }
-    }
-
-
-    private NotationDTO convertNotationToDTO(NotationEntity notation) {
+    private NotationDTO convertToDTO(NotationEntity n) {
         NotationDTO dto = new NotationDTO();
-        dto.setId(notation.getId());
-        dto.setBibliothequeId(notation.getBibliotheque().getId());
-        dto.setBibliothequeNom(notation.getBibliotheque().getNom());
-        dto.setNote(notation.getNote());
-        dto.setCommentaire(notation.getCommentaire());
-        dto.setDateVisite(notation.getDateVisite());
-        dto.setDateNotation(notation.getDateNotation());
+        dto.setId(n.getId());
+        dto.setBibliothequeId(n.getBibliotheque().getId());
+        dto.setBibliothequeNom(n.getBibliotheque().getNom());
+        dto.setNote(n.getNote());
+        dto.setCommentaire(n.getCommentaire());
+        dto.setDateVisite(n.getDateVisite());
+        dto.setDateNotation(n.getDateNotation());
         return dto;
     }
 
-    private FavoriDTO convertFavoriToDTO(FavoriEntity favori) {
+    private FavoriDTO convertFavoriToDTO(FavoriEntity f) {
         FavoriDTO dto = new FavoriDTO();
-        dto.setId(favori.getId());
-        dto.setBibliothequeId(favori.getLibraryEntity().getId());
-        dto.setBibliothequeNom(favori.getLibraryEntity().getNom());
-        dto.setDateAjout(favori.getDateAjout());
+        dto.setId(f.getId());
+        dto.setBibliothequeId(f.getLibraryEntity().getId());
+        dto.setBibliothequeNom(f.getLibraryEntity().getNom());
+        dto.setDateAjout(f.getDateAjout());
         return dto;
     }
 }
