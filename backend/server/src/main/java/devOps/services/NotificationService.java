@@ -86,14 +86,14 @@ public class NotificationService {
         notificationRepository.deleteByUserIdAndLueIsTrue(userId);
     }
 
-    // ─── Générateurs de notifications enrichis ────────────────────────────────
+    // ─── Générateurs de notifications ─────────────────────────────────────────
 
     @Transactional
     public void genererNotificationFermeture(Long userId, Long bibliothequeId) {
         LibraryEntity b = getBib(bibliothequeId);
         creerNotification(userId, TypeNotification.FERMETURE_BIBLIOTHEQUE,
                 "Fermeture imminente — " + b.getNom(),
-                "La bibliothèque " + b.getNom() + " ferme dans 30 minutes. Pensez à sauvegarder vos affaires !",
+                "La bibliothèque " + b.getNom() + " ferme dans 30 minutes.",
                 bibliothequeId);
     }
 
@@ -101,8 +101,8 @@ public class NotificationService {
     public void genererNotificationAffluenceFaible(Long userId, Long bibliothequeId) {
         LibraryEntity b = getBib(bibliothequeId);
         creerNotification(userId, TypeNotification.AFFLUENCE_FAIBLE,
-                "Moment idéal pour réviser 📚",
-                "La bibliothèque " + b.getNom() + " est calme en ce moment. C'est le moment parfait pour une session de révision !",
+                "Moment idéal pour réviser \uD83D\uDCDA",
+                "La bibliothèque " + b.getNom() + " est calme en ce moment.",
                 bibliothequeId);
     }
 
@@ -111,7 +111,7 @@ public class NotificationService {
         LibraryEntity b = getBib(bibliothequeId);
         creerNotification(userId, TypeNotification.LIVRE_DISPONIBLE,
                 "\"" + titreLivre + "\" est disponible !",
-                "Bonne nouvelle ! Le livre \"" + titreLivre + "\" est maintenant disponible à la bibliothèque " + b.getNom() + ". Dépêchez-vous avant qu'il ne soit emprunté.",
+                "Le livre \"" + titreLivre + "\" est disponible à " + b.getNom() + ".",
                 bibliothequeId);
     }
 
@@ -119,31 +119,24 @@ public class NotificationService {
     public void genererNotificationRecommandation(Long userId, Long bibliothequeId) {
         LibraryEntity b = getBib(bibliothequeId);
         creerNotification(userId, TypeNotification.RECOMMANDATION,
-                "Bibliothèque recommandée pour vous ⭐",
-                "Basé sur vos habitudes, nous pensons que vous adoreriez " + b.getNom() + ". Elle correspond parfaitement à vos centres d'intérêt !",
+                "Bibliothèque recommandée pour vous \u2B50",
+                "Nous pensons que vous adoreriez " + b.getNom() + ".",
                 bibliothequeId);
     }
 
-    // ✅ Nouveaux générateurs
-
     @Transactional
     public void genererRappelLecture(Long userId, String titreLivre) {
-        String[] messages = {
-            "Vous n'avez pas lu \"" + titreLivre + "\" depuis quelques jours. Reprenez votre lecture, vous étiez sur une bonne lancée !",
-            "Rappel doux : \"" + titreLivre + "\" vous attend. Même 15 minutes de lecture font la différence !",
-            "\"" + titreLivre + "\" s'impatiente 📖 Accordez-lui un peu de temps aujourd'hui ?"
-        };
-        int idx = (int)(Math.random() * messages.length);
         creerNotification(userId, TypeNotification.RAPPEL_LECTURE,
-                "Continuez \"" + titreLivre + "\" 📖",
-                messages[idx], null);
+                "Continuez \"" + titreLivre + "\" \uD83D\uDCD6",
+                "\"" + titreLivre + "\" vous attend. Même 15 minutes font la différence !",
+                null);
     }
 
     @Transactional
     public void genererNotificationNouvellePublication(Long userId, String auteurUsername, String extrait) {
         creerNotification(userId, TypeNotification.NOUVELLE_PUBLICATION,
-                auteurUsername + " a publié quelque chose 💬",
-                "\"" + extrait + "\" — Réagissez ou commentez dans le Feed Social !",
+                auteurUsername + " a publié quelque chose \uD83D\uDCAC",
+                "\"" + extrait + "\" — Réagissez dans le Feed Social !",
                 null);
     }
 
@@ -158,16 +151,16 @@ public class NotificationService {
     @Transactional
     public void genererRappelSession(Long userId, String objectif) {
         creerNotification(userId, TypeNotification.SESSION_REMINDER,
-                "Il est temps de réviser ! ⏱️",
-                "Vous avez planifié une session sur \"" + objectif + "\". Lancez le minuteur et restez concentré — vous êtes capable !",
+                "Il est temps de réviser ! \u23F1\uFE0F",
+                "Session planifiée sur \"" + objectif + "\". Lancez le minuteur !",
                 null);
     }
 
     @Transactional
     public void genererNotificationObjectifAtteint(Long userId, String objectif, int minutes) {
         creerNotification(userId, TypeNotification.OBJECTIF_ATTEINT,
-                "Félicitations ! Objectif atteint 🎉",
-                "Vous avez complété \"" + objectif + "\" en " + minutes + " minutes. Excellent travail — chaque session vous rapproche de votre but !",
+                "Félicitations ! Objectif atteint \uD83C\uDF89",
+                "Vous avez complété \"" + objectif + "\" en " + minutes + " minutes.",
                 null);
     }
 

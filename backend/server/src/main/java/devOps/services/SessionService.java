@@ -89,9 +89,8 @@ public class SessionService {
                 .filter(s -> ChronoUnit.DAYS.between(s.getDateCreation(), LocalDateTime.now()) <= 7)
                 .collect(Collectors.toList());
 
-        // ✅ Fix : utiliser tempsEcoulesMinutes (temps réel) et non dureeMinutes (temps prévu)
         Integer totalMinutes = sessionsHebdo.stream()
-                .mapToInt(SessionEntity::getTempsEcoulesMinutes)
+                .mapToInt(SessionEntity::getDureeMinutes)
                 .sum();
 
         return new SessionStatistiquesDTO(

@@ -144,7 +144,6 @@ class ProfileCountersTest {
                         makeFavori(2L, nour, bib2)
                 ));
 
-        when(favoriRepository.existsByUser_IdAndLibraryEntity_Id(1L, 3L)).thenReturn(true);
         doNothing().when(favoriRepository).deleteByUser_IdAndLibraryEntity_Id(1L, 3L);
 
         // Avant suppression

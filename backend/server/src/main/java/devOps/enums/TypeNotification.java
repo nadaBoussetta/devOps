@@ -1,14 +1,11 @@
 package devOps.enums;
 
 public enum TypeNotification {
-    // Existants
     FERMETURE_BIBLIOTHEQUE("Fermeture imminente"),
     AFFLUENCE_FAIBLE("Affluence faible"),
     LIVRE_DISPONIBLE("Livre disponible"),
     NOUVELLE_BIBLIOTHEQUE("Nouvelle bibliothèque"),
     RECOMMANDATION("Recommandation personnalisée"),
-
-    // ✅ Nouveaux types
     RAPPEL_LECTURE("Rappel de lecture"),
     NOUVELLE_PUBLICATION("Nouvelle publication"),
     RECHERCHE_LIVRE("Suggestion de livre"),

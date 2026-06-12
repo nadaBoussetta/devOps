@@ -6,13 +6,12 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,83 +28,65 @@ public class NotificationController {
     private NotificationService notificationService;
 
     @GetMapping
-    public ResponseEntity<List<NotificationDTO>> getNotifications() {
-        return ResponseEntity.ok(notificationService.getNotificationsByUser(uid()));
+    public ResponseEntity<List<NotificationDTO>> getNotifications(Authentication authentication) {
+        Long userId = extractUserId(authentication);
+        List<NotificationDTO> notifications = notificationService.getNotificationsByUser(userId);
+        return ResponseEntity.ok(notifications);
     }
 
     @GetMapping("/non-lues")
-    public ResponseEntity<List<NotificationDTO>> getNonLues() {
-        return ResponseEntity.ok(notificationService.getNotificationsNonLuesByUser(uid()));
+    public ResponseEntity<List<NotificationDTO>> getNotificationsNonLues(Authentication authentication) {
+        Long userId = extractUserId(authentication);
+        List<NotificationDTO> notifications = notificationService.getNotificationsNonLuesByUser(userId);
+        return ResponseEntity.ok(notifications);
     }
 
     @GetMapping("/count-non-lues")
-    public ResponseEntity<Map<String, Integer>> countNonLues() {
-        Map<String, Integer> r = new HashMap<>();
-        r.put("count", notificationService.countNotificationsNonLues(uid()));
-        return ResponseEntity.ok(r);
+    public ResponseEntity<Map<String, Integer>> countNotificationsNonLues(Authentication authentication) {
+        Long userId = extractUserId(authentication);
+        Integer count = notificationService.countNotificationsNonLues(userId);
+        Map<String, Integer> response = new HashMap<>();
+        response.put("count", count);
+        return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/{id}/lire")
-    public ResponseEntity<NotificationDTO> marquerLue(@PathVariable Long id) {
-        return ResponseEntity.ok(notificationService.marquerCommeLue(id));
+    @PutMapping("/{notificationId}/lire")
+    public ResponseEntity<NotificationDTO> marquerCommeLue(
+            @PathVariable Long notificationId,
+            Authentication authentication) {
+        Long userId = extractUserId(authentication);
+        NotificationDTO notification = notificationService.marquerCommeLue(notificationId);
+        return ResponseEntity.ok(notification);
     }
 
     @PutMapping("/lire-tout")
-    public ResponseEntity<Void> marquerToutesLues() {
-        notificationService.marquerToutesCommeLues(uid());
+    public ResponseEntity<Void> marquerToutesCommeLues(Authentication authentication) {
+        Long userId = extractUserId(authentication);
+        notificationService.marquerToutesCommeLues(userId);
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> supprimer(@PathVariable Long id) {
-        notificationService.supprimerNotification(id);
+    @DeleteMapping("/{notificationId}")
+    public ResponseEntity<Void> supprimerNotification(
+            @PathVariable Long notificationId,
+            Authentication authentication) {
+        Long userId = extractUserId(authentication);
+        notificationService.supprimerNotification(notificationId);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/lues")
-    public ResponseEntity<Void> supprimerLues() {
-        notificationService.supprimerNotificationsLues(uid());
+    public ResponseEntity<Void> supprimerNotificationsLues(Authentication authentication) {
+        Long userId = extractUserId(authentication);
+        notificationService.supprimerNotificationsLues(userId);
         return ResponseEntity.noContent().build();
     }
 
-    // ✅ Endpoints de déclenchement manuel (utile pour tests / démo)
-    @PostMapping("/generer/rappel-lecture")
-    public ResponseEntity<Void> genererRappelLecture(@RequestBody Map<String, String> body) {
-        notificationService.genererRappelLecture(uid(), body.get("titreLivre"));
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/generer/nouvelle-publication")
-    public ResponseEntity<Void> genererNouvellePublication(@RequestBody Map<String, String> body) {
-        notificationService.genererNotificationNouvellePublication(uid(),
-                body.get("auteurUsername"), body.get("extrait"));
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/generer/suggestion-livre")
-    public ResponseEntity<Void> genererSuggestionLivre(@RequestBody Map<String, String> body) {
-        notificationService.genererSuggestionLivre(uid(),
-                body.get("titreLivre"), body.get("auteur"), body.get("raison"));
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/generer/rappel-session")
-    public ResponseEntity<Void> genererRappelSession(@RequestBody Map<String, String> body) {
-        notificationService.genererRappelSession(uid(), body.get("objectif"));
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/generer/objectif-atteint")
-    public ResponseEntity<Void> genererObjectifAtteint(@RequestBody Map<String, Object> body) {
-        notificationService.genererNotificationObjectifAtteint(uid(),
-                (String) body.get("objectif"),
-                ((Number) body.get("minutes")).intValue());
-        return ResponseEntity.noContent().build();
-    }
-
-    private Long uid() {
-        Long id = SecurityUtil.getCurrentUserId();
-        if (id == null) throw new RuntimeException("Non authentifié");
-        return id;
+    private Long extractUserId(Authentication authentication) {
+        Long userId = SecurityUtil.getCurrentUserId();
+        if (userId == null) {
+            throw new RuntimeException("Utilisateur non authentifié");
+        }
+        return userId;
     }
 }
