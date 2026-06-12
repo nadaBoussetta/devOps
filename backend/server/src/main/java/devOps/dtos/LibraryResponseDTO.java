@@ -12,6 +12,9 @@ import java.util.List;
 @AllArgsConstructor
 public class LibraryResponseDTO {
 
+    private Double searchLatitude;
+    private Double searchLongitude;
+
     private Long id;
     private String nom;
     private String adresse;

@@ -10,13 +10,262 @@
 
 
     <link rel="icon" href="resources/logo_pic.png" type="image/png">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <style>
+        #map {
+            height: 500px;
+            width: 100%;
+            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .map-section {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        /* Styles pour l'autocomplétion */
+        .address-input-wrapper {
+            position: relative;
+        }
+
+        .autocomplete-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            border-radius: 0 0 4px 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .autocomplete-suggestion {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.2s;
+        }
+
+        .autocomplete-suggestion:hover {
+            background-color: #f5f5f5;
+        }
+
+        .autocomplete-suggestion:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-suggestion-main {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .autocomplete-suggestion-sub {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 3px;
+        }
+
+        .geolocation-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2em;
+            color: #007bff;
+            padding: 5px 10px;
+            transition: color 0.2s;
+        }
+
+        .geolocation-btn:hover {
+            color: #0056b3;
+        }
+
+        .geolocation-btn.loading {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: translateY(-50%) rotate(0deg); }
+            to { transform: translateY(-50%) rotate(360deg); }
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        /* ===== Styles pour la recherche avancée (itinéraire) ===== */
+        .btn-advanced {
+            background: linear-gradient(135deg, #6f42c1, #4a2d8f);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-left: 0.75rem;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .btn-advanced:hover {
+            background: linear-gradient(135deg, #5a32a3, #3b2270);
+            transform: translateY(-1px);
+        }
+        .btn-advanced:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .itineraire-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #f0ebfa;
+            border-radius: 10px;
+            border-left: 5px solid #6f42c1;
+        }
+        .itineraire-section h3 {
+            color: #4a2d8f;
+            margin-bottom: 0.5rem;
+        }
+        .itineraire-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: #555;
+        }
+        .itineraire-meta span {
+            background: white;
+            padding: 0.3rem 0.75rem;
+            border-radius: 20px;
+            border: 1px solid #d0b8f5;
+        }
+        .itineraire-badge-ok {
+            background: #d4edda !important;
+            border-color: #28a745 !important;
+            color: #155724 !important;
+            font-weight: 600;
+        }
+        .itineraire-badge-partial {
+            background: #fff3cd !important;
+            border-color: #ffc107 !important;
+            color: #856404 !important;
+            font-weight: 600;
+        }
+
+        .itineraire-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+        .itineraire-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            position: relative;
+        }
+        .itineraire-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 19px;
+            top: 44px;
+            width: 2px;
+            height: calc(100% - 10px);
+            background: #c3a6f5;
+        }
+        .step-number {
+            min-width: 40px;
+            height: 40px;
+            background: #6f42c1;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            flex-shrink: 0;
+            margin-top: 0.25rem;
+            z-index: 1;
+        }
+        .step-content {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            flex: 1;
+            margin-bottom: 1.25rem;
+            box-shadow: 0 1px 4px rgba(111,66,193,0.1);
+            border: 1px solid #e0d0f8;
+        }
+        .step-content h4 {
+            margin: 0 0 0.4rem 0;
+            color: #3b2270;
+            font-size: 1rem;
+        }
+        .step-creneau {
+            display: inline-block;
+            background: #6f42c1;
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .step-details {
+            font-size: 0.88rem;
+            color: #555;
+            line-height: 1.6;
+        }
+        .step-details strong {
+            color: #333;
+        }
+        .itineraire-message {
+            margin-top: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            font-size: 0.92rem;
+        }
+        .itineraire-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .itineraire-message.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        .itineraire-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .itineraire-map-route {
+            stroke: #6f42c1;
+            stroke-width: 3;
+            stroke-dasharray: 8, 5;
+        }
+    </style>
 
 </head>
 <body>
 
 <div class="header">
     <img alt="logo" id="logo_pic" src="resources/logo_pic.png" >
-    <h1 id="titre">Bibliothèques d’Île‑de‑France</h1>
+    <h1 id="titre">Bibliothèques d'Île‑de‑France</h1>
 </div>
 
 <div class="menu">
@@ -38,53 +287,77 @@
 
 <div class="partie_1"></div>
 
-    <main class="container">
-        <section class="search-section">
-            <h2 class="tit-s">Rechercher une bibliothèque</h2>
-            <p class="tit-s">Trouvez les bibliothèques les plus adaptées selon votre localisation et vos horaires.</p>
+<main class="container">
+    <section class="search-section">
+        <h2 class="tit-s">Rechercher une bibliothèque</h2>
+        <p class="tit-s">Trouvez les bibliothèques les plus adaptées selon votre localisation et vos horaires.</p>
 
-            <form id="search-form" class="search-form">
-                <div class="form-group">
-                    <label for="adresse">Adresse ou lieu</label>
-                    <input type="text" id="adresse" placeholder="Ex: 5 Rue de la Sorbonne, Paris" required>
-                    <small>Exemples: Sorbonne, République, Tour Eiffel, Paris</small>
+        <form id="search-form" class="search-form">
+            <div class="form-group">
+                <label for="adresse">Adresse ou lieu</label>
+                <div class="address-input-wrapper">
+                    <input type="text" id="adresse" placeholder="Ex: 5 Rue de la Sorbonne, Paris" required autocomplete="off">
+                    <button type="button" id="geolocation-btn" class="geolocation-btn" title="Utiliser ma localisation">📍</button>
+                    <div id="autocomplete-suggestions" class="autocomplete-suggestions" style="display: none;"></div>
                 </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="heureDebut">Heure de début</label>
-                        <input type="time" id="heureDebut" value="09:00" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="heureFin">Heure de fin</label>
-                        <input type="time" id="heureFin" value="18:00" required>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="rayon">Rayon de recherche (km)</label>
-                    <input type="number" id="rayon" min="0.5" max="50" step="0.5" value="5" required>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Rechercher</button>
-            </form>
-        </section>
-
-        <section class="results-section">
-            <h3 class="tit-s">Résultats</h3>
-            <div id="results-container">
-                <p class="info-message">Effectuez une recherche pour voir les résultats.</p>
+                <small>Exemples: Sorbonne, République, Tour Eiffel, Paris</small>
             </div>
-        </section>
-    </main>
 
-    <footer>
-        <div class="container">
-            <p>&copy; 2026 Bibliothèques Île-de-France. Tous droits réservés.</p>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="heureDebut">Heure de début</label>
+                    <input type="time" id="heureDebut" value="09:00" required>
+                </div>
+                <div class="form-group">
+                    <label for="heureFin">Heure de fin</label>
+                    <input type="time" id="heureFin" value="18:00" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="rayon">Rayon de recherche (km)</label>
+                <input type="number" id="rayon" min="0.5" max="50" step="0.5" value="5" required>
+            </div>
+
+            <div class="form-actions" style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem;">
+                <button type="submit" class="btn btn-primary">Rechercher</button>
+                <button type="button" id="btn-itineraire" class="btn-advanced">
+                    &#128205; Recherche Avancée (Itinéraire Optimisé)
+                </button>
+            </div>
+        </form>
+    </section>
+
+    <section class="map-section" id="map-section" style="display: none;">
+        <h3 class="tit-s">Carte des bibliothèques</h3>
+        <div id="map"></div>
+    </section>
+
+    <section class="results-section">
+        <h3 class="tit-s">Résultats</h3>
+        <div id="results-container">
+            <p class="info-message">Effectuez une recherche pour voir les résultats.</p>
         </div>
-    </footer>
+    </section>
 
-    <script src="js/api.js"></script>
-    <script src="js/recherche.js"></script>
+    <!-- Section résultat de l'itinéraire optimisé (cachée par défaut) -->
+    <section id="itineraire-section" class="itineraire-section" style="display: none;">
+        <h3>&#128205; Itinéraire Optimisé</h3>
+        <div id="itineraire-meta" class="itineraire-meta"></div>
+        <div id="itineraire-steps" class="itineraire-steps"></div>
+        <div id="itineraire-message" class="itineraire-message"></div>
+    </section>
+</main>
+
+<footer>
+    <div class="container">
+        <p>&copy; 2026 Bibliothèques Île-de-France. Tous droits réservés.</p>
+    </div>
+</footer>
+
+<!-- Leaflet JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="js/api.js"></script>
+<script src="js/recherche.js"></script>
 </body>
 </html>
