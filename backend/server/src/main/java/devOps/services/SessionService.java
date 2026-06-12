@@ -16,7 +16,7 @@ import devOps.repositories.SessionRepository;
 import devOps.repositories.UtilisateurRepository;
 
 @Service
-public class SessionService {
+public class         SessionService {
 
     @Autowired
     private SessionRepository sessionRepository;
@@ -31,7 +31,7 @@ public class SessionService {
 
         SessionEntity session = new SessionEntity();
         session.setUser(user);
-        session.setObjectif(sessionDTO.getObjectif());
+        session.setObjectif(sessionDTO.getObjectif());   
         session.setDureeMinutes(sessionDTO.getDureeMinutes());
         session.setTempsEcoulesMinutes(0);
         session.setCompletee(false);

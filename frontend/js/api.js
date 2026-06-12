@@ -62,6 +62,21 @@ const BibliothequeAPI = {
     async getById(id)                               { return fetchAPI(`/bibliotheques/${id}`); },
     async rechercher(adresse, heureDebut, heureFin, rayon) {
         return fetchAPI('/bibliotheques/recherche', { method: 'POST', body: JSON.stringify({ adresse, heureDebut, heureFin, rayon }) });
+        return fetchAPI('/bibliotheques/recherche', {
+            method: 'POST',
+            body: JSON.stringify({ adresse, heureDebut, heureFin, rayon })
+        });
+    },
+
+    /**
+     * Calcule un itinéraire optimisé couvrant le créneau horaire complet.
+     * Appelle le nouvel endpoint POST /api/bibliotheques/itineraire.
+     */
+    async rechercherItineraire(adresse, heureDebut, heureFin, rayon) {
+        return fetchAPI('/bibliotheques/itineraire', {
+            method: 'POST',
+            body: JSON.stringify({ adresse, heureDebut, heureFin, rayon })
+        });
     }
 };
 

@@ -1,50 +1,162 @@
 package devOps.services;
-import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.fasterxml.jackson.databind.JsonNode;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class GeolocationService {
 
-    private static final Map<String, double[]> ADRESSES_MOCK = new HashMap<>();
+    private static final String API_URL = "https://api-adresse.data.gouv.fr/search/";
+    private final RestTemplate restTemplate;
 
-    static {
-        ADRESSES_MOCK.put("5 rue de la sorbonne, paris", new double[]{48.8489, 2.3436});
-        ADRESSES_MOCK.put("10 place du panthéon, paris", new double[]{48.8462, 2.3464});
-        ADRESSES_MOCK.put("place de la république, paris", new double[]{48.8676, 2.3634});
-        ADRESSES_MOCK.put("tour eiffel, paris", new double[]{48.8584, 2.2945});
-        ADRESSES_MOCK.put("arc de triomphe, paris", new double[]{48.8738, 2.2950});
-        ADRESSES_MOCK.put("notre-dame, paris", new double[]{48.8530, 2.3499});
-        ADRESSES_MOCK.put("gare du nord, paris", new double[]{48.8809, 2.3553});
-        ADRESSES_MOCK.put("montparnasse, paris", new double[]{48.8422, 2.3219});
-        ADRESSES_MOCK.put("bastille, paris", new double[]{48.8532, 2.3690});
-        ADRESSES_MOCK.put("châtelet, paris", new double[]{48.8584, 2.3470});
-
-        ADRESSES_MOCK.put("paris", new double[]{48.8566, 2.3522});
+    public GeolocationService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
     }
 
+    /**
+     * POINT D'ENTRÉE PRINCIPAL
+     */
     public double[] geocodeAdresse(String adresse) {
-        String adresseNormalisee = normaliserAdresse(adresse);
 
-        if (ADRESSES_MOCK.containsKey(adresseNormalisee)) {
-            return ADRESSES_MOCK.get(adresseNormalisee);
+        if (adresse == null || adresse.trim().isEmpty()) {
+            return null;
         }
 
-        for (Map.Entry<String, double[]> entry : ADRESSES_MOCK.entrySet()) {
-            if (adresseNormalisee.contains(entry.getKey()) || entry.getKey().contains(adresseNormalisee)) {
-                return entry.getValue();
-            }
-        }
+        // 🔥 1️⃣ normalisation intelligente
+        String normalized = normalizeAddress(adresse);
 
-        return ADRESSES_MOCK.get("paris");
+        // 2️⃣ tentative normale (optimisée)
+        double[] result = callApi(normalized);
+        if (result != null) return result;
+
+        // 3️⃣ fallback : simplification (sans numéro)
+        String simplified = simplifyAddress(normalized);
+        result = callApi(simplified);
+        if (result != null) return result;
+
+        // 4️⃣ fallback final : ville seule
+        String city = extractCity(normalized);
+        return callApi(city);
     }
 
-    private String normaliserAdresse(String adresse) {
-        return adresse.toLowerCase()
-                .trim()
+    /**
+     * NORMALISATION INTELLIGENTE
+     * 👉 remet la ville en premier
+     */
+    private String normalizeAddress(String adresse) {
+
+        adresse = adresse.trim().replaceAll("\\s+", " ");
+
+        // détecter code postal
+        Pattern cpPattern = Pattern.compile("\\b\\d{5}\\b");
+        Matcher matcher = cpPattern.matcher(adresse);
+
+        String codePostal = "";
+        if (matcher.find()) {
+            codePostal = matcher.group();
+            adresse = adresse.replace(codePostal, "").trim();
+        }
+
+        // détecter ville (dernier mot souvent)
+        String[] parts = adresse.split(" ");
+        if (parts.length > 1) {
+            String ville = parts[parts.length - 1];
+
+            // reconstruire : ville + reste
+            String reste = adresse.substring(0, adresse.lastIndexOf(ville)).trim();
+
+            return ville + " " + reste + (codePostal.isEmpty() ? "" : " " + codePostal);
+        }
+
+        return adresse;
+    }
+
+    /**
+     * APPEL API
+     */
+    private double[] callApi(String query) {
+
+        try {
+            UriComponentsBuilder builder = UriComponentsBuilder
+                    .fromHttpUrl(API_URL)
+                    .queryParam("q", query)
+                    .queryParam("limit", 5)
+                    .queryParam("autocomplete", 1); // 🔥 améliore pertinence
+
+            JsonNode response = restTemplate.getForObject(builder.toUriString(), JsonNode.class);
+
+            if (response == null || !response.has("features")) {
+                return null;
+            }
+
+            JsonNode features = response.get("features");
+
+            double bestScore = -1;
+            double bestLat = 0;
+            double bestLon = 0;
+
+            for (JsonNode feature : features) {
+
+                JsonNode props = feature.get("properties");
+                JsonNode geometry = feature.get("geometry");
+
+                if (geometry == null || !geometry.has("coordinates")) continue;
+
+                double score = props.has("score") ? props.get("score").asDouble() : 0;
+
+                JsonNode coords = geometry.get("coordinates");
+
+                double lon = coords.get(0).asDouble();
+                double lat = coords.get(1).asDouble();
+
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestLat = lat;
+                    bestLon = lon;
+                }
+            }
+
+            if (bestScore > 0) {
+                return new double[]{bestLat, bestLon};
+            }
+
+        } catch (Exception e) {
+            System.err.println("Erreur géocodage API: " + e.getMessage());
+        }
+
+        return null;
+    }
+
+    /**
+     * SIMPLIFICATION
+     */
+    private String simplifyAddress(String adresse) {
+        return adresse
+                .replaceAll("\\d+", "")
                 .replaceAll("\\s+", " ")
-                .replaceAll("[,.]", "");
+                .trim();
+    }
+
+    /**
+     * EXTRAIRE VILLE
+     */
+    private String extractCity(String adresse) {
+
+        // essayer avec code postal
+        Pattern cpPattern = Pattern.compile("(\\d{5})\\s*(\\w+)");
+        Matcher matcher = cpPattern.matcher(adresse);
+
+        if (matcher.find()) {
+            return matcher.group(2); // ville après CP
+        }
+
+        // fallback : dernier mot
+        String[] parts = adresse.split(" ");
+        return parts[parts.length - 1];
     }
 }
-
