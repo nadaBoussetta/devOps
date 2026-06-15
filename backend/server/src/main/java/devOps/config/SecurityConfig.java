@@ -41,10 +41,12 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/api/feed/**").authenticated()
                         .requestMatchers("/api/notations/**").authenticated()
+                        .requestMatchers("/api/favoris/**").authenticated()   // ← ajouté
                         .requestMatchers("/api/recommandations/**").authenticated()
                         .requestMatchers("/api/sessions/**").authenticated()
                         .requestMatchers("/api/users/**").authenticated()
                         .requestMatchers("/api/notifications/**").authenticated()
+                        .requestMatchers("/api/adresses/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

@@ -3,32 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Accueil - Bibliothèques d’Île‑de‑France</title>
+    <title>Accueil - Bibliothèques d'Île‑de‑France</title>
     <link rel="stylesheet" href="css/MyFeed.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <link rel="icon" href="resources/logo_pic.png" type="image/png">
 </head>
 <body>
 <div class="main-wrapper">
-    <!-- Background Image -->
+
     <div class="background-image"></div>
+    <canvas id="particles-canvas"></canvas>
 
-    <!-- Sidebar / Content -->
-    <div class="sidebar">
-        <div class="big-number">01</div>
-        <div class="interior-label">Île‑de‑France</div>
-        <h1>Bibliothèques d’Île‑de‑France</h1>
-        <p class="description">
-            Recherchez des bibliothèques selon votre localisation, consultez les livres disponibles,
-            partagez vos expériences et recevez des recommandations personnalisées.
-        </p>
-        <a href="#" class="read-more">Read more</a>
-    </div>
-
-    <!-- Navigation -->
+    <!-- Nav -->
     <nav>
-        <div class="logo">Bibliothèques IDF</div>
+        <div class="logo">
+            Bibliothèques IDF
+        </div>
         <ul class="nav-links">
             <li><a href="MyFeed.html">Accueil</a></li>
             <li><a href="recherche.html">Recherche</a></li>
@@ -40,7 +31,6 @@
             <li><a href="login.html" id="auth-link">Connexion</a></li>
             <li><a href="profile.html">Mon Profil</a></li>
         </ul>
-
         <div class="search-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="11" cy="11" r="8"></circle>
@@ -49,53 +39,102 @@
         </div>
     </nav>
 
-    <!-- Main Content Overlay -->
+    <!-- Contenu -->
     <main class="content-overlay">
+
+        <!-- Hero -->
         <section class="hero">
-            <h2>Trouvez la bibliothèque idéale en Île-de-France</h2>
-            <p>Recherchez des bibliothèques selon votre localisation, consultez les livres disponibles,
-                partagez vos expériences et recevez des recommandations personnalisées.</p>
+            
+            <h2>Trouvez la bibliothèque<br><em>idéale</em> en Île‑de‑France</h2>
+            <p>Recherchez par localisation, consultez les livres disponibles,
+               partagez vos expériences et recevez des recommandations personnalisées.</p>
             <div class="cta-buttons">
-                <a href="recherche.html" class="btn btn-primary">Rechercher une bibliothèque</a>
-                <a href="livres.html" class="btn btn-primary">Chercher un livre</a>
+                <a href="recherche.html" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Rechercher une bibliothèque
+                </a>
+                <a href="livres.html" class="btn btn-secondary">
+                    <i class="fas fa-book"></i> Chercher un livre
+                </a>
             </div>
         </section>
 
+        <!-- Citation + Stats côte à côte -->
+        <div class="mid-row">
+
+            <!-- Citation littéraire tournante -->
+            <div class="quote-card" id="quote-card">
+                <div class="quote-icon"><i class="fas fa-quote-left"></i></div>
+                <blockquote id="quote-text"></blockquote>
+                <cite id="quote-author"></cite>
+                <div class="quote-dots" id="quote-dots"></div>
+            </div>
+
+            <!-- Horloge + Stats -->
+            <div class="side-col">
+                <div class="live-clock-card">
+                    <div class="clock-time" id="clock-time">00:00:00</div>
+                    <div class="clock-date" id="clock-date"></div>
+                </div>
+
+                <div class="stats-section">
+                    <div class="stat-item">
+                        <div class="stat-number" data-target="1200">0</div>
+                        <div class="stat-label">Bibliothèques</div>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <div class="stat-number" data-target="8">0</div>
+                        <div class="stat-label">Départements</div>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <div class="stat-number" data-target="50000">0</div>
+                        <div class="stat-label">Livres</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Features -->
         <section class="features">
             <h3>Fonctionnalités</h3>
             <div class="feature-grid">
-                <div class="feature-card">
+                <a href="recherche.html" class="feature-card">
                     <div class="feature-icon"><i class="fa-solid fa-location-dot"></i></div>
                     <h4>Recherche par localisation</h4>
-                    <p>Trouvez les bibliothèques les plus proches de vous, ouvertes selon vos horaires.</p>
-                </div>
-
-                <div class="feature-card">
+                    <p>Trouvez les bibliothèques les plus proches, ouvertes selon vos horaires.</p>
+                    <span class="feature-arrow"><i class="fas fa-arrow-right"></i></span>
+                </a>
+                <a href="livres.html" class="feature-card">
                     <div class="feature-icon"><i class="fa-solid fa-book"></i></div>
                     <h4>Recherche de livres</h4>
-                    <p>Découvrez dans quelles bibliothèques universitaires vos livres sont disponibles.</p>
-                </div>
-
-                <div class="feature-card">
+                    <p>Découvrez dans quelles bibliothèques vos livres sont disponibles.</p>
+                    <span class="feature-arrow"><i class="fas fa-arrow-right"></i></span>
+                </a>
+                <a href="feed.html" class="feature-card">
                     <div class="feature-icon"><i class="fa-solid fa-comments"></i></div>
                     <h4>Feed social</h4>
                     <p>Partagez vos avis, commentez et échangez avec la communauté.</p>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fa-solid fa-star"></i></div>
-                    <h4>Recommandations</h4>
-                    <p>Recevez des suggestions personnalisées basées sur vos préférences.</p>
-                </div>
+                    <span class="feature-arrow"><i class="fas fa-arrow-right"></i></span>
+                </a>
+                <a href="sessions.html" class="feature-card">
+                    <div class="feature-icon"><i class="fa-solid fa-clock"></i></div>
+                    <h4>Sessions de révision</h4>
+                    <p>Planifiez et chronométrez vos sessions de travail en bibliothèque.</p>
+                    <span class="feature-arrow"><i class="fas fa-arrow-right"></i></span>
+                </a>
             </div>
         </section>
+
     </main>
 
     <footer>
-        <div class="footer-container">
-            <p>&copy; 2024 Bibliothèques Île-de-France. Tous droits réservés.</p>
-        </div>
+        <p>&copy; 2026 Bibliothèques Île-de-France. Tous droits réservés.</p>
     </footer>
 </div>
+
+<script src="js/api.js"></script>
+<script src="js/MyFeed.js"></script>
 </body>
 </html>

@@ -6,24 +6,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchForm = document.getElementById('search-form');
     searchForm.addEventListener('submit', handleSearch);
 
-    // Bouton de recherche avancée (itinéraire optimisé)
     const btnItineraire = document.getElementById('btn-itineraire');
     if (btnItineraire) {
         btnItineraire.addEventListener('click', handleItineraire);
     }
 
-    // Initialiser la géolocalisation
     initializeGeolocation();
-
-    // Initialiser l'autocomplétion
     initializeAutocomplete();
-
     initializeMap();
 });
 
-/**
- * Initialise la géolocalisation du navigateur
- */
 function initializeGeolocation() {
     const geolocationBtn = document.getElementById('geolocation-btn');
 
@@ -38,9 +30,6 @@ function initializeGeolocation() {
     });
 }
 
-/**
- * Utilise la localisation actuelle de l'utilisateur
- */
 function useCurrentLocation() {
     const geolocationBtn = document.getElementById('geolocation-btn');
     const addressInput = document.getElementById('adresse');
@@ -53,7 +42,6 @@ function useCurrentLocation() {
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
 
-            // Appeler l'API de géocodage inverse pour obtenir l'adresse
             reverseGeocode(lat, lon)
                 .then(address => {
                     addressInput.value = address || `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
@@ -82,9 +70,6 @@ function useCurrentLocation() {
     );
 }
 
-/**
- * Effectue un géocodage inverse pour obtenir l'adresse à partir des coordonnées
- */
 async function reverseGeocode(lat, lon) {
     try {
         const response = await fetch(`https://api-adresse.data.gouv.fr/reverse/?lon=${lon}&lat=${lat}`);
@@ -100,9 +85,6 @@ async function reverseGeocode(lat, lon) {
     }
 }
 
-/**
- * Initialise l'autocomplétion d'adresses
- */
 function initializeAutocomplete() {
     const addressInput = document.getElementById('adresse');
     const suggestionsContainer = document.getElementById('autocomplete-suggestions');
@@ -110,22 +92,18 @@ function initializeAutocomplete() {
     addressInput.addEventListener('input', (e) => {
         const query = e.target.value.trim();
 
-        // Masquer les suggestions si le champ est vide
         if (query.length < 2) {
             suggestionsContainer.style.display = 'none';
             return;
         }
 
-        // Effacer le timeout précédent
         clearTimeout(autocompleteTimeout);
 
-        // Ajouter un délai avant de faire la requête
         autocompleteTimeout = setTimeout(() => {
             fetchAddressSuggestions(query);
         }, 300);
     });
 
-    // Masquer les suggestions quand on clique ailleurs
     document.addEventListener('click', (e) => {
         if (e.target !== addressInput && e.target !== suggestionsContainer) {
             suggestionsContainer.style.display = 'none';
@@ -133,25 +111,17 @@ function initializeAutocomplete() {
     });
 }
 
-/**
- * Récupère les suggestions d'adresses depuis l'API
- */
 async function fetchAddressSuggestions(query) {
     try {
         const response = await fetch(`http://localhost:8080/api/adresses/autocomplete?query=${encodeURIComponent(query)}&limit=5`);
         const suggestions = await response.json();
-
         displayAddressSuggestions(suggestions);
     } catch (error) {
         console.error('Erreur lors de la récupération des suggestions:', error);
-        // Fallback: utiliser l'API directement
         fallbackAddressSuggestions(query);
     }
 }
 
-/**
- * Fallback si le backend n'est pas disponible
- */
 async function fallbackAddressSuggestions(query) {
     try {
         const response = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=5`);
@@ -173,9 +143,6 @@ async function fallbackAddressSuggestions(query) {
     }
 }
 
-/**
- * Affiche les suggestions d'adresses
- */
 function displayAddressSuggestions(suggestions) {
     const suggestionsContainer = document.getElementById('autocomplete-suggestions');
 
@@ -208,9 +175,6 @@ function displayAddressSuggestions(suggestions) {
     suggestionsContainer.style.display = 'block';
 }
 
-/**
- * Sélectionne une suggestion d'adresse
- */
 function selectAddressSuggestion(suggestion) {
     const addressInput = document.getElementById('adresse');
     const suggestionsContainer = document.getElementById('autocomplete-suggestions');
@@ -220,7 +184,7 @@ function selectAddressSuggestion(suggestion) {
 }
 
 function initializeMap() {
-    map = L.map('map').setView([48.8566, 2.3522], 12); // Paris par défaut
+    map = L.map('map').setView([48.8566, 2.3522], 12);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -260,7 +224,6 @@ async function handleSearch(e) {
             return;
         }
 
-        // Afficher la carte et les résultats
         document.getElementById('map-section').style.display = 'block';
         displayResults(resultats);
         displayMap(resultats);
@@ -275,11 +238,9 @@ function displayMap(resultats) {
 
     if (resultats.length === 0) return;
 
-    // Récupérer les coordonnées de l'adresse recherchée (depuis le premier résultat)
     const searchLat = resultats[0].searchLatitude;
     const searchLon = resultats[0].searchLongitude;
 
-    // Ajouter un marqueur pour l'adresse recherchée (en rouge)
     if (searchLat && searchLon) {
         const searchMarker = L.marker([searchLat, searchLon], {
             icon: L.icon({
@@ -296,7 +257,6 @@ function displayMap(resultats) {
         markers.push(searchMarker);
     }
 
-    // Ajouter les marqueurs pour les bibliothèques (en bleu)
     resultats.forEach((biblio, index) => {
         if (biblio.latitude && biblio.longitude) {
             const marker = L.marker([biblio.latitude, biblio.longitude], {
@@ -321,23 +281,18 @@ function displayMap(resultats) {
         }
     });
 
-    // 1. zoom immédiat sur l'adresse utilisateur (priorité)
     if (searchLat && searchLon) {
-        map.setView([searchLat, searchLon], 14); // 👈 zoom plus précis (14 = ville/ quartier)
+        map.setView([searchLat, searchLon], 14);
     }
 
-    // 2. petit délai pour laisser Leaflet stabiliser
     setTimeout(() => {
-
         if (markers.length > 0) {
             const group = new L.featureGroup(markers);
-
             map.fitBounds(group.getBounds(), {
-                padding: [50, 50],   // 👈 marge propre
-                maxZoom: 15          // 👈 empêche zoom trop large
+                padding: [50, 50],
+                maxZoom: 15
             });
         }
-
     }, 300);
 
     setTimeout(() => {
@@ -355,6 +310,8 @@ function displayResults(resultats) {
     });
 }
 
+// ── MODIFIÉ : les données biblio sont stockées sur le bouton via dataset
+//              pour éviter les problèmes d'échappement dans onclick ──────
 function createResultCard(biblio) {
     const card = document.createElement('div');
     card.className = 'card';
@@ -380,15 +337,22 @@ function createResultCard(biblio) {
                 ${formatHorairesDetailles(biblio.horaires)}
             </div>
         </details>
-        <button onclick="ajouterAuxFavoris(${biblio.id})" class="btn-favori">❤️ Ajouter aux favoris</button>
+        <button class="btn-favori">❤️ Ajouter aux favoris</button>
     `;
+
+    // Stocker les données sur le bouton via dataset (évite tout problème d'échappement)
+    const btn = card.querySelector('.btn-favori');
+    btn.dataset.id        = biblio.id;
+    btn.dataset.nom       = biblio.nom;
+    btn.dataset.adresse   = biblio.adresse;
+    btn.dataset.latitude  = biblio.latitude;
+    btn.dataset.longitude = biblio.longitude;
+    btn.dataset.type      = biblio.type;
+    btn.addEventListener('click', () => ajouterAuxFavoris(btn));
 
     return card;
 }
 
-/**
- * Formate les horaires détaillés pour l'affichage.
- */
 function formatHorairesDetailles(horaires) {
     if (!horaires || horaires.length === 0) return '<p>Horaires non disponibles</p>';
 
@@ -399,29 +363,22 @@ function formatHorairesDetailles(horaires) {
 
     let html = '<ul style="list-style: none; padding-left: 0;">';
     horairesTries.forEach(h => {
-        // Formater les horaires de manière lisible
         const debut = formatTime(h.heureOuverture);
         const fin = formatTime(h.heureFermeture);
         const jourFormate = formatJourSemaine(h.jourSemaine);
-        html += `<li style="padding: 5px 0; border-bottom: 1px solid #eee;"><strong>${jourFormate}:</strong> ${debut} – ${fin}</li>`;
+        html += `<li style="padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.06);"><strong>${jourFormate}:</strong> ${debut} – ${fin}</li>`;
     });
     html += '</ul>';
 
     return html;
 }
 
-/**
- * Formate une heure au format HH:mm en format lisible
- */
 function formatTime(timeString) {
     if (!timeString) return '-';
     const [hours, minutes] = timeString.split(':');
     return `${hours}h${minutes !== '00' ? minutes : ''}`;
 }
 
-/**
- * Formate le nom du jour de la semaine
- */
 function formatJourSemaine(jour) {
     const jours = {
         'LUNDI': 'Lundi',
@@ -435,19 +392,26 @@ function formatJourSemaine(jour) {
     return jours[jour] || jour;
 }
 
-async function ajouterAuxFavoris(bibliothequeId) {
+// ── MODIFIÉ : reçoit le bouton, lit les données depuis dataset ────────
+async function ajouterAuxFavoris(btn) {
+    if (!isAuthenticated()) {
+        alert('Vous devez être connecté pour ajouter un favori.');
+        window.location.href = 'login.html';
+        return;
+    }
     try {
-        const response = await fetch('http://localhost:8080/api/favoris', {
+        await fetchAPI('/favoris', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify({ bibliothequeId })
+            body: JSON.stringify({
+                bibliothequeId:        parseInt(btn.dataset.id),
+                bibliothequeNom:       btn.dataset.nom,
+                bibliothequeAdresse:   btn.dataset.adresse,
+                bibliothequeLatitude:  parseFloat(btn.dataset.latitude),
+                bibliothequeLongitude: parseFloat(btn.dataset.longitude),
+                bibliothequeType:      btn.dataset.type
+            })
         });
-
-        if (!response.ok) throw new Error("Impossible d'ajouter aux favoris");
-        alert("Bibliothèque ajoutée aux favoris !");
+        alert('Bibliothèque ajoutée aux favoris !');
     } catch (err) {
         console.error(err);
         alert(err.message);
@@ -458,12 +422,7 @@ async function ajouterAuxFavoris(bibliothequeId) {
 // RECHERCHE AVANCÉE - ITÍNÉRAIRE OPTIMISÉ
 // =============================================================================
 
-/**
- * Gestionnaire du bouton "Recherche Avancée".
- * Déclenche le calcul de l'itinéraire optimisé sans toucher à la recherche standard.
- */
 async function handleItineraire() {
-
     const resultsContainer = document.getElementById('results-container');
     resultsContainer.innerHTML = '';
 
@@ -483,7 +442,6 @@ async function handleItineraire() {
     btnItineraire.disabled = true;
     btnItineraire.textContent = 'Calcul en cours...';
 
-    // Masquer les résultats précédents de l'itinéraire
     const itineraireSection = document.getElementById('itineraire-section');
     itineraireSection.style.display = 'none';
 
@@ -491,7 +449,6 @@ async function handleItineraire() {
         const itineraire = await BibliothequeAPI.rechercherItineraire(adresse, heureDebut, heureFin, rayon);
         displayItineraire(itineraire);
     } catch (error) {
-        const itineraireSection = document.getElementById('itineraire-section');
         itineraireSection.style.display = 'block';
         document.getElementById('itineraire-meta').innerHTML = '';
         document.getElementById('itineraire-steps').innerHTML = '';
@@ -504,10 +461,6 @@ async function handleItineraire() {
     }
 }
 
-/**
- * Affiche l'itinéraire optimisé dans la section dédiée.
- * @param {Object} itineraire - La réponse de l'API /bibliotheques/itineraire
- */
 function displayItineraire(itineraire) {
     const itineraireSection = document.getElementById('itineraire-section');
     const metaContainer = document.getElementById('itineraire-meta');
@@ -516,7 +469,6 @@ function displayItineraire(itineraire) {
 
     itineraireSection.style.display = 'block';
 
-    // --- Métadonnées de l'itinéraire ---
     const couvertBadgeClass = itineraire.creneauCompletementCouvert
         ? 'itineraire-badge-ok'
         : 'itineraire-badge-partial';
@@ -525,29 +477,26 @@ function displayItineraire(itineraire) {
         : '&#9888; Créneau partiellement couvert';
 
     metaContainer.innerHTML = `
-        <span>&#128205; Départ : <strong>${itineraire.adresseDepart}</strong></span>
-        <span>&#128336; Créneau demandé : <strong>${itineraire.heureDebutDemandee} – ${itineraire.heureFinDemandee}</strong></span>
+        <span>&#128205; Départ : <strong>${itineraire.adresseDepart}</strong></span>
+        <span>&#128336; Créneau demandé : <strong>${itineraire.heureDebutDemandee} – ${itineraire.heureFinDemandee}</strong></span>
         <span>&#128218; ${itineraire.etapes ? itineraire.etapes.length : 0} étape(s)</span>
-        <span>&#128663; Distance totale : <strong>${itineraire.distanceTotale || 0} km</strong></span>
+        <span>&#128663; Distance totale : <strong>${itineraire.distanceTotale || 0} km</strong></span>
         <span class="${couvertBadgeClass}">${couvertLabel}</span>
     `;
 
-    // --- Étapes de l'itinéraire ---
     stepsContainer.innerHTML = '';
 
     if (!itineraire.etapes || itineraire.etapes.length === 0) {
-        stepsContainer.innerHTML = '<p style="color:#555;">Aucune étape trouvée.</p>';
+        stepsContainer.innerHTML = '<p style="color: var(--text-gray);">Aucune étape trouvée.</p>';
     } else {
         itineraire.etapes.forEach(etape => {
             const stepEl = createItineraireStep(etape);
             stepsContainer.appendChild(stepEl);
         });
 
-        // Afficher l'itinéraire sur la carte
         displayItineraireOnMap(itineraire);
     }
 
-    // --- Message de synthèse ---
     if (itineraire.message) {
         messageEl.className = 'itineraire-message ' +
             (itineraire.creneauCompletementCouvert ? 'success' : 'warning');
@@ -556,15 +505,9 @@ function displayItineraire(itineraire) {
         messageEl.textContent = '';
     }
 
-    // Faire défiler jusqu'à la section
     itineraireSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-/**
- * Crée l'élément HTML pour une étape de l'itinéraire.
- * @param {Object} etape - Une étape de l'itinéraire
- * @returns {HTMLElement}
- */
 function createItineraireStep(etape) {
     const biblio = etape.bibliotheque;
     const stepDiv = document.createElement('div');
@@ -578,9 +521,9 @@ function createItineraireStep(etape) {
             <h4>${typeIcon} ${biblio.nom}</h4>
             <span class="step-creneau">&#128336; ${etape.creneauDebut} – ${etape.creneauFin}</span>
             <div class="step-details">
-                <p><strong>&#128205; Adresse :</strong> ${biblio.adresse}</p>
-                <p><strong>&#128663; Distance depuis étape précédente :</strong> ${etape.distanceDepuisPrecedent} km</p>
-                <p><strong>&#128663; Distance cumulée :</strong> ${etape.distanceCumulee} km</p>
+                <p><strong>&#128205; Adresse :</strong> ${biblio.adresse}</p>
+                <p><strong>&#128663; Distance depuis étape précédente :</strong> ${etape.distanceDepuisPrecedent} km</p>
+                <p><strong>&#128663; Distance cumulée :</strong> ${etape.distanceCumulee} km</p>
                 <details>
                     <summary style="cursor:pointer;font-weight:600;margin-top:0.5rem;">&#128336; Voir les horaires complets</summary>
                     <div style="margin-top:0.4rem;">${formatHorairesDetailles(biblio.horaires)}</div>
@@ -592,19 +535,12 @@ function createItineraireStep(etape) {
     return stepDiv;
 }
 
-/**
- * Affiche l'itinéraire sur la carte Leaflet avec des marqueurs numérotés
- * et une ligne en pointillé reliant les étapes.
- * @param {Object} itineraire - La réponse complète de l'itinéraire
- */
 function displayItineraireOnMap(itineraire) {
-    // Afficher la section carte
     document.getElementById('map-section').style.display = 'block';
     clearMarkers();
 
     const points = [];
 
-    // Marqueur de départ (rouge)
     if (itineraire.latitudeDepart && itineraire.longitudeDepart) {
         const departMarker = L.marker(
             [itineraire.latitudeDepart, itineraire.longitudeDepart],
@@ -624,7 +560,6 @@ function displayItineraireOnMap(itineraire) {
         points.push([itineraire.latitudeDepart, itineraire.longitudeDepart]);
     }
 
-    // Marqueurs numérotés pour chaque étape (violet)
     const couleurs = [
         'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png',
         'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
@@ -652,14 +587,13 @@ function displayItineraireOnMap(itineraire) {
         marker.bindPopup(`
             <b>Étape ${etape.ordre} : ${biblio.nom}</b><br/>
             ${biblio.adresse}<br/>
-            <strong>Créneau :</strong> ${etape.creneauDebut} – ${etape.creneauFin}<br/>
-            <strong>Distance cumulée :</strong> ${etape.distanceCumulee} km
+            <strong>Créneau :</strong> ${etape.creneauDebut} – ${etape.creneauFin}<br/>
+            <strong>Distance cumulée :</strong> ${etape.distanceCumulee} km
         `);
         markers.push(marker);
         points.push([biblio.latitude, biblio.longitude]);
     });
 
-    // Tracer la ligne de trajet en pointillés
     if (points.length > 1) {
         const polyline = L.polyline(points, {
             color: '#6f42c1',
@@ -670,7 +604,6 @@ function displayItineraireOnMap(itineraire) {
         markers.push(polyline);
     }
 
-    // Ajuster le zoom pour voir tout l'itinéraire
     setTimeout(() => {
         if (markers.length > 0) {
             const group = new L.featureGroup(markers);
