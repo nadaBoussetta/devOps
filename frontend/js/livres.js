@@ -53,6 +53,7 @@ async function searchBooks(query) {
     emptyState.style.display = 'none';
     section.style.display    = 'block';
     aiSummary.style.display  = 'none';
+
     container.innerHTML = `
         <div class="loading-grid">
             ${[1,2,3,4,5,6].map(() => `
@@ -63,11 +64,14 @@ async function searchBooks(query) {
                     <div class="skel skel-line short"></div>
                 </div>`).join('')}
         </div>`;
+
     countEl.textContent = '';
     titleEl.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Recherche en cours...`;
 
     try {
-        const books = await searchGoogleBooks(query);
+        let books = await searchGoogleBooks(query);
+
+        books = optimiserLivres(books, query);
 
         titleEl.innerHTML   = `<i class="fas fa-list"></i> Résultats pour "${escapeHtml(query)}"`;
         countEl.textContent = `${books.length} livre${books.length > 1 ? 's' : ''} trouvé${books.length > 1 ? 's' : ''}`;
@@ -81,7 +85,18 @@ async function searchBooks(query) {
             return;
         }
 
-        // Afficher d'abord les cartes, puis vérifier dispo IDF en arrière-plan
+        aiSummary.style.display = 'flex';
+        aiSummary.innerHTML = `
+            <span class="ai-badge">
+                <i class="fas fa-ranking-star"></i> Optimisation
+            </span>
+            <span>
+                Les résultats sont automatiquement classés selon la pertinence du titre,
+                l'auteur, la popularité, la note moyenne et la disponibilité du livre.
+                Les 3 meilleurs résultats sont mis en avant.
+            </span>
+        `;
+
         renderBooks(books);
         checkDisponibiliteIDF(books);
 
@@ -133,17 +148,52 @@ async function searchGoogleBooks(query) {
     });
 }
 
+// ─── Optimisation des résultats ──────────────────────────────────────────────
+
+function optimiserLivres(books, query) {
+    return books
+        .map(book => ({
+            ...book,
+            scoreOptimisation: calculerScore(book, query)
+        }))
+        .sort((a, b) => b.scoreOptimisation - a.scoreOptimisation);
+}
+
+function calculerScore(book, query) {
+    let score = 0;
+
+    const q = query.toLowerCase().trim();
+    const titre = (book.titre || '').toLowerCase();
+    const auteur = (book.auteur || '').toLowerCase();
+    const genre = (book.genre || '').toLowerCase();
+
+    if (titre === q) score += 50;
+    else if (titre.includes(q)) score += 35;
+
+    if (auteur.includes(q)) score += 20;
+    if (genre.includes(q)) score += 10;
+
+    score += (parseFloat(book.note) || 0) * 6;
+    score += Math.min((book.nbAvis || 0) / 10, 15);
+
+    if (book.disponible) score += 10;
+    if (book.acces) score += 5;
+    if (book.langue === 'Français') score += 5;
+    if (book.couverture) score += 3;
+    if (book.resume) score += 2;
+
+    return Math.round(score);
+}
+
 // ─── Vérification disponibilité IDF via Sudoc ─────────────────────────────────
 
-// Bibliothèques IDF référencées dans le Sudoc avec leurs codes RCR
-// (RCR = Répertoire des Centres de Ressources — identifiant unique Sudoc)
 const BIBLIOTHEQUES_IDF = [
     { nom: 'BnF — Bibliothèque nationale de France',    rcr: '751021301' },
     { nom: 'Bibliothèque Sainte-Geneviève',             rcr: '751052101' },
     { nom: 'Bibliothèque Mazarine',                     rcr: '751042101' },
-    { nom: 'BU Paris-Sorbonne (Paris IV)',               rcr: '751031001' },
-    { nom: 'BU Paris Cité (ex-Paris V)',                 rcr: '751052201' },
-    { nom: 'BU Sorbonne Nouvelle (Paris III)',           rcr: '751032101' },
+    { nom: 'BU Paris-Sorbonne (Paris IV)',              rcr: '751031001' },
+    { nom: 'BU Paris Cité (ex-Paris V)',                rcr: '751052201' },
+    { nom: 'BU Sorbonne Nouvelle (Paris III)',          rcr: '751032101' },
     { nom: 'BU Paris-Nanterre',                         rcr: '920502201' },
     { nom: 'BU Université Paris-Est Créteil',           rcr: '940112201' },
     { nom: 'BU CY Cergy Paris Université',              rcr: '950502101' },
@@ -151,8 +201,6 @@ const BIBLIOTHEQUES_IDF = [
 ];
 
 async function checkDisponibiliteIDF(books) {
-    // Pour chaque livre qui a un ISBN, on interroge le Sudoc
-    // On fait les appels en parallèle pour ne pas bloquer l'UI
     const promises = books.map(async (book) => {
         if (!book.isbn) {
             updateBadgeIDF(book.id, 'inconnu', null);
@@ -160,7 +208,6 @@ async function checkDisponibiliteIDF(books) {
         }
 
         try {
-            // API Sudoc isbn2ppn : retourne les PPN (identifiants) des notices
             const url = `https://www.sudoc.fr/services/isbn2ppn/${book.isbn.replace(/-/g, '')}`;
             const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
 
@@ -171,13 +218,10 @@ async function checkDisponibiliteIDF(books) {
 
             const text = await res.text();
 
-            // Réponse XML — si on trouve un PPN c'est que le livre est dans le Sudoc
             if (text.includes('<ppn>') || text.includes('ppn=')) {
-                // Extraire le premier PPN pour construire le lien de localisation
                 const ppnMatch = text.match(/<ppn>(\d+)<\/ppn>/) || text.match(/ppn=(\d+)/);
                 const ppn = ppnMatch ? ppnMatch[1] : null;
 
-                // Lien vers les localisations dans les bibliothèques IDF
                 const lienSudoc = ppn
                     ? `https://www.sudoc.fr/${ppn}`
                     : `https://www.sudoc.fr/cgi-bin/sru?version=1.1&operation=searchRetrieve&query=bath.isbn+all+%22${book.isbn}%22`;
@@ -188,7 +232,6 @@ async function checkDisponibiliteIDF(books) {
             }
 
         } catch (err) {
-            // Timeout ou erreur réseau — on affiche "non vérifié"
             updateBadgeIDF(book.id, 'inconnu', null);
         }
     });
@@ -242,9 +285,18 @@ function bookCard(b, index) {
     return `
     <div class="book-card" style="animation-delay:${index * 0.06}s">
         <div class="book-cover" style="background:${coverBg}">
+            ${index < 3 ? `
+                <div class="recommended-badge">
+                    <i class="fas fa-award"></i>
+                    Top ${index + 1}
+                </div>
+            ` : ''}
+
             ${coverHtml}
+
             ${b.acces ? '<span class="online-badge"><i class="fas fa-book-open"></i> Aperçu</span>' : ''}
         </div>
+
         <div class="book-info">
             <div class="book-header">
                 <h3 class="book-title">${escapeHtml(b.titre)}</h3>
@@ -258,11 +310,17 @@ function bookCard(b, index) {
 
             ${b.resume ? `<p class="book-resume">${escapeHtml(b.resume)}</p>` : ''}
 
-            <!-- Badge disponibilité IDF — mis à jour en arrière-plan -->
             <div id="idf-badge-${b.id}" class="idf-badge idf-loading">
                 <i class="fas fa-spinner fa-spin"></i>
                 <span>Vérification disponibilité IDF...</span>
             </div>
+
+            ${index < 3 ? `
+                <div class="recommendation-info">
+                    <i class="fas fa-star"></i>
+                    Livre recommandé par l'algorithme d'optimisation
+                </div>
+            ` : ''}
 
             <div class="book-footer">
                 <div class="book-rating">
