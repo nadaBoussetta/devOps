@@ -111,4 +111,38 @@ class LivreServiceTest {
 
         assertTrue(exception.getMessage().contains("Bibliothèque non trouvée"));
     }
+
+    @Test
+    void rechercherLivre_shouldReturnEmptyListWhenNoAdapterExists() {
+        when(adapterFactory.getAllAdapters()).thenReturn(List.of());
+
+        List<LivreResponseDTO> resultats = livreService.rechercherLivre("Java");
+
+        assertTrue(resultats.isEmpty());
+        verify(adapterFactory).getAllAdapters();
+    }
+
+    @Test
+    void rechercherLivre_shouldReturnEmptyListWhenLibrariesReturnNoBooks() {
+        when(adapterFactory.getAllAdapters()).thenReturn(List.of(adapterSorbonne));
+        when(adapterSorbonne.rechercherLivre("Java")).thenReturn(List.of());
+
+        List<LivreResponseDTO> resultats = livreService.rechercherLivre("Java");
+
+        assertEquals(0, resultats.size());
+        verify(adapterSorbonne).rechercherLivre("Java");
+    }
+
+    @Test
+    void rechercherLivreDansBibliotheque_shouldReturnEmptyListWhenNoBookFound() {
+        when(adapterFactory.getAdapter("Sorbonne")).thenReturn(adapterSorbonne);
+        when(adapterSorbonne.rechercherLivre("Java")).thenReturn(List.of());
+
+        List<LivreResponseDTO> resultats =
+                livreService.rechercherLivreDansBibliotheque("Java", "Sorbonne");
+
+        assertTrue(resultats.isEmpty());
+        verify(adapterFactory).getAdapter("Sorbonne");
+        verify(adapterSorbonne).rechercherLivre("Java");
+    }
 }
