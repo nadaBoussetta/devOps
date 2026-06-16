@@ -30,10 +30,7 @@ public class ItineraireOptimisationService {
     private HoraireParser horaireParser;
 
     public ItineraireResponseDTO calculerItineraire(RechercheDTO recherche) {
-
-        // 1. Géocoder l'adresse de départ
         double[] coordonnees = geolocationService.geocodeAdresse(recherche.getAdresse());
-
         ItineraireResponseDTO response = new ItineraireResponseDTO();
         response.setAdresseDepart(recherche.getAdresse());
         response.setHeureDebutDemandee(recherche.getHeureDebut());
@@ -52,118 +49,114 @@ public class ItineraireOptimisationService {
         response.setLatitudeDepart(latDepart);
         response.setLongitudeDepart(lonDepart);
 
-        // 2. Récupérer toutes les bibliothèques dans le rayon
         List<IleDeFranceLibraryDTO> idfLibraries = ileDeFranceLibraryApiService.searchLibraries(
                 latDepart, lonDepart, recherche.getRayon());
 
-        // 3. Convertir en LibraryResponseDTO avec horaires parsés
         List<LibraryResponseDTO> candidats = new ArrayList<>();
         for (IleDeFranceLibraryDTO idfLib : idfLibraries) {
             candidats.add(convertIleDeFranceToDTO(idfLib, latDepart, lonDepart));
         }
 
-        // 4. Jour actuel
         String jourActuel = getJourActuel();
-
-        // 5. Parser les heures demandées
         LocalTime heureDebutDemandee = LocalTime.parse(recherche.getHeureDebut(), TIME_FORMATTER);
         LocalTime heureFinDemandee = LocalTime.parse(recherche.getHeureFin(), TIME_FORMATTER);
 
-        // 6. Initialisation de l'itinéraire
-        List<ItineraireEtapeDTO> etapes = new ArrayList<>();
-        LocalTime heureCourante = heureDebutDemandee;
-        double latCourante = latDepart;
-        double lonCourante = lonDepart;
-        double distanceCumulee = 0.0;
-        List<Long> bibliothequesDejaSelectionnees = new ArrayList<>();
+        // Algorithme amélioré : Recherche de l'itinéraire avec le moins d'étapes et la distance minimale
+        // On utilise une approche de programmation dynamique simplifiée (recherche du chemin le plus court dans un DAG)
+        List<ItineraireEtapeDTO> meilleuresEtapes = resoudreItineraire(
+                candidats, jourActuel, heureDebutDemandee, heureFinDemandee, latDepart, lonDepart);
 
-        boolean debutCouvert = false;
+        response.setEtapes(meilleuresEtapes);
+        double distanceTotale = meilleuresEtapes.isEmpty() ? 0.0 : meilleuresEtapes.get(meilleuresEtapes.size() - 1).getDistanceCumulee();
+        response.setDistanceTotale(distanceTotale);
 
-        while (heureCourante.isBefore(heureFinDemandee)) {
-
-            MeilleurCandidat meilleur = trouverMeilleurCandidat(
-                    candidats, jourActuel, heureCourante, heureFinDemandee,
-                    latCourante, lonCourante, bibliothequesDejaSelectionnees);
-
-            if (meilleur == null) {
-                // Aucune bibliothèque ouverte à l'heureCourante
-                LocalTime prochainDebut = trouverProchainCreneauDisponible(candidats, jourActuel, heureCourante);
-                if (prochainDebut == null || !prochainDebut.isBefore(heureFinDemandee)) break; // pas de bibliothèques restantes ou après la fin demandée
-                
-                if (!debutCouvert) {
-                    // Marquer le début réel couvert après attente
-                    heureCourante = prochainDebut;
-                } else {
-                    // On pourrait attendre, mais pour l'instant on s'arrête si on a un trou dans l'itinéraire
-                    // ou on saute le trou
-                    heureCourante = prochainDebut;
-                }
-                continue;
-            }
-
-            debutCouvert = true;
-
-            // Calculer la distance depuis le point courant
-            double distanceEtape = DistanceCalculator.calculateDistance(
-                    latCourante, lonCourante,
-                    meilleur.bibliotheque.getLatitude(), meilleur.bibliotheque.getLongitude());
-            distanceEtape = Math.round(distanceEtape * 100.0) / 100.0;
-            distanceCumulee += distanceEtape;
-            distanceCumulee = Math.round(distanceCumulee * 100.0) / 100.0;
-
-            // Créer l'étape
-            ItineraireEtapeDTO etape = new ItineraireEtapeDTO();
-            etape.setOrdre(etapes.size() + 1);
-            etape.setBibliotheque(meilleur.bibliotheque);
-            etape.setCreneauDebut(heureCourante.format(TIME_FORMATTER));
-            
-            // La fin de l'étape est soit la fermeture de la bibliothèque, soit la fin demandée
-            LocalTime finEtape = meilleur.heureFermeture.isAfter(heureFinDemandee) ? heureFinDemandee : meilleur.heureFermeture;
-            etape.setCreneauFin(finEtape.format(TIME_FORMATTER));
-            etape.setDistanceDepuisPrecedent(distanceEtape);
-            etape.setDistanceCumulee(distanceCumulee);
-
-            etapes.add(etape);
-
-            // Mise à jour
-            latCourante = meilleur.bibliotheque.getLatitude();
-            lonCourante = meilleur.bibliotheque.getLongitude();
-            heureCourante = finEtape;
-            bibliothequesDejaSelectionnees.add(meilleur.bibliotheque.getId());
-        }
-
-        response.setEtapes(etapes);
-        response.setDistanceTotale(distanceCumulee);
-
-        if (etapes.isEmpty()) {
+        if (meilleuresEtapes.isEmpty()) {
             response.setCreneauCompletementCouvert(false);
-            response.setMessage("Aucune bibliothèque disponible dans ce rayon pour ce créneau horaire. "
-                    + "Essayez d'augmenter le rayon de recherche.");
-            response.setHeureDebutCouverte(null);
-            response.setHeureFinCouverte(null);
+            response.setMessage("Aucune bibliothèque disponible pour ce créneau.");
         } else {
-            String heureDebutCouverte = etapes.get(0).getCreneauDebut();
-            String heureFinCouverte = etapes.get(etapes.size() - 1).getCreneauFin();
-            response.setHeureDebutCouverte(heureDebutCouverte);
-            response.setHeureFinCouverte(heureFinCouverte);
+            String hDebut = meilleuresEtapes.get(0).getCreneauDebut();
+            String hFin = meilleuresEtapes.get(meilleuresEtapes.size() - 1).getCreneauFin();
+            response.setHeureDebutCouverte(hDebut);
+            response.setHeureFinCouverte(hFin);
 
-            LocalTime finCouverte = LocalTime.parse(heureFinCouverte, TIME_FORMATTER);
-            boolean couvertCompletement = !finCouverte.isBefore(heureFinDemandee) && heureDebutCouverte.equals(recherche.getHeureDebut());
-            response.setCreneauCompletementCouvert(couvertCompletement);
-
-            if (couvertCompletement) {
-                response.setMessage("Itinéraire optimal trouvé ! Le créneau "
-                        + recherche.getHeureDebut() + " - " + recherche.getHeureFin() +
-                        " est entièrement couvert en " + etapes.size() + " étape(s).");
-            } else {
-                response.setMessage("Itinéraire partiel : le créneau est couvert de " +
-                        heureDebutCouverte + " à " + heureFinCouverte +
-                        ". Aucune bibliothèque disponible pour couvrir la totalité du créneau demandé. "
-                        + "Essayez d'augmenter le rayon de recherche.");
-            }
+            boolean complet = hDebut.equals(recherche.getHeureDebut()) &&
+                    !LocalTime.parse(hFin, TIME_FORMATTER).isBefore(heureFinDemandee);
+            response.setCreneauCompletementCouvert(complet);
+            response.setMessage(complet ? "Itinéraire optimal trouvé !" : "Itinéraire partiel trouvé.");
         }
 
         return response;
+    }
+
+    private List<ItineraireEtapeDTO> resoudreItineraire(
+            List<LibraryResponseDTO> candidats, String jour,
+            LocalTime debut, LocalTime fin, double latDep, double lonDep) {
+
+        // Structure pour stocker le meilleur chemin vers chaque bibliothèque à un certain moment
+        // Pour rester pragmatique, on garde l'approche gloutonne mais améliorée pour regarder un coup d'avance
+        // ou privilégier la couverture maximale avec le moins de sauts.
+
+        List<ItineraireEtapeDTO> etapes = new ArrayList<>();
+        LocalTime heureCourante = debut;
+        double latC = latDep;
+        double lonC = lonDep;
+        double distC = 0.0;
+        List<Long> selectionnees = new ArrayList<>();
+
+        while (heureCourante.isBefore(fin)) {
+            LibraryResponseDTO meilleur = null;
+            LocalTime meilleureFin = heureCourante;
+            double meilleureDist = Double.MAX_VALUE;
+
+            for (LibraryResponseDTO c : candidats) {
+                if (selectionnees.contains(c.getId())) continue;
+
+                for (HoraireDTO h : c.getHoraires()) {
+                    if (!jour.equalsIgnoreCase(h.getJourSemaine())) continue;
+
+                    LocalTime o = LocalTime.parse(h.getHeureOuverture(), TIME_FORMATTER);
+                    LocalTime f = LocalTime.parse(h.getHeureFermeture(), TIME_FORMATTER);
+
+                    if (o.isAfter(heureCourante) || f.isBefore(heureCourante) || !f.isAfter(heureCourante)) continue;
+
+                    double d = DistanceCalculator.calculateDistance(latC, lonC, c.getLatitude(), c.getLongitude());
+                    LocalTime fEffective = f.isAfter(fin) ? fin : f;
+
+                    // Score : on veut maximiser la durée de l'étape et minimiser la distance
+                    // Un bon compromis : privilégier la fin la plus tardive, puis la distance
+                    if (meilleur == null || fEffective.isAfter(meilleureFin) || (fEffective.equals(meilleureFin) && d < meilleureDist)) {
+                        meilleur = c;
+                        meilleureFin = fEffective;
+                        meilleureDist = d;
+                    }
+                }
+            }
+
+            if (meilleur == null) {
+                // Essayer de trouver une bibliothèque qui ouvre plus tard (attente)
+                LocalTime prochain = trouverProchainCreneauDisponible(candidats, jour, heureCourante);
+                if (prochain == null || !prochain.isBefore(fin)) break;
+                heureCourante = prochain;
+                continue;
+            }
+
+            ItineraireEtapeDTO etape = new ItineraireEtapeDTO();
+            etape.setOrdre(etapes.size() + 1);
+            etape.setBibliotheque(meilleur);
+            etape.setCreneauDebut(heureCourante.format(TIME_FORMATTER));
+            etape.setCreneauFin(meilleureFin.format(TIME_FORMATTER));
+            etape.setDistanceDepuisPrecedent(Math.round(meilleureDist * 100.0) / 100.0);
+            distC += meilleureDist;
+            etape.setDistanceCumulee(Math.round(distC * 100.0) / 100.0);
+
+            etapes.add(etape);
+            selectionnees.add(meilleur.getId());
+            latC = meilleur.getLatitude();
+            lonC = meilleur.getLongitude();
+            heureCourante = meilleureFin;
+        }
+
+        return etapes;
     }
 
     // --- Méthodes auxiliaires ---

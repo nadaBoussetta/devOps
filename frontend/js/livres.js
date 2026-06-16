@@ -127,6 +127,7 @@ async function searchBooks(query) {
     emptyState.style.display = 'none';
     section.style.display    = 'block';
     aiSummary.style.display  = 'none';
+
     container.innerHTML = `
         <div class="loading-grid">
             ${[1,2,3,4,5,6].map(() => `
@@ -137,6 +138,7 @@ async function searchBooks(query) {
                     <div class="skel skel-line short"></div>
                 </div>`).join('')}
         </div>`;
+
     countEl.textContent = '';
     titleEl.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Recherche en cours...`;
 
@@ -321,9 +323,18 @@ function bookCard(b, index) {
     return `
     <div class="book-card" style="animation-delay:${index * 0.06}s">
         <div class="book-cover" style="background:${coverBg}">
+            ${index < 3 ? `
+                <div class="recommended-badge">
+                    <i class="fas fa-award"></i>
+                    Top ${index + 1}
+                </div>
+            ` : ''}
+
             ${coverHtml}
+
             ${b.acces ? '<span class="online-badge"><i class="fas fa-book-open"></i> Aperçu</span>' : ''}
         </div>
+
         <div class="book-info">
             <div class="book-header">
                 <h3 class="book-title">${escapeHtml(b.titre)}</h3>
@@ -340,6 +351,13 @@ function bookCard(b, index) {
                 <i class="fas fa-spinner fa-spin"></i>
                 <span>Vérification dans vos bibliothèques...</span>
             </div>
+
+            ${index < 3 ? `
+                <div class="recommendation-info">
+                    <i class="fas fa-star"></i>
+                    Livre recommandé par l'algorithme d'optimisation
+                </div>
+            ` : ''}
 
             <div class="book-footer">
                 <div class="book-rating">

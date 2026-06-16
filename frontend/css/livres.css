@@ -385,3 +385,34 @@ nav {
     margin-left: auto;
 }
 .idf-badge .badge-link:hover { border-color: #34d399; }
+/* ── Recommandations optimisées ─────────────────────────── */
+
+.recommended-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 2;
+    background: #fbbf24;
+    color: #1a1a1e;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.recommendation-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #fbbf24;
+    background: rgba(251,191,36,0.08);
+    border: 1px solid rgba(251,191,36,0.2);
+    padding: 8px 10px;
+    border-radius: 8px;
+}
