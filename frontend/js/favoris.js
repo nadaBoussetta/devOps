@@ -1,83 +1,107 @@
-/**
- * Script pour la page des favoris.
- * Affiche les bibliothèques favorites de l'utilisateur.
- */
-
 document.addEventListener('DOMContentLoaded', async () => {
-    // Vérifier l'authentification
     if (!isAuthenticated()) {
         alert('Vous devez être connecté pour accéder à vos favoris.');
         window.location.href = 'login.html';
         return;
     }
-
-    // Charger les favoris
     await loadFavoris();
 });
 
-/**
- * Charge et affiche les favoris de l'utilisateur.
- */
+// =============================================================================
+// CHARGEMENT
+// =============================================================================
+
 async function loadFavoris() {
     const container = document.getElementById('favoris-container');
-    
     try {
-        const favoris = await NotationAPI.getMesFavoris();
-        
-        if (favoris.length === 0) {
-            container.innerHTML = '<p class="info-message">Vous n\'avez aucune bibliothèque en favoris. Commencez à en ajouter !</p>';
+        const favoris = await fetchAPI('/favoris');
+
+        if (!favoris || favoris.length === 0) {
+            container.innerHTML = `
+                <p class="info-message">
+                    <i class="fas fa-heart-broken"></i>
+                    Vous n'avez aucune bibliothèque en favoris.
+                    <a href="recherche.html" style="color:rgb(2,71,100); margin-left:6px;">En ajouter ?</a>
+                </p>`;
             return;
         }
 
         container.innerHTML = '';
-        container.classList.remove('loading');
+        favoris.forEach(favori => container.appendChild(createFavoriCard(favori)));
 
-        favoris.forEach(favori => {
-            const card = createFavoriCard(favori);
-            container.appendChild(card);
-        });
     } catch (error) {
-        container.innerHTML = `<p class="error-message">Erreur lors du chargement: ${error.message}</p>`;
+        container.innerHTML = `<p class="error-message"><i class="fas fa-exclamation-circle"></i> Erreur lors du chargement : ${error.message}</p>`;
     }
 }
 
-/**
- * Crée une carte pour un favori.
- */
+// =============================================================================
+// CRÉATION DES CARTES
+// =============================================================================
+
 function createFavoriCard(favori) {
     const card = document.createElement('div');
     card.className = 'card';
-    
-    const dateAjout = new Date(favori.dateAjout).toLocaleDateString('fr-FR', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-    });
-    
+
+    const typeIcon  = favori.bibliothequeType === 'UNIVERSITAIRE' ? '🎓' : '📚';
+    const adresse   = favori.bibliothequeAdresse
+        ? `<p><strong>📍 Adresse :</strong> <span>${favori.bibliothequeAdresse}</span></p>` : '';
+    const typeLabel = favori.bibliothequeType
+        ? `<p><strong>🏷️ Type :</strong> <span>${favori.bibliothequeType}</span></p>` : '';
+    const dateAjout = favori.dateAjout
+        ? new Date(favori.dateAjout).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+        : '—';
+
+    // Note personnelle stockée en localStorage par id
+    const storageKey  = `favori-note-${favori.bibliothequeId}`;
+    const noteActuelle = localStorage.getItem(storageKey) || '';
+
     card.innerHTML = `
         <div class="card-header">
-            <h4 class="card-title">📚 ${favori.bibliothequeNom}</h4>
+            <h4 class="card-title">${typeIcon} ${favori.bibliothequeNom}</h4>
             <span class="badge badge-success">★ Favori</span>
         </div>
-        <p><strong>Ajouté le:</strong> ${dateAjout}</p>
+        ${adresse}
+        ${typeLabel}
+        <p><strong>📅 Ajouté le :</strong> <span>${dateAjout}</span></p>
+
+        <textarea class="description-textarea" rows="2" placeholder="Ajouter une note personnelle...">${noteActuelle}</textarea>
+        <button class="description-save-btn"><i class="fas fa-save"></i> Sauvegarder la note</button>
+
         <div class="card-actions">
-            <button onclick="removeFavori(${favori.id}, ${favori.bibliothequeId})" class="btn btn-danger">Supprimer des favoris</button>
+            <button class="btn btn-danger">
+                <i class="fas fa-trash"></i> Supprimer
+            </button>
         </div>
     `;
-    
+
+    // Sauvegarder la note en localStorage
+    const textarea = card.querySelector('.description-textarea');
+    const saveBtn  = card.querySelector('.description-save-btn');
+    saveBtn.addEventListener('click', () => {
+        localStorage.setItem(storageKey, textarea.value.trim());
+        saveBtn.innerHTML = '<i class="fas fa-check"></i> Note sauvegardée !';
+        setTimeout(() => { saveBtn.innerHTML = '<i class="fas fa-save"></i> Sauvegarder la note'; }, 1800);
+    });
+
+    // Supprimer le favori
+    const btnDelete = card.querySelector('.btn-danger');
+    btnDelete.dataset.bibliothequeId = favori.bibliothequeId;
+    btnDelete.addEventListener('click', () => removeFavori(btnDelete));
+
     return card;
 }
 
-/**
- * Supprime un favori.
- */
-async function removeFavori(favoriId, bibliothequeId) {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce favori ?')) {
-        try {
-            await NotationAPI.supprimerFavori(bibliothequeId);
-            await loadFavoris();
-        } catch (error) {
-            alert('Erreur lors de la suppression: ' + error.message);
-        }
+// =============================================================================
+// SUPPRESSION
+// =============================================================================
+
+async function removeFavori(btn) {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce favori ?')) return;
+    try {
+        await fetchAPI(`/favoris/${btn.dataset.bibliothequeId}`, { method: 'DELETE' });
+        localStorage.removeItem(`favori-note-${btn.dataset.bibliothequeId}`);
+        await loadFavoris();
+    } catch (error) {
+        alert('Erreur lors de la suppression : ' + error.message);
     }
 }

@@ -147,12 +147,16 @@ function updateTimerDisplay() {
 function updateProgressBar() {
     if (!sessionEnCours) return;
 
-    const progression = sessionEnCours.progressionPourcentage || 0;
+    // Calcul local pour que la barre se remplisse en temps réel
+    const progression = sessionEnCours.dureeMinutes > 0
+        ? Math.min(100, (sessionEnCours.tempsEcoulesMinutes / sessionEnCours.dureeMinutes) * 100)
+        : 0;
+
     const progressFill = document.getElementById('progress-fill');
     const progressText = document.getElementById('progress-text');
 
-    progressFill.style.width = progression + '%';
-    progressText.textContent = Math.round(progression) + '%';
+    if (progressFill) progressFill.style.width = progression + '%';
+    if (progressText) progressText.textContent = Math.round(progression) + '%';
 }
 
 /**

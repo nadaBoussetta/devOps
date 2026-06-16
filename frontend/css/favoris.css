@@ -1,13 +1,18 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;500;600;700&display=swap');
 
 :root {
     --bg-dark: #1a1a1e;
-    --bg-overlay: rgba(26, 26, 30, 0.85);
     --text-white: #ffffff;
     --text-gray: #a0a0a5;
-    --accent-orange: rgba(2, 71, 100, 0.65);
+    --accent: rgb(2, 71, 100);
+    --accent-light: rgba(2, 71, 100, 0.18);
+    --accent-hover: #015f87;
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.09);
     --nav-bg: rgba(40, 40, 45, 0.6);
-    --dark: #1a1a1e; /* Ajout de la variable manquante */
+    --success: #34d399;
+    --danger: #f87171;
+    --card-radius: 18px;
 }
 
 * {
@@ -18,104 +23,33 @@
 
 body {
     font-family: 'Poppins', sans-serif;
-    background-color: var(--bg-dark);
+    background: var(--bg-dark);
     color: var(--text-white);
-    overflow-x: hidden; /* Empêche le défilement horizontal */
-}
-
-.main-wrapper {
-    position: relative;
-    width: 100%;
+    overflow-x: hidden;
     min-height: 100vh;
 }
 
-/* Background Image */
+/* ── Background ──────────────────────────────────────────── */
+.main-wrapper {
+    position: relative;
+    min-height: 100vh;
+}
+
 .background-image {
-    position: fixed; /* Changé en fixed pour couvrir tout l'arrière-plan */
-    top: 0;
-    right: 0;
-    width: 70%;
-    height: 100%;
-    background-image: url('../resources/biblio.jpg'); /* Chemin corrigé relatif au dossier css/ */
-    background-size: cover;
-    background-position: center;
-    z-index: 1;
+    position: fixed;
+    inset: 0;
+    background: url('../resources/biblio.jpg') center/cover;
+    z-index: 0;
 }
 
 .background-image::after {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(to right, var(--bg-dark) 0%, transparent 20%);
+    inset: 0;
+    background: rgba(26, 26, 30, 0.93);
 }
 
-/* Sidebar / Content Area */
-.sidebar {
-    position: relative;
-    width: 35%;
-    min-height: 100vh;
-    background-color: var(--bg-dark);
-    z-index: 10;
-    padding: 120px 60px 80px; /* Augmenté le padding top pour laisser de la place au nav */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    box-shadow: 20px 0 50px rgba(0,0,0,0.5);
-}
-
-.big-number {
-    position: absolute;
-    top: 10%;
-    left: 40px;
-    font-size: 25rem;
-    font-weight: 700;
-    color: rgba(255, 255, 255, 0.03);
-    line-height: 1;
-    z-index: -1;
-    pointer-events: none;
-}
-
-.interior-label {
-    text-transform: uppercase;
-    letter-spacing: 3px;
-    font-size: 0.8rem;
-    color: var(--text-gray);
-    margin-bottom: 20px;
-}
-
-h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: 4rem; /* Réduit de 8rem à 4rem pour une meilleure lisibilité */
-    line-height: 1.1;
-    margin-bottom: 40px;
-}
-
-.description {
-    color: var(--text-gray);
-    font-size: 0.95rem;
-    line-height: 1.8;
-    max-width: 300px;
-    margin-bottom: 60px;
-}
-
-.read-more {
-    text-decoration: none;
-    color: var(--text-white);
-    font-size: 0.9rem;
-    border-bottom: 1px solid var(--text-gray);
-    padding-bottom: 5px;
-    width: fit-content;
-    transition: 0.3s;
-}
-
-.read-more:hover {
-    color: var(--accent-orange);
-    border-color: var(--accent-orange);
-}
-
+/* ── Nav ─────────────────────────────────────────────────── */
 /* Navigation */
 nav {
     position: fixed; /* Changé en fixed pour rester visible au scroll */
@@ -139,14 +73,29 @@ nav {
 
 .logo {
     font-weight: 700;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     letter-spacing: 1px;
+    white-space: nowrap;
+    color: var(--text-white);
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
+
+#logo_pic {
+    width: 36px;
+    height: 36px;
+    object-fit: cover;
+    border-radius: 50%;
+    transition: rotate 0.6s ease;
+}
+
+#logo_pic:hover { rotate: 180deg; }
 
 .nav-links {
     display: flex;
     list-style: none;
-    gap: 10px;
+    gap: 4px;
     flex-wrap: wrap;
     justify-content: center;
     flex: 1;
@@ -155,103 +104,397 @@ nav {
 .nav-links a {
     text-decoration: none;
     color: var(--text-white);
-    font-size: 0.8rem;
-    opacity: 0.8;
-    transition: 0.3s;
-    padding: 8px 10px;
-    border-radius: 5px;
+    font-size: 0.78rem;
+    opacity: 0.75;
+    transition: 0.2s;
+    padding: 6px 10px;
+    border-radius: 8px;
     white-space: nowrap;
 }
 
 .nav-links a:hover {
     opacity: 1;
-    background-color: rgba(230, 126, 69, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-white);
 }
 
 .search-icon {
     cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
 }
 
-/* --- CONTENT AREA --- */
-.content-overlay {
-    position: relative;
-    z-index: 5;
-    padding: 150px 5% 50px 37%;
+.search-icon:hover { opacity: 1; }
+
+/* ── Sidebar ─────────────────────────────────────────────── */
+.sidebar {
+    position: fixed;
+    width: 290px;
+    height: 100vh;
+    background: #111114;
+    z-index: 10;
+    padding: 140px 36px 60px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--glass-border);
 }
 
-h1, .section-title {
+.big-number {
+    position: absolute;
+    top: 6%;
+    left: 8px;
+    font-size: 14rem;
+    font-weight: 700;
+    color: rgba(2, 71, 100, 0.07);
+    line-height: 1;
+    z-index: -1;
+    pointer-events: none;
     font-family: 'Playfair Display', serif;
-    margin-bottom: 30px;
 }
 
-h1 { font-size: 4rem; }
-.section-title { font-size: 2.5rem; }
-
-/* --- FORM & INPUTS (Mêmes propriétés partout) --- */
-.search-form-container {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    padding: 30px;
-    border-radius: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    max-width: 700px;
-    margin-bottom: 50px;
-}
-/* --- SECTION FAVORIS --- */
-
-/* On réutilise la grille pour afficher les favoris proprement */
-#favoris-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 25px;
-    margin-top: 20px;
+.interior-label {
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    font-size: 0.7rem;
+    color: var(--accent);
+    margin-bottom: 14px;
+    font-weight: 600;
 }
 
-/* La carte favorite (identique à library-card ou book-card) */
-.favorite-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 25px;
-    border-radius: 15px;
-    transition: 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.favorite-card:hover {
-    transform: translateY(-5px);
-    background: rgba(255, 255, 255, 0.08);
-    border-color: var(--accent-orange);
-}
-
-.favorite-card h3 {
+.sidebar h1 {
     font-family: 'Playfair Display', serif;
-    font-size: 1.5rem;
-    margin-bottom: 10px;
+    font-size: 2.6rem;
+    line-height: 1.1;
+    margin-bottom: 18px;
     color: var(--text-white);
 }
 
-.favorite-card p {
-    font-size: 0.9rem;
+.description {
     color: var(--text-gray);
-    margin-bottom: 8px;
+    font-size: 0.83rem;
+    line-height: 1.8;
+    margin-bottom: 36px;
 }
 
-/* Petit badge ou bouton de suppression */
-.remove-favorite {
-    margin-top: 15px;
-    background: transparent;
-    border: 1px solid rgba(255, 0, 0, 0.3);
-    color: #ff6b6b;
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 0.8rem;
+.read-more {
+    text-decoration: none;
+    color: #ffffff;
+    font-size: 0.82rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.2s;
+}
+
+.read-more:hover { color: var(--text-gray); }
+
+/* ── Content overlay ─────────────────────────────────────── */
+.content-overlay {
+    position: relative;
+    z-index: 5;
+    padding: 150px 40px 80px 350px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* ── Section titles ──────────────────────────────────────── */
+.section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    margin-bottom: 20px;
+    color: var(--text-white);
+}
+
+.section-title-small {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-gray);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.section-title-small::before {
+    content: '';
+    display: block;
+    width: 3px;
+    height: 14px;
+    background: var(--accent);
+    border-radius: 2px;
+}
+
+/* ── Grille des favoris ──────────────────────────────────── */
+#favoris-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+/* ── Cards ───────────────────────────────────────────────── */
+.card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--card-radius);
+    padding: 22px 24px;
+    transition: transform 0.2s, border-color 0.2s;
+    animation: fadeIn 0.4s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(2, 71, 100, 0.4);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--glass-border);
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.card-title {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--text-white);
+    line-height: 1.3;
+}
+
+.card > p {
+    font-size: 0.83rem;
+    color: var(--text-gray);
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    line-height: 1.5;
+}
+
+.card > p:last-of-type { border-bottom: none; }
+
+.card > p strong {
+    color: rgba(255,255,255,0.6);
+    font-weight: 500;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* ── Badges ──────────────────────────────────────────────── */
+.badge {
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.badge-success {
+    background: rgba(52, 211, 153, 0.1);
+    border: 1px solid rgba(52, 211, 153, 0.25);
+    color: var(--success);
+}
+
+/* ── Actions ─────────────────────────────────────────────── */
+.card-actions {
+    margin-top: 6px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: 0.3s;
+    transition: all 0.2s;
+    text-decoration: none;
+    border: none;
 }
 
-.remove-favorite:hover {
-    background: rgba(255, 107, 107, 0.2);
-    border-color: #ff6b6b;
+.btn-danger {
+    width: 100%;
+    justify-content: center;
+    background: rgba(248, 113, 113, 0.08);
+    border: 1px solid rgba(248, 113, 113, 0.2);
+    color: var(--danger);
+}
+
+.btn-danger:hover {
+    background: rgba(248, 113, 113, 0.18);
+    border-color: var(--danger);
+    transform: translateY(-1px);
+}
+
+/* ── Messages ────────────────────────────────────────────── */
+.info-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--text-gray);
+    font-size: 0.86rem;
+    padding: 40px 28px;
+    background: var(--glass-bg);
+    border: 1px dashed var(--glass-border);
+    border-radius: var(--card-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.error-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--danger);
+    font-size: 0.86rem;
+    padding: 28px;
+    background: rgba(248, 113, 113, 0.06);
+    border: 1px solid rgba(248, 113, 113, 0.2);
+    border-radius: var(--card-radius);
+}
+
+/* ── Footer ──────────────────────────────────────────────── */
+footer {
+    position: relative;
+    z-index: 5;
+    text-align: center;
+    padding: 24px;
+    color: var(--text-gray);
+    font-size: 0.78rem;
+    border-top: 1px solid var(--glass-border);
+    margin-top: 40px;
+}
+
+/* ── Animations ──────────────────────────────────────────── */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 1100px) {
+    .sidebar { display: none; }
+    .content-overlay { padding: 140px 20px 60px; }
+}
+
+@media (max-width: 768px) {
+    #favoris-container { grid-template-columns: 1fr; }
+    nav { top: 12px; padding: 10px 16px; }
+}
+
+@media (max-width: 480px) {
+    .content-overlay { padding: 90px 14px 50px; }
+}
+
+/* ── Deux boutons côte à côte dans card-actions ─────────── */
+.card-actions {
+    margin-top: 6px;
+    display: flex;
+    gap: 10px;
+}
+
+.btn-note {
+    flex: 1;
+    justify-content: center;
+    background: rgba(2, 71, 100, 0.12);
+    border: 1px solid rgba(2, 71, 100, 0.3);
+    color: rgb(2, 71, 100);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.btn-note:hover {
+    background: rgba(2, 71, 100, 0.25);
+    border-color: rgb(2, 71, 100);
+    transform: translateY(-1px);
+}
+
+.btn-danger {
+    flex: 1;
+}
+
+/* ── Description inline sous la carte ───────────────────── */
+.card-description {
+    margin-top: 4px;
+    font-size: 0.8rem;
+    color: var(--text-gray);
+    font-style: italic;
+    line-height: 1.5;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+}
+
+/* ── Textarea description ────────────────────────────────── */
+.description-textarea {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.28);
+    border: 1px solid var(--glass-border);
+    padding: 10px 14px;
+    border-radius: 10px;
+    color: var(--text-white);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.82rem;
+    outline: none;
+    resize: none;
+    transition: all 0.25s;
+    margin-top: 8px;
+}
+
+.description-textarea::placeholder {
+    color: rgba(160,160,165,0.45);
+}
+
+.description-textarea:focus {
+    border-color: rgba(2, 71, 100, 0.7);
+    background: rgba(0,0,0,0.45);
+    box-shadow: 0 0 0 3px rgba(2,71,100,0.15);
+}
+
+.description-save-btn {
+    margin-top: 6px;
+    background: var(--accent);
+    color: var(--text-white);
+    border: none;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.description-save-btn:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
 }

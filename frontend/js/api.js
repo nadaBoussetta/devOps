@@ -24,8 +24,9 @@ async function fetchAPI(endpoint, options = {}) {
             return;
         }
         if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Erreur lors de la requête');
+            const errText = await response.text();
+            const errJson = errText ? JSON.parse(errText) : {};
+            throw new Error(errJson.message || errJson.error || `Erreur ${response.status}`);
         }
         const text = await response.text();
         return text ? JSON.parse(text) : {};
@@ -61,17 +62,11 @@ const BibliothequeAPI = {
     async getAll()                                  { return fetchAPI('/bibliotheques'); },
     async getById(id)                               { return fetchAPI(`/bibliotheques/${id}`); },
     async rechercher(adresse, heureDebut, heureFin, rayon) {
-        return fetchAPI('/bibliotheques/recherche', { method: 'POST', body: JSON.stringify({ adresse, heureDebut, heureFin, rayon }) });
         return fetchAPI('/bibliotheques/recherche', {
             method: 'POST',
             body: JSON.stringify({ adresse, heureDebut, heureFin, rayon })
         });
     },
-
-    /**
-     * Calcule un itinéraire optimisé couvrant le créneau horaire complet.
-     * Appelle le nouvel endpoint POST /api/bibliotheques/itineraire.
-     */
     async rechercherItineraire(adresse, heureDebut, heureFin, rayon) {
         return fetchAPI('/bibliotheques/itineraire', {
             method: 'POST',
@@ -90,23 +85,17 @@ const LivreAPI = {
 };
 
 const FeedAPI = {
-    async getAllPosts() {
-        return fetchAPI('/feed');
-    },
-    async getPostById(id) {
-        return fetchAPI(`/feed/${id}`);
-    },
+    async getAllPosts()                              { return fetchAPI('/feed'); },
+    async getPostById(id)                           { return fetchAPI(`/feed/${id}`); },
     async createPost(contenu, bibliothequeId = null) {
         return fetchAPI('/feed', { method: 'POST', body: JSON.stringify({ contenu, bibliothequeId }) });
     },
-    // ✅ Nouveau : repost
     async repost(postId, commentaire) {
         return fetchAPI(`/feed/${postId}/repost`, {
             method: 'POST',
             body: JSON.stringify({ commentaire: commentaire || '' })
         });
     },
-    // ✅ Nouveau : réaction
     async reagir(postId, type) {
         return fetchAPI(`/feed/${postId}/reactions`, {
             method: 'POST',

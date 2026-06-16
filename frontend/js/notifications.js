@@ -267,3 +267,16 @@ async function updateNotificationBadge() {
 // Mettre à jour le badge toutes les 30 secondes
 setInterval(updateNotificationBadge, 30000);
 document.addEventListener('DOMContentLoaded', updateNotificationBadge);
+
+    // Mise à jour du badge de count
+    async function refreshUnreadCount() {
+        try {
+            const result = await NotificationAPI.countNotificationsNonLues();
+            const count = result.count || 0;
+            const badge = document.getElementById('unread-count');
+            const badgeEl = document.getElementById('unread-count-badge');
+            if (badge) badge.textContent = count;
+            if (badgeEl) badgeEl.style.display = count > 0 ? 'inline-flex' : 'none';
+        } catch(e) {}
+    }
+    document.addEventListener('DOMContentLoaded', refreshUnreadCount);

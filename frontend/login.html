@@ -3,28 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion - Bibliothèques d’Île‑de‑France</title>
+    <title>Connexion - Bibliothèques d'Île‑de‑France</title>
     <link rel="stylesheet" href="css/login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <link rel="icon" href="resources/logo_pic.png" type="image/png">
 </head>
 <body>
 <div class="main-wrapper">
+
     <div class="background-image"></div>
 
+    <!-- Sidebar -->
     <aside class="sidebar">
         <div class="big-number">08</div>
         <div class="interior-label">Espace Membre</div>
-        <h1>Rejoignez-nous</h1>
+        <h1>Rejoignez‑nous</h1>
         <p class="description">
             Accédez à votre espace personnel pour gérer vos emprunts, vos favoris et interagir avec la communauté.
         </p>
-        <a href="MyFeed.html" class="read-more">Retour à l'accueil</a>
+        <a href="MyFeed.html" class="read-more">
+            <i class="fas fa-arrow-left"></i> Retour à l'accueil
+        </a>
     </aside>
 
+    <!-- Nav -->
     <nav>
-        <div class="logo">Bibliothèques IDF</div>
+        <div class="logo">
+            Bibliothèques IDF
+        </div>
         <ul class="nav-links">
             <li><a href="MyFeed.html">Accueil</a></li>
             <li><a href="recherche.html">Recherche</a></li>
@@ -36,7 +43,6 @@
             <li><a href="login.html" id="auth-link">Connexion</a></li>
             <li><a href="profile.html">Mon Profil</a></li>
         </ul>
-
         <div class="search-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="11" cy="11" r="8"></circle>
@@ -45,54 +51,109 @@
         </div>
     </nav>
 
+    <!-- Contenu -->
     <main class="content-overlay">
+
         <div class="auth-container">
+
+            <!-- Onglets -->
             <div class="auth-tabs">
-                <button class="tab-btn active" data-tab="login">Connexion</button>
-                <button class="tab-btn" data-tab="register">Inscription</button>
+                <button class="tab-btn active" data-tab="login">
+                    <i class="fas fa-sign-in-alt"></i> Connexion
+                </button>
+                <button class="tab-btn" data-tab="register">
+                    <i class="fas fa-user-plus"></i> Inscription
+                </button>
             </div>
 
+            <!-- Formulaire Connexion -->
             <div id="login-form" class="auth-form active">
+                <h2 class="form-title">Bon retour</h2>
                 <form id="login">
                     <div class="form-group">
-                        <label for="login-username">Nom d'utilisateur</label>
-                        <input type="text" id="login-username" placeholder="Pseudo" required>
+                        <label for="login-username">
+                            <i class="fas fa-user"></i> Nom d'utilisateur
+                        </label>
+                        <input type="text" id="login-username" placeholder="Votre pseudo" required autocomplete="username">
                     </div>
                     <div class="form-group">
-                        <label for="login-password">Mot de passe</label>
-                        <input type="password" id="login-password" placeholder="••••••••" required>
+                        <label for="login-password">
+                            <i class="fas fa-lock"></i> Mot de passe
+                        </label>
+                        <div class="password-wrapper">
+                            <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password">
+                            <button type="button" class="toggle-password" data-target="login-password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
-                    <button type="submit" class="btn-submit">Se connecter</button>
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-sign-in-alt"></i> Se connecter
+                    </button>
                     <div id="login-message" class="message"></div>
                 </form>
             </div>
 
+            <!-- Formulaire Inscription -->
             <div id="register-form" class="auth-form">
+                <h2 class="form-title">Créer un compte</h2>
                 <form id="register">
                     <div class="form-group">
-                        <label for="register-username">Nom d'utilisateur</label>
-                        <input type="text" id="register-username" required>
+                        <label for="register-username">
+                            <i class="fas fa-user"></i> Nom d'utilisateur
+                        </label>
+                        <input type="text" id="register-username" placeholder="Choisissez un pseudo" required autocomplete="username">
                     </div>
                     <div class="form-group">
-                        <label for="register-email">Email</label>
-                        <input type="email" id="register-email" required>
+                        <label for="register-email">
+                            <i class="fas fa-envelope"></i> Email
+                        </label>
+                        <input type="email" id="register-email" placeholder="votre@email.com" required autocomplete="email">
                     </div>
                     <div class="form-group">
-                        <label for="register-password">Mot de passe</label>
-                        <input type="password" id="register-password" required>
+                        <label for="register-password">
+                            <i class="fas fa-lock"></i> Mot de passe
+                        </label>
+                        <div class="password-wrapper">
+                            <input type="password" id="register-password" placeholder="••••••••" required autocomplete="new-password">
+                            <button type="button" class="toggle-password" data-target="register-password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
-                    <button type="submit" class="btn-submit">S'inscrire</button>
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-user-plus"></i> S'inscrire
+                    </button>
                     <div id="register-message" class="message"></div>
                 </form>
             </div>
+
         </div>
     </main>
 
     <footer>
-        <p>&copy; 2024 Bibliothèques Île-de-France. Tous droits réservés.</p>
+        <p>&copy; 2026 Bibliothèques Île-de-France. Tous droits réservés.</p>
     </footer>
+
 </div>
+
 <script src="js/api.js"></script>
 <script src="js/auth.js"></script>
+<script>
+    // Toggle password visibility
+    document.querySelectorAll('.toggle-password').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const input = document.getElementById(btn.dataset.target);
+            const icon  = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        });
+    });
+</script>
 </body>
 </html>
