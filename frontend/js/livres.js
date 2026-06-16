@@ -1,6 +1,24 @@
 /**
- * Recherche de livres via Google Books API + vérification disponibilité Sudoc IDF
+ * Recherche de livres via Google Books API
+ * + disponibilité dans les bibliothèques IDF (géolocalisation automatique)
+ *
+ * Au chargement de la page :
+ *   1. Géolocalisation silencieuse de l'utilisateur
+ *   2. Reverse geocode → adresse lisible
+ *   3. Recherche automatique des bibliothèques IDF dans un rayon de 5 km
+ *   4. Résultats stockés en mémoire → utilisés pour chaque recherche de livre
+ *
+ * Lors d'une recherche de livre :
+ *   1. Google Books → cartes visuelles
+ *   2. POST /api/livres/disponibilite avec le titre + les bibliothèques proches
+ *   3. Badge mis à jour : liste des bibliothèques qui ont le livre
  */
+
+// Bibliothèques IDF chargées automatiquement au démarrage
+let bibliothequesCourantes = [];
+let geolocChargement = null; // Promise de chargement (évite double appel)
+
+// ─── Initialisation ───────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
     const form     = document.getElementById('book-search-form');
@@ -23,7 +41,65 @@ document.addEventListener('DOMContentLoaded', () => {
         input.focus();
         resetResults();
     });
+
+    // Lancer la géolocalisation + chargement des bibliothèques en arrière-plan
+    // dès l'ouverture de la page, sans attendre que l'utilisateur cherche
+    geolocChargement = chargerBibliothequesCourantes();
 });
+
+/**
+ * Géolocalise l'utilisateur silencieusement, puis charge les bibliothèques IDF proches.
+ * Stocke le résultat dans bibliothequesCourantes.
+ */
+async function chargerBibliothequesCourantes() {
+    try {
+        // 1. Obtenir la position GPS
+        const position = await new Promise((resolve, reject) => {
+            if (!navigator.geolocation) {
+                reject(new Error('Géolocalisation non supportée'));
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+                enableHighAccuracy: false,
+                timeout: 8000,
+                maximumAge: 60000 // accepter une position en cache jusqu'à 1 min
+            });
+        });
+
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+
+        // 2. Reverse geocode → adresse lisible pour l'API backend
+        const adresse = await reverseGeocode(lat, lon)
+                     || `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+
+        // 3. Appeler /api/bibliotheques/recherche avec rayon 5 km, horaires larges
+        const resultats = await BibliothequeAPI.rechercher(adresse, '00:00', '23:59', 5);
+        bibliothequesCourantes = resultats || [];
+
+    } catch (err) {
+        // Géolocalisation refusée ou timeout → tableau vide, badges neutres
+        bibliothequesCourantes = [];
+        console.warn('[IDF] Géolocalisation impossible:', err.message);
+    }
+}
+
+async function reverseGeocode(lat, lon) {
+    try {
+        const res  = await fetch(
+            `https://api-adresse.data.gouv.fr/reverse/?lon=${lon}&lat=${lat}`
+        );
+        const data = await res.json();
+        if (data.features && data.features.length > 0) {
+            return data.features[0].properties.label;
+        }
+        return null;
+    } catch {
+        return null;
+    }
+}
+
+// ─── Recherche principale ─────────────────────────────────────────────────────
 
 function searchQuick(query) {
     document.getElementById('titre_livre').value = query;
@@ -36,8 +112,6 @@ function resetResults() {
     document.getElementById('empty-state').style.display     = 'flex';
     document.getElementById('book-results-container').innerHTML = '';
 }
-
-// ─── Recherche principale ─────────────────────────────────────────────────────
 
 async function searchBooks(query) {
     const btn        = document.getElementById('btn-search');
@@ -67,6 +141,10 @@ async function searchBooks(query) {
     titleEl.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Recherche en cours...`;
 
     try {
+        // Attendre que le chargement des bibliothèques soit terminé
+        // (s'il est encore en cours au moment où l'utilisateur cherche)
+        if (geolocChargement) await geolocChargement;
+
         const books = await searchGoogleBooks(query);
 
         titleEl.innerHTML   = `<i class="fas fa-list"></i> Résultats pour "${escapeHtml(query)}"`;
@@ -81,9 +159,10 @@ async function searchBooks(query) {
             return;
         }
 
-        // Afficher d'abord les cartes, puis vérifier dispo IDF en arrière-plan
         renderBooks(books);
-        checkDisponibiliteIDF(books);
+
+        // Vérifier la dispo dans les bibliothèques IDF en arrière-plan
+        checkDisponibiliteIDF(books, query);
 
     } catch (err) {
         container.innerHTML = `
@@ -103,10 +182,8 @@ async function searchBooks(query) {
 
 async function searchGoogleBooks(query) {
     const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=40&langRestrict=fr&printType=books&key=AIzaSyBEs_clokNr7Js50BE3OxjtVCVIdr0eKpk`;
-
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Erreur Google Books (${response.status})`);
-
     const data = await response.json();
     if (!data.items || data.items.length === 0) return [];
 
@@ -133,86 +210,88 @@ async function searchGoogleBooks(query) {
     });
 }
 
-// ─── Vérification disponibilité IDF via Sudoc ─────────────────────────────────
+// ─── Disponibilité dans les bibliothèques IDF ─────────────────────────────────
 
-// Bibliothèques IDF référencées dans le Sudoc avec leurs codes RCR
-// (RCR = Répertoire des Centres de Ressources — identifiant unique Sudoc)
-const BIBLIOTHEQUES_IDF = [
-    { nom: 'BnF — Bibliothèque nationale de France',    rcr: '751021301' },
-    { nom: 'Bibliothèque Sainte-Geneviève',             rcr: '751052101' },
-    { nom: 'Bibliothèque Mazarine',                     rcr: '751042101' },
-    { nom: 'BU Paris-Sorbonne (Paris IV)',               rcr: '751031001' },
-    { nom: 'BU Paris Cité (ex-Paris V)',                 rcr: '751052201' },
-    { nom: 'BU Sorbonne Nouvelle (Paris III)',           rcr: '751032101' },
-    { nom: 'BU Paris-Nanterre',                         rcr: '920502201' },
-    { nom: 'BU Université Paris-Est Créteil',           rcr: '940112201' },
-    { nom: 'BU CY Cergy Paris Université',              rcr: '950502101' },
-    { nom: 'BU Paris-Saclay (UVSQ)',                    rcr: '780472201' },
-];
+async function checkDisponibiliteIDF(books, query) {
+    // Si aucune bibliothèque n'a été chargée (géoloc refusée), badge neutre
+    if (!bibliothequesCourantes || bibliothequesCourantes.length === 0) {
+        books.forEach(b => updateBadgeIDF(b.id, 'geo-indisponible', null));
+        return;
+    }
 
-async function checkDisponibiliteIDF(books) {
-    // Pour chaque livre qui a un ISBN, on interroge le Sudoc
-    // On fait les appels en parallèle pour ne pas bloquer l'UI
+    // Appels en parallèle pour tous les livres
     const promises = books.map(async (book) => {
-        if (!book.isbn) {
-            updateBadgeIDF(book.id, 'inconnu', null);
-            return;
-        }
-
         try {
-            // API Sudoc isbn2ppn : retourne les PPN (identifiants) des notices
-            const url = `https://www.sudoc.fr/services/isbn2ppn/${book.isbn.replace(/-/g, '')}`;
-            const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+            const response = await fetch(`${API_BASE_URL}/livres/disponibilite`, {
+                method:  'POST',
+                headers: {
+                    'Content-Type':  'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+                },
+                body: JSON.stringify({
+                    titre:         book.titre,
+                    bibliotheques: bibliothequesCourantes.map(b => ({
+                        nom:      b.nom,
+                        adresse:  b.adresse,
+                        distance: b.distance,
+                        ouvert:   b.ouvert
+                    }))
+                })
+            });
 
-            if (!res.ok) {
-                updateBadgeIDF(book.id, 'inconnu', null);
+            if (!response.ok) {
+                updateBadgeIDF(book.id, 'erreur', null);
                 return;
             }
 
-            const text = await res.text();
+            const resultats    = await response.json();
+            const disponibles  = resultats.filter(r => r.livreDisponible);
 
-            // Réponse XML — si on trouve un PPN c'est que le livre est dans le Sudoc
-            if (text.includes('<ppn>') || text.includes('ppn=')) {
-                // Extraire le premier PPN pour construire le lien de localisation
-                const ppnMatch = text.match(/<ppn>(\d+)<\/ppn>/) || text.match(/ppn=(\d+)/);
-                const ppn = ppnMatch ? ppnMatch[1] : null;
-
-                // Lien vers les localisations dans les bibliothèques IDF
-                const lienSudoc = ppn
-                    ? `https://www.sudoc.fr/${ppn}`
-                    : `https://www.sudoc.fr/cgi-bin/sru?version=1.1&operation=searchRetrieve&query=bath.isbn+all+%22${book.isbn}%22`;
-
-                updateBadgeIDF(book.id, 'disponible', lienSudoc);
+            if (disponibles.length > 0) {
+                updateBadgeIDF(book.id, 'disponible', disponibles);
             } else {
-                updateBadgeIDF(book.id, 'non-trouve', null);
+                updateBadgeIDF(book.id, 'non-disponible', null);
             }
 
         } catch (err) {
-            // Timeout ou erreur réseau — on affiche "non vérifié"
-            updateBadgeIDF(book.id, 'inconnu', null);
+            updateBadgeIDF(book.id, 'erreur', null);
         }
     });
 
     await Promise.allSettled(promises);
 }
 
-function updateBadgeIDF(bookId, statut, lienSudoc) {
+function updateBadgeIDF(bookId, statut, bibliotheques) {
     const badge = document.getElementById(`idf-badge-${bookId}`);
     if (!badge) return;
 
     if (statut === 'disponible') {
+        const liste = bibliotheques.map(b => `
+            <li class="badge-biblio-item ${b.ouvert ? 'ouvert' : 'ferme'}">
+                <i class="fas fa-${b.ouvert ? 'door-open' : 'door-closed'}"></i>
+                <span class="badge-biblio-nom">${escapeHtml(b.nomBibliotheque)}</span>
+                <span class="badge-biblio-dist">${b.distance != null ? b.distance.toFixed(1) + ' km' : ''}</span>
+                <span class="badge-biblio-statut">${b.ouvert ? 'Ouvert' : 'Fermé'}</span>
+            </li>`).join('');
+
         badge.innerHTML = `
-            <i class="fas fa-check-circle"></i>
-            <span>Disponible en IDF</span>
-            ${lienSudoc ? `<a href="${lienSudoc}" target="_blank" rel="noopener" class="badge-link">
-                Voir les bibliothèques <i class="fas fa-external-link-alt"></i>
-            </a>` : ''}`;
+            <div class="badge-dispo-header">
+                <i class="fas fa-check-circle"></i>
+                <span>Disponible dans ${bibliotheques.length} bibliothèque${bibliotheques.length > 1 ? 's' : ''} près de vous</span>
+            </div>
+            <ul class="badge-biblio-list">${liste}</ul>`;
         badge.className = 'idf-badge idf-dispo';
-    } else if (statut === 'non-trouve') {
-        badge.innerHTML = `<i class="fas fa-times-circle"></i> <span>Non référencé en IDF</span>`;
+
+    } else if (statut === 'non-disponible') {
+        badge.innerHTML = `<i class="fas fa-times-circle"></i> <span>Non disponible dans les bibliothèques proches</span>`;
         badge.className = 'idf-badge idf-indispo';
+
+    } else if (statut === 'geo-indisponible') {
+        badge.innerHTML = `<i class="fas fa-location-slash"></i> <span>Activez la géolocalisation pour voir la disponibilité locale</span>`;
+        badge.className = 'idf-badge idf-inconnu';
+
     } else {
-        badge.innerHTML = `<i class="fas fa-question-circle"></i> <span>Disponibilité IDF non vérifiée</span>`;
+        badge.innerHTML = `<i class="fas fa-question-circle"></i> <span>Disponibilité non vérifiée</span>`;
         badge.className = 'idf-badge idf-inconnu';
     }
 }
@@ -255,13 +334,11 @@ function bookCard(b, index) {
             </div>
 
             ${genres ? `<div class="genre-tags">${genres}</div>` : ''}
-
             ${b.resume ? `<p class="book-resume">${escapeHtml(b.resume)}</p>` : ''}
 
-            <!-- Badge disponibilité IDF — mis à jour en arrière-plan -->
             <div id="idf-badge-${b.id}" class="idf-badge idf-loading">
                 <i class="fas fa-spinner fa-spin"></i>
-                <span>Vérification disponibilité IDF...</span>
+                <span>Vérification dans vos bibliothèques...</span>
             </div>
 
             <div class="book-footer">
