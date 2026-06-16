@@ -1,0 +1,65 @@
+@startuml
+skinparam sequenceArrowThickness 1.5
+skinparam roundcorner 8
+skinparam sequenceParticipantBorderThickness 1
+skinparam sequenceLifeLineBorderThickness 1
+skinparam fontName "DejaVu Sans"
+skinparam sequenceMessageAlign center
+
+skinparam participant {
+    BackgroundColor #F1EFE8
+    BorderColor #888780
+    FontColor #2C2C2A
+}
+
+skinparam sequence {
+    ArrowColor #534AB7
+    LifeLineBorderColor #B4B2A9
+    GroupBackgroundColor #EEEDFE
+    GroupBorderColor #AFA9EC
+    GroupFontColor #3C3489
+    DividerBackgroundColor #E1F5EE
+    DividerBorderColor #5DCAA5
+}
+
+actor       Utilisateur  as U
+participant Navigateur   as N  #D3D1C7
+participant "Google Books\nAPI"      as GB #9FE1CB
+participant "API Adresse\n+ Géoloc"  as GA #FAC775
+participant "Backend\n(Spring Boot)" as B  #F5C4B3
+participant "OpenLibrary\nAdapter"   as OL #F4C0D1
+
+== ① Chargement de la page ==
+
+U  -> N  : Ouvre livres.html
+N  -> GA : getCurrentPosition()
+N  -> GA : GET /reverse?lon=&lat=
+N  -> B  : POST /api/bibliotheques/recherche
+B --> N  : bibliothequesCourantes[]
+
+== ② Saisie et recherche ==
+
+U  -> N  : Saisit un titre + soumet
+N  -> GB : GET /volumes?q=... (langRestrict=fr)
+GB --> N : 20 livres (JSON)
+
+== ③ Affichage + vérification disponibilité IDF ==
+
+N  -> N  : renderBooks()\nsquelettes + badges "Vérification en cours…"
+N  ->  B : POST /api/livres/disponibilite ×N\n(Promise.allSettled — appels parallèles)
+B  -> OL : verifierDisponibilite(titre)
+OL --> B : ISBN + données Open Library
+B --> N  : DisponibiliteResultatDTO[]
+
+== ④ Mise à jour des badges ==
+
+N  -> N  : updateBadgeIDF()\nbadge vert / rouge / gris
+
+note over N
+  **Fallbacks :**
+  • Géoloc refusée → badge "Activez la géolocalisation"
+  • Backend inaccessible → badge gris "Disponibilité non vérifiée"
+  • ISBN absent → badge gris direct
+end note
+
+@enduml
